@@ -1,0 +1,55 @@
+{
+  "request_id": "26bc99891495440da3192842ced9dd69",
+  "overall_score": 85,
+  "level": "high",
+  "level_label": "强匹配",
+  "dimension_scores": [
+    { "key": "skill_match", "label": "技能匹配", "score": 90, "weight": 0.4 },
+    { "key": "experience_relevance", "label": "经历相关", "score": 85, "weight": 0.3 },
+    { "key": "keyword_coverage", "label": "关键词覆盖", "score": 80, "weight": 0.2 },
+    { "key": "education_match", "label": "教育/证书", "score": 85, "weight": 0.1 }
+  ],
+  "highlights": [
+    {
+      "title": "技能栈高度契合",
+      "evidence": "熟练掌握Python、FastAPI和Redis",
+      "source": "resume"
+    },
+    {
+      "title": "项目方向与岗位一致",
+      "evidence": "独立完成时序预测模型的训练与调参，覆盖数据清洗、训练、指标评估的完整链路",
+      "source": "resume"
+    },
+    {
+      "title": "命中 JD 核心关键词",
+      "evidence": "简历中出现 FastAPI、Redis、Docker、容器化等 JD 明确要求的工具",
+      "source": "resume"
+    }
+  ],
+  "gaps": [
+    {
+      "title": "缺乏K8s经验",
+      "jd_requirement": "熟悉Kubernetes容器编排",
+      "resume_evidence": "了解Docker部署",
+      "suggestion": "建议补充K8s相关项目经验",
+      "severity": "low"
+    },
+    {
+      "title": "缺少高并发场景数据",
+      "jd_requirement": "有高并发、大流量系统的性能优化经验",
+      "resume_evidence": "简历中项目均为单机部署，未提及并发量级",
+      "suggestion": "补充一个压测或性能优化案例，写明 QPS 与优化前后的耗时对比",
+      "severity": "medium"
+    },
+    {
+      "title": "团队协作证据不足",
+      "jd_requirement": "熟悉敏捷开发流程，有跨团队协作经验",
+      "resume_evidence": "项目描述集中在个人产出，未体现需求评审、代码评审等协作环节",
+      "suggestion": "在项目条目中补充你的角色与协作方式，如主导评审、对接前后端联调",
+      "severity": "low"
+    }
+  ],
+  "summary": "候选人背景与岗位高度匹配，建议进入面试。",
+  "disclaimer": "AI诊断结果仅供参考，请以实际岗位要求为准。",
+  "meta": { "model": "mock-model", "mode": "mock", "elapsed_ms": 120 }
+}
