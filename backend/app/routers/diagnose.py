@@ -80,6 +80,38 @@ severity 只能是 high、medium 或 low。
 """
 
 
+ASCII_TERM = re.compile(r"[A-Za-z][A-Za-z0-9+#.]*[A-Za-z0-9+#]")
+YEARS = re.compile(r"\d+\s*年|[一二两三四五六七八九十]+年")
+# 要求里的修饰词，去掉后剩下的才是要在简历里找的关键词
+REQUIREMENT_WORDS = re.compile(
+    r"熟练掌握|熟练|熟悉|掌握|精通|了解|具备|具有|拥有|相关|经验|经历|能力|背景|优先|加分|以上|"
+    r"良好|工作|独立|负责|参与|常用|实际|一定|至少|要求|任职|构建|进行|完成|有|者|的|等|或|与|和|及"
+    r"|[^一-鿿]+")
+
+
+def requirement_keywords(requirement):
+    # 有英文技术词时只看英文词（如 RESTful、Vite），否则按修饰词切出中文关键词（如 制造业）
+    terms = {term for term in ASCII_TERM.findall(requirement)}
+    if terms:
+        return terms
+    return {part for part in REQUIREMENT_WORDS.split(requirement) if len(part) >= 2}
+
+
+def contradicts_resume(gap, resume_text):
+    """缺项说简历未体现，但要求里的关键词全都在简历原文里出现，视为误判。
+
+    年限类要求（如“3 年以上”）无法靠关键词判断，一律保留；
+    resume_evidence 非空说明模型已引用简历、属于程度不足，也保留。
+    """
+    if gap.resume_evidence is not None or YEARS.search(gap.jd_requirement):
+        return False
+    keywords = requirement_keywords(gap.jd_requirement)
+    if not keywords:
+        return False
+    return all(re.search(rf"(?<![A-Za-z0-9]){re.escape(word)}(?![A-Za-z0-9])", resume_text, re.IGNORECASE)
+               for word in keywords)
+
+
 def parse_report(content, payload, request_id, elapsed_ms):
     if not isinstance(content, str) or not content.strip():
         raise ValueError("empty_content")
@@ -128,6 +160,7 @@ def parse_report(content, payload, request_id, elapsed_ms):
                 raise ValueError("证据必须逐字复制对应原文的连续片段，不得改写、拼接或使用未提及等说明；没有简历证据时 resume_evidence 必须填 null")
     if any(not text.strip() for text in texts):
         raise ValueError("blank_text")
+    report.gaps = [gap for gap in report.gaps if not contradicts_resume(gap, payload.resume_text)]
     report.overall_score = int(sum(d.score * DIMENSIONS[d.key][1] for d in report.dimension_scores) + 0.5)
     report.level = "high" if report.overall_score >= 80 else "medium" if report.overall_score >= 60 else "low"
     report.level_label = {"high": "强匹配", "medium": "较匹配", "low": "存在缺口"}[report.level]

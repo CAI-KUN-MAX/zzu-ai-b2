@@ -84,6 +84,25 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(report.overall_score, 37)
         self.assertEqual(report.level, "low")
 
+    def test_gap_contradicting_resume(self):
+        gap = lambda req, evidence=None: SimpleNamespace(jd_requirement=req, resume_evidence=evidence)
+        resume = ("某制造业集团 · 总账会计 · 2020.07 - 至今\n与后端约定 RESTful 接口规范，熟悉 HTTP 协议\n"
+                  "将构建工具从 Webpack 迁移到 Vite，熟悉 Git 工作流\n熟练 Python / TypeScript，了解 React")
+        # 简历已写明却说未体现：丢弃
+        for req in ("制造业背景优先", "熟悉 HTTP 协议与 RESTful 接口对接；", "熟悉 Git、Vite / Webpack 等构建工具；"):
+            self.assertTrue(module.contradicts_resume(gap(req), resume), req)
+        # 真实缺口、年限要求、已引用简历的程度不足：保留
+        for item in (gap("熟练掌握 JavaScript / TypeScript，熟悉 React 或 Vue；"), gap("有 B 端 / SaaS 产品经验者优先"),
+                     gap("3 年以上总账工作经验"), gap("熟悉 React", "了解 React"), gap("熟悉 Java")):
+            self.assertFalse(module.contradicts_resume(item, resume + "\nJavaScript 入门"), item.jd_requirement)
+
+    def test_contradicting_gap_dropped_from_report(self):
+        data = valid_data()
+        data["gaps"].append({"title": "缺乏MySQL", "jd_requirement": "要求Python和MySQL", "resume_evidence": None,
+                             "suggestion": "补充数据库项目", "severity": "high"})
+        report = module.parse_report(json.dumps(data), PAYLOAD, "id", 0)
+        self.assertEqual([g.jd_requirement for g in report.gaps], ["熟悉Kubernetes容器编排"])
+
     def test_user_message_isolates_input(self):
         message = module.build_user_message(PAYLOAD, "简体中文")
         self.assertIn(f"<resume>\n{PAYLOAD.resume_text}\n</resume>", message)

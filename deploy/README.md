@@ -23,4 +23,12 @@ sudo nginx -t && sudo systemctl reload nginx
 | `CORS_ORIGINS` | `http://8.163.105.39,http://localhost:5173,http://127.0.0.1:5173` | 允许跨域的前端地址，英文逗号分隔；走 Nginx 同源代理时可不改 |
 | `ENABLE_DOCS` | `false` | 设为 `true` 才开放 `/docs`、`/redoc`、`/openapi.json`，仅限本地调试 |
 
-后端只需监听本机：`uvicorn app.main:app --host 127.0.0.1 --port 8000`。改走 Nginx 后，可以在安全组里关掉 8000 端口的公网访问。
+## 限流
+
+[nginx.conf](nginx.conf) 对 `/api/` 按 IP 限流：每分钟 10 次，允许突发 3 次，超出返回 429 和 JSON 错误，前端会提示「请求过于频繁」。
+
+**限流只对经过 Nginx 的请求有效。** 后端必须只监听本机，并在云服务器安全组里关掉 8000 端口的公网访问，否则别人绕过 Nginx 直接请求 `http://8.163.105.39:8000/api/diagnose` 就没有任何限制：
+
+```bash
+uvicorn app.main:app --host 127.0.0.1 --port 8000
+```

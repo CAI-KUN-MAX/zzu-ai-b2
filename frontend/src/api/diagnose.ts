@@ -1,8 +1,8 @@
 import type { ApiErrorBody, DiagnoseRequest, DiagnoseResponse } from "../types";
 import mockResponse from "../mock/response.json";
 
-/** 是否处于 mock 模式（.env 里 VITE_USE_MOCK=true） */
-export const IS_MOCK_MODE = import.meta.env.VITE_USE_MOCK !== "false";
+/** 是否处于 mock 模式：只有 .env 里明确写 VITE_USE_MOCK=true 才启用，漏配时默认请求真实后端 */
+export const IS_MOCK_MODE = import.meta.env.VITE_USE_MOCK === "true";
 
 const API_BASE = (import.meta.env.VITE_API_BASE ?? "").replace(/\/+$/, "");
 // 需大于后端 TOTAL_TIMEOUT（75 秒），否则后端还在算前端就先放弃了
@@ -52,6 +52,10 @@ function toDiagnoseError(parsed: unknown, status: number): DiagnoseError {
 
   const body = (parsed ?? {}) as ApiErrorBody;
 
+  if (status === 429 && !body.error?.message) {
+    return new DiagnoseError("请求过于频繁，请 1 分钟后再试", status);
+  }
+
   // 契约预留形态：{ error: { code, message } }
   if (body.error?.message) {
     return new DiagnoseError(body.error.message, body.error.code ?? status);
@@ -81,7 +85,7 @@ function toDiagnoseError(parsed: unknown, status: number): DiagnoseError {
 
 /**
  * 调用诊断接口。
- * mock 模式下返回内置样例，联调时把 .env 的 VITE_USE_MOCK 改成 false 即可，页面代码零改动。
+ * mock 模式下返回内置样例，离线调 UI 时把 .env 的 VITE_USE_MOCK 设为 true，页面代码零改动。
  */
 export async function diagnose(payload: DiagnoseRequest): Promise<DiagnoseResponse> {
   if (IS_MOCK_MODE) {
@@ -109,7 +113,8 @@ export async function diagnose(payload: DiagnoseRequest): Promise<DiagnoseRespon
       try {
         parsed = JSON.parse(raw);
       } catch {
-        throw new DiagnoseError("诊断服务返回的内容不是合法 JSON");
+        // 网关（Nginx）报错时返回的是 HTML，按状态码给提示即可
+        if (res.ok) throw new DiagnoseError("诊断服务返回的内容不是合法 JSON");
       }
     }
 
