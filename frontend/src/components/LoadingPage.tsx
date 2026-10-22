@@ -38,7 +38,7 @@ export function LoadingPage() {
           </h2>
           <p className="mt-2 text-[13px] text-ink-500">
             已等待 <span className="num font-medium text-ink-700">{seconds}</span> 秒 · 通常需要
-            20-30 秒，请不要关闭页面
+            20-40 秒，请不要关闭页面
           </p>
         </div>
 

@@ -5,7 +5,8 @@ import mockResponse from "../mock/response.json";
 export const IS_MOCK_MODE = import.meta.env.VITE_USE_MOCK !== "false";
 
 const API_BASE = (import.meta.env.VITE_API_BASE ?? "").replace(/\/+$/, "");
-const TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT ?? 45000);
+// 需大于后端 TOTAL_TIMEOUT（75 秒），否则后端还在算前端就先放弃了
+const TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT ?? 80000);
 
 /** 统一的业务异常，页面只需要读 message 做提示 */
 export class DiagnoseError extends Error {
@@ -39,7 +40,12 @@ function normalize(data: DiagnoseResponse): DiagnoseResponse {
 
 /** 后端错误体有三种形态，这里统一成一句可读的中文提示 */
 function toDiagnoseError(parsed: unknown, status: number): DiagnoseError {
-  // 5xx 多为大模型生成失败（JSON 格式偶发崩），错误体通常不可读，统一给人话提示
+  // 504 是模型确实超时，和生成失败分开提示，用户才知道该等还是该精简内容
+  if (status === 504) {
+    return new DiagnoseError("AI 响应超时，请稍后重试；内容较长时可适当精简", status);
+  }
+
+  // 其他 5xx 多为大模型生成失败（JSON 格式偶发崩），错误体通常不可读，统一给人话提示
   if (status >= 500) {
     return new DiagnoseError("AI 正在思考中，请稍后重试", status);
   }

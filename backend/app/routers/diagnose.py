@@ -20,7 +20,12 @@ load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 router = APIRouter()
 logger = logging.getLogger(__name__)
 MODEL = "glm-4-flash"
-TOTAL_TIMEOUT = 60
+# 实测正常长度输入单次 15–50 秒；单次上限 50 秒，含一次重试总上限 75 秒。
+# 前端 VITE_API_TIMEOUT 与 Nginx proxy_read_timeout 都要大于 TOTAL_TIMEOUT
+TOTAL_TIMEOUT = 75
+CALL_TIMEOUT = 50.0
+# 报告 JSON 实测 1000 token 以内，上限调低以缩短生成时间
+MAX_TOKENS = 2048
 MIN_CHARS = 30
 MAX_TOTAL_CHARS = 20000
 # 没有任何来自简历的亮点时，技能/经历/关键词三项不可能高分，防止被简历里的指令带偏
@@ -47,7 +52,15 @@ SYSTEM_PROMPT = """
 resume_evidence 不得填写“未提及”“无相关经验”等说明文字；找不到可逐字引用的证据就填 null。
 未体现某项经历不代表不具备。建议必须具体可执行，不得建议编造经历。
 没有亮点或缺口时允许对应数组为空，不要为凑数量编造。
-四个维度必须完整唯一，分数是 0–100 整数，权重固定如下。无相关证据时保守评分。
+四个维度必须完整唯一，分数是 0–100 整数，权重固定如下。每个维度按以下档位独立评分：
+- 85–100：JD 要求基本全部满足，且有具体成果或量化数据
+- 65–84：大部分要求满足，个别缺失
+- 40–64：部分满足，或有明显可迁移的相关经验
+- 15–39：只有少量相关或可迁移的内容
+- 0–14：该维度在简历中完全找不到任何相关内容
+只有确实找不到任何相关内容才给 0–14 分，不要因为整体不匹配就把四个维度都打成 0。
+可迁移能力要计分：JD 写到的沟通协作、团队管理、语言能力、海外经历、数据分析等，简历有对应证据时，在相关维度给分并可列为亮点。
+教育/证书维度：学历层次达到 JD 要求但专业不对口给 30–60 分；学历低于要求酌情给 15–40 分；只有完全没有教育信息时才给 0–14 分。
 只返回以下业务字段，示例分数不是默认评分：
 {
   "dimension_scores": [
@@ -173,11 +186,13 @@ async def diagnose(payload: DiagnoseRequest):
     try:
         async with asyncio.timeout(TOTAL_TIMEOUT):
             async with AsyncOpenAI(api_key=api_key, base_url="https://open.bigmodel.cn/api/paas/v4/",
-                                   timeout=30.0, max_retries=0) as client:
+                                   timeout=CALL_TIMEOUT, max_retries=0) as client:
                 for attempt in range(1, 3):
+                    # do_sample=false 关闭采样，同一输入尽量得到相同分数（此时 temperature 不生效）
                     response = await client.chat.completions.create(
                         model=MODEL, messages=messages, temperature=0.2,
-                        response_format={"type": "json_object"}, max_tokens=4096,
+                        response_format={"type": "json_object"}, max_tokens=MAX_TOKENS,
+                        extra_body={"do_sample": False},
                     )
                     try:
                         if not response.choices or response.choices[0].finish_reason != "stop":

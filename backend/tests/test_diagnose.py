@@ -113,6 +113,16 @@ class RouteTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.create.await_count, 2)
         self.assertEqual(self.client_class.call_args.kwargs["max_retries"], 0)
 
+    async def test_deterministic_and_timeouts(self):
+        self.create.return_value = completion(json.dumps(valid_data()))
+        await module.diagnose(PAYLOAD)
+        kwargs = self.create.call_args.kwargs
+        self.assertEqual(kwargs["extra_body"], {"do_sample": False})
+        self.assertEqual(kwargs["max_tokens"], module.MAX_TOKENS)
+        self.assertEqual(self.client_class.call_args.kwargs["timeout"], module.CALL_TIMEOUT)
+        # 单次超时要比总超时短，才留得出一次重试的时间
+        self.assertLess(module.CALL_TIMEOUT, module.TOTAL_TIMEOUT)
+
     async def test_truncation_retry(self):
         self.create.side_effect = [completion("{}", "length"), completion(json.dumps(valid_data()))]
         await module.diagnose(PAYLOAD)
