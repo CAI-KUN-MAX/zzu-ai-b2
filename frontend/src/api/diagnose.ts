@@ -5,7 +5,7 @@ import mockResponse from "../mock/response.json";
 export const IS_MOCK_MODE = import.meta.env.VITE_USE_MOCK !== "false";
 
 const API_BASE = (import.meta.env.VITE_API_BASE ?? "").replace(/\/+$/, "");
-const TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT ?? 60000);
+const TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT ?? 45000);
 
 /** 统一的业务异常，页面只需要读 message 做提示 */
 export class DiagnoseError extends Error {
@@ -39,6 +39,11 @@ function normalize(data: DiagnoseResponse): DiagnoseResponse {
 
 /** 后端错误体有三种形态，这里统一成一句可读的中文提示 */
 function toDiagnoseError(parsed: unknown, status: number): DiagnoseError {
+  // 5xx 多为大模型生成失败（JSON 格式偶发崩），错误体通常不可读，统一给人话提示
+  if (status >= 500) {
+    return new DiagnoseError("AI 正在思考中，请稍后重试", status);
+  }
+
   const body = (parsed ?? {}) as ApiErrorBody;
 
   // 契约预留形态：{ error: { code, message } }
@@ -114,7 +119,7 @@ export async function diagnose(payload: DiagnoseRequest): Promise<DiagnoseRespon
   } catch (error) {
     if (error instanceof DiagnoseError) throw error;
     if (error instanceof DOMException && error.name === "AbortError") {
-      throw new DiagnoseError(`请求超时（${Math.round(TIMEOUT_MS / 1000)} 秒），请稍后重试`);
+      throw new DiagnoseError(`AI 响应超时（${Math.round(TIMEOUT_MS / 1000)} 秒），请稍后重试`);
     }
     throw new DiagnoseError("网络异常，无法连接诊断服务");
   } finally {

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { SAMPLE_JD, SAMPLE_RESUME } from "../lib/sample";
 import { AlertIcon, ArrowRightIcon, InfoIcon, SpinnerIcon } from "./icons";
 
@@ -76,15 +76,27 @@ function TextPanel({
 }
 
 interface InputPageProps {
+  /** 输入内容由 App 持有，避免提交失败返回后内容丢失 */
+  resume: string;
+  jd: string;
+  onResumeChange: (value: string) => void;
+  onJdChange: (value: string) => void;
   loading: boolean;
   error: string | null;
-  onSubmit: (resume: string, jd: string) => void;
+  onSubmit: () => void;
+  onRetry: () => void;
 }
 
-export function InputPage({ loading, error, onSubmit }: InputPageProps) {
-  const [resume, setResume] = useState("");
-  const [jd, setJd] = useState("");
-
+export function InputPage({
+  resume,
+  jd,
+  onResumeChange,
+  onJdChange,
+  loading,
+  error,
+  onSubmit,
+  onRetry,
+}: InputPageProps) {
   const resumeChars = resume.trim().length;
   const jdChars = jd.trim().length;
 
@@ -121,8 +133,8 @@ export function InputPage({ loading, error, onSubmit }: InputPageProps) {
           hint="建议粘贴完整的教育与项目经历"
           placeholder="把你的简历全文粘到这里，纯文本即可，不用管格式…"
           value={resume}
-          onChange={setResume}
-          onFillSample={() => setResume(SAMPLE_RESUME)}
+          onChange={onResumeChange}
+          onFillSample={() => onResumeChange(SAMPLE_RESUME)}
         />
         <TextPanel
           index="02"
@@ -130,15 +142,23 @@ export function InputPage({ loading, error, onSubmit }: InputPageProps) {
           hint="职责与任职要求都要带上"
           placeholder="把目标岗位的 JD 粘到这里，越完整分析越准…"
           value={jd}
-          onChange={setJd}
-          onFillSample={() => setJd(SAMPLE_JD)}
+          onChange={onJdChange}
+          onFillSample={() => onJdChange(SAMPLE_JD)}
         />
       </div>
 
       {error ? (
         <div className="mt-5 flex items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           <AlertIcon className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>{error}</span>
+          <span className="flex-1 leading-relaxed">{error}</span>
+          <button
+            type="button"
+            onClick={onRetry}
+            disabled={!canSubmit}
+            className="shrink-0 rounded-lg bg-rose-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            重试
+          </button>
         </div>
       ) : null}
 
@@ -149,7 +169,7 @@ export function InputPage({ loading, error, onSubmit }: InputPageProps) {
 
         <button
           type="button"
-          onClick={() => onSubmit(resume.trim(), jd.trim())}
+          onClick={onSubmit}
           disabled={!canSubmit}
           className="group inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-700 hover:shadow-md disabled:cursor-not-allowed disabled:bg-ink-300 disabled:shadow-none"
         >

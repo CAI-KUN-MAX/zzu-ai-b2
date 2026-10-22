@@ -56,4 +56,18 @@
       transform: translateY(0);
     }
   }
+
+  /* 不确定进度条：大模型接口耗时不可知，用循环滑动表达"还在跑" */
+  .animate-indeterminate {
+    animation: indeterminate 1.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes indeterminate {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(300%);
+    }
+  }
 }

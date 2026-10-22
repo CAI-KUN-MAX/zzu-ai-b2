@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { DiagnoseError, diagnose } from "./api/diagnose";
 import { Header } from "./components/Header";
 import { InputPage } from "./components/InputPage";
+import { LoadingPage } from "./components/LoadingPage";
 import { ResultPage } from "./components/ResultPage";
 import type { DiagnoseResponse } from "./types";
 
@@ -9,19 +10,25 @@ type View = { name: "input" } | { name: "result"; data: DiagnoseResponse };
 
 export default function App() {
   const [view, setView] = useState<View>({ name: "input" });
+  // 输入内容提到 App 层：请求失败或重试时，用户已经粘好的文本不会丢
+  const [resume, setResume] = useState("");
+  const [jd, setJd] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // 切换页面时回到顶部
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [view.name]);
+  }, [view.name, loading]);
 
-  async function handleSubmit(resume: string, jd: string) {
+  async function runDiagnose() {
     setLoading(true);
     setError(null);
     try {
-      const data = await diagnose({ resume_text: resume, jd_text: jd });
+      const data = await diagnose({
+        resume_text: resume.trim(),
+        jd_text: jd.trim(),
+      });
       setView({ name: "result", data });
     } catch (err) {
       setError(err instanceof DiagnoseError ? err.message : "诊断失败，请稍后重试");
@@ -40,8 +47,19 @@ export default function App() {
       <Header />
 
       <div className="flex-1">
-        {view.name === "input" ? (
-          <InputPage loading={loading} error={error} onSubmit={handleSubmit} />
+        {loading ? (
+          <LoadingPage />
+        ) : view.name === "input" ? (
+          <InputPage
+            resume={resume}
+            jd={jd}
+            onResumeChange={setResume}
+            onJdChange={setJd}
+            loading={loading}
+            error={error}
+            onSubmit={runDiagnose}
+            onRetry={runDiagnose}
+          />
         ) : (
           <ResultPage data={view.data} onReset={handleReset} />
         )}

@@ -29,9 +29,9 @@ npm run typecheck  # 只做类型检查
 
 | 变量 | 说明 |
 | --- | --- |
-| `VITE_USE_MOCK` | `true` 用本地 mock（`src/mock/response.json`）；`false` 打真实接口 |
-| `VITE_API_BASE` | 接口前缀，留空则走 vite 代理（同源 `/api`），部署时填线上地址 |
-| `VITE_API_TIMEOUT` | 单次请求超时（ms），默认 60000 |
+| `VITE_USE_MOCK` | `false` 打真实后端（默认）；`true` 用本地 mock（`src/mock/response.json`）离线跑 UI |
+| `VITE_API_BASE` | 后端地址，默认 `http://8.163.105.39:8000`；留空则走 vite 代理（同源 `/api`） |
+| `VITE_API_TIMEOUT` | 单次请求超时（ms），默认 45000。实测 GLM-4 单次 22–28s，不要低于 30000 |
 
 联调时把 `VITE_USE_MOCK` 改成 `false` 即可，页面代码零改动：
 
@@ -93,7 +93,9 @@ FastAPI 默认 `{"detail": "..."}`、422 校验 `{"detail": [{"loc","msg"}]}`、
 
 ## 已处理的前端健壮性
 
-- 请求超时（AbortController，默认 60s），避免大模型链路卡死无反馈
+- 请求超时（AbortController，默认 45s），避免大模型链路卡死无反馈
+- 5xx 统一提示「AI 正在思考中，请稍后重试」，并给一键重试，输入内容不丢
+- 请求期间进入分阶段 Loading（解析简历 → 匹配要求 → 深度诊断），带已等待秒数
 - 响应非 JSON / 空 body / 字段缺失时给出可读提示，不白屏
 - `dimension_scores` 等数组缺失时降级为空列表并给出占位文案
 - 未知 `level` / `severity` 枚举值落到 medium 样式，不崩
