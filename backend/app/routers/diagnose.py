@@ -61,6 +61,7 @@ resume_evidence 不得填写“未提及”“无相关经验”等说明文字�
 只有确实找不到任何相关内容才给 0–14 分，不要因为整体不匹配就把四个维度都打成 0。
 可迁移能力要计分：JD 写到的沟通协作、团队管理、语言能力、海外经历、数据分析等，简历有对应证据时，在相关维度给分并可列为亮点。
 教育/证书维度：学历层次达到 JD 要求但专业不对口给 30–60 分；学历低于要求酌情给 15–40 分；只有完全没有教育信息时才给 0–14 分。
+如果 JD 没有提出任何学历、学位、院校、应届身份、语言等级或证书要求，该维度固定给 100 分，不得凭空扣分。
 只返回以下业务字段，示例分数不是默认评分：
 {
   "dimension_scores": [
@@ -82,6 +83,12 @@ severity 只能是 high、medium 或 low。
 
 ASCII_TERM = re.compile(r"[A-Za-z][A-Za-z0-9+#.]*[A-Za-z0-9+#]")
 YEARS = re.compile(r"\d+\s*年|[一二两三四五六七八九十]+年")
+CLAUSE_SEPARATOR = re.compile(r"[，,；;。！？\n]+")
+EDUCATION_REQUIREMENT = re.compile(
+    r"学历|本科|大专|专科|硕士|研究生|博士|学位|应届|毕业生|院校|证书|认证|"
+    r"CET[- ]?[46]|英语\s*[四六46]级|托福|雅思|TOEFL|IELTS",
+    re.IGNORECASE,
+)
 # 要求里的修饰词，去掉后剩下的才是要在简历里找的关键词
 REQUIREMENT_WORDS = re.compile(
     r"熟练掌握|熟练|熟悉|掌握|精通|了解|具备|具有|拥有|相关|经验|经历|能力|背景|优先|加分|以上|"
@@ -97,19 +104,41 @@ def requirement_keywords(requirement):
     return {part for part in REQUIREMENT_WORDS.split(requirement) if len(part) >= 2}
 
 
+def keyword_in_text(keyword, text):
+    return re.search(rf"(?<![A-Za-z0-9]){re.escape(keyword)}(?![A-Za-z0-9])", text, re.IGNORECASE) is not None
+
+
+def clause_is_covered(clause, resume_text):
+    """判断一个要求分句是否已有简历证据；“或”和技术栈斜杠按可替代项处理。"""
+    keywords = requirement_keywords(clause)
+    if not keywords:
+        return False
+    matches = [keyword_in_text(keyword, resume_text) for keyword in keywords]
+    is_alternative = "或" in clause or ("/" in clause and len(keywords) == 2)
+    return any(matches) if is_alternative else all(matches)
+
+
 def contradicts_resume(gap, resume_text):
-    """缺项说简历未体现，但要求里的关键词全都在简历原文里出现，视为误判。
+    """缺项说简历未体现，但各要求分句已有对应证据，视为误判。
 
     年限类要求（如“3 年以上”）无法靠关键词判断，一律保留；
     resume_evidence 非空说明模型已引用简历、属于程度不足，也保留。
     """
     if gap.resume_evidence is not None or YEARS.search(gap.jd_requirement):
         return False
-    keywords = requirement_keywords(gap.jd_requirement)
-    if not keywords:
+    clauses = [clause.strip() for clause in CLAUSE_SEPARATOR.split(gap.jd_requirement) if clause.strip()]
+    if not clauses:
         return False
-    return all(re.search(rf"(?<![A-Za-z0-9]){re.escape(word)}(?![A-Za-z0-9])", resume_text, re.IGNORECASE)
-               for word in keywords)
+    return all(clause_is_covered(clause, resume_text) for clause in clauses)
+
+
+def fallback_summary(report, language):
+    """过滤模型误判后同步改写摘要，避免卡片已删除但摘要仍保留矛盾结论。"""
+    if language == "en-US":
+        return (f"Based on the resume evidence, the overall match score is {report.overall_score}; "
+                f"{len(report.highlights)} strengths and {len(report.gaps)} gaps were identified.")
+    return (f"根据简历中的现有证据，本次综合匹配度为 {report.overall_score} 分；"
+            f"识别出 {len(report.highlights)} 项亮点和 {len(report.gaps)} 项待补齐内容。")
 
 
 def parse_report(content, payload, request_id, elapsed_ms):
@@ -138,6 +167,9 @@ def parse_report(content, payload, request_id, elapsed_ms):
         if dimension.weight != weight:
             raise ValueError("invalid_weight")
         dimension.label = label
+        # JD 没有教育/证书门槛时，这一维不存在未满足项，不允许模型无依据扣分。
+        if dimension.key == "education_match" and not EDUCATION_REQUIREMENT.search(payload.jd_text):
+            dimension.score = 100
     texts = [report.summary]
     sources = {"resume": payload.resume_text, "jd": payload.jd_text}
     # 亮点只展示候选人自己的内容，引用 JD 原文的条目直接丢弃
@@ -160,10 +192,14 @@ def parse_report(content, payload, request_id, elapsed_ms):
                 raise ValueError("证据必须逐字复制对应原文的连续片段，不得改写、拼接或使用未提及等说明；没有简历证据时 resume_evidence 必须填 null")
     if any(not text.strip() for text in texts):
         raise ValueError("blank_text")
+    original_gap_count = len(report.gaps)
     report.gaps = [gap for gap in report.gaps if not contradicts_resume(gap, payload.resume_text)]
     report.overall_score = int(sum(d.score * DIMENSIONS[d.key][1] for d in report.dimension_scores) + 0.5)
     report.level = "high" if report.overall_score >= 80 else "medium" if report.overall_score >= 60 else "low"
     report.level_label = {"high": "强匹配", "medium": "较匹配", "low": "存在缺口"}[report.level]
+    if len(report.gaps) != original_gap_count:
+        language = (payload.options or {}).get("language")
+        report.summary = fallback_summary(report, language)
     return report
 
 
@@ -198,7 +234,8 @@ async def diagnose(payload: DiagnoseRequest):
     validate_length(payload)
 
     request_id = uuid.uuid4().hex
-    if os.getenv("MOCK_MODE", "true").lower() == "true":
+    # 只有显式开启才返回 mock，避免生产环境漏配变量时悄悄返回假报告。
+    if os.getenv("MOCK_MODE", "false").lower() == "true":
         res = MOCK_RESPONSES["medium"].model_copy(deep=True)
         res.request_id = request_id
         return res

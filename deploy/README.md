@@ -19,7 +19,7 @@ sudo nginx -t && sudo systemctl reload nginx
 | 变量 | 默认值 | 说明 |
 |---|---|---|
 | `LLM_API_KEY` | 无 | 智谱 API Key，必填 |
-| `MOCK_MODE` | `true` | 线上设为 `false` |
+| `MOCK_MODE` | `false` | 只有显式设为 `true` 才返回 mock；线上保持 `false` |
 | `CORS_ORIGINS` | `http://8.163.105.39,http://localhost:5173,http://127.0.0.1:5173` | 允许跨域的前端地址，英文逗号分隔；走 Nginx 同源代理时可不改 |
 | `ENABLE_DOCS` | `false` | 设为 `true` 才开放 `/docs`、`/redoc`、`/openapi.json`，仅限本地调试 |
 
