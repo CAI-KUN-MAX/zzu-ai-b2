@@ -67,8 +67,8 @@ export default function App() {
 
       <footer className="border-t border-surface-line bg-white/60">
         <div className="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-5 text-[11px] text-ink-500 sm:flex-row sm:items-center sm:justify-between">
-          <span>简历诊断 · 前后端分离演示版</span>
-          <span>接口 POST /api/diagnose · 数据仅用于本次分析</span>
+          <span>© 2026 简历诊断 · 保留所有权利</span>
+          <span>简历与岗位匹配分析工具</span>
         </div>
       </footer>
     </div>

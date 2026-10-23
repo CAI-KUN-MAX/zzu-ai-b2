@@ -28,9 +28,6 @@ export function ResultPage({ data, onReset }: ResultPageProps) {
           <ArrowLeftIcon className="h-4 w-4" />
           重新粘贴
         </button>
-        <span className="hidden text-[11px] text-ink-500 sm:block">
-          ID {data.request_id.slice(0, 12)}
-        </span>
       </div>
 
       {/* 总分卡 */}
@@ -52,13 +49,15 @@ export function ResultPage({ data, onReset }: ResultPageProps) {
 
             <div className="mt-5 flex flex-wrap gap-x-6 gap-y-1.5 text-[11px] text-ink-500">
               <span>
-                模型 <span className="font-medium text-ink-700">{data.meta.model}</span>
+                由 <span className="font-medium text-ink-700">{data.meta.model}</span> 生成
               </span>
               <span>
-                耗时 <span className="num font-medium text-ink-700">{data.meta.elapsed_ms} ms</span>
-              </span>
-              <span>
-                场景 <span className="font-medium text-ink-700">{data.meta.mode}</span>
+                耗时{" "}
+                <span className="num font-medium text-ink-700">
+                  {data.meta.elapsed_ms >= 1000
+                    ? `${(data.meta.elapsed_ms / 1000).toFixed(1)} 秒`
+                    : `${data.meta.elapsed_ms} 毫秒`}
+                </span>
               </span>
             </div>
           </div>
