@@ -29,11 +29,11 @@ npm run typecheck  # 只做类型检查
 
 | 变量 | 说明 |
 | --- | --- |
-| `VITE_USE_MOCK` | `false` 打真实后端（默认）；`true` 用本地 mock（`src/mock/response.json`）离线跑 UI |
+| `VITE_USE_MOCK` | 只有写 `true` 才用本地 mock（`src/mock/response.json`）离线跑 UI；不写或写其他值都请求真实后端 |
 | `VITE_API_BASE` | 后端地址，默认 `http://8.163.105.39:8000`；留空则走 vite 代理（同源 `/api`） |
-| `VITE_API_TIMEOUT` | 单次请求超时（ms），默认 45000。实测 GLM-4 单次 22–28s，不要低于 30000 |
+| `VITE_API_TIMEOUT` | 单次请求超时（ms），默认 80000。需大于后端总超时 75s；实测 GLM-4 单次 15–50s |
 
-联调时把 `VITE_USE_MOCK` 改成 `false` 即可，页面代码零改动：
+默认就请求真实后端；只想离线调 UI 时才把 `VITE_USE_MOCK` 设为 `true`：
 
 ```bash
 # .env

@@ -1,11 +1,12 @@
 import type { ApiErrorBody, DiagnoseRequest, DiagnoseResponse } from "../types";
 import mockResponse from "../mock/response.json";
 
-/** 是否处于 mock 模式（.env 里 VITE_USE_MOCK=true） */
-export const IS_MOCK_MODE = import.meta.env.VITE_USE_MOCK !== "false";
+/** 是否处于 mock 模式：只有 .env 里明确写 VITE_USE_MOCK=true 才启用，漏配时默认请求真实后端 */
+export const IS_MOCK_MODE = import.meta.env.VITE_USE_MOCK === "true";
 
 const API_BASE = (import.meta.env.VITE_API_BASE ?? "").replace(/\/+$/, "");
-const TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT ?? 45000);
+// 需大于后端 TOTAL_TIMEOUT（75 秒），否则后端还在算前端就先放弃了
+const TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT ?? 80000);
 
 /** 统一的业务异常，页面只需要读 message 做提示 */
 export class DiagnoseError extends Error {
@@ -39,12 +40,21 @@ function normalize(data: DiagnoseResponse): DiagnoseResponse {
 
 /** 后端错误体有三种形态，这里统一成一句可读的中文提示 */
 function toDiagnoseError(parsed: unknown, status: number): DiagnoseError {
-  // 5xx 多为大模型生成失败（JSON 格式偶发崩），错误体通常不可读，统一给人话提示
+  // 504 是模型确实超时，和生成失败分开提示，用户才知道该等还是该精简内容
+  if (status === 504) {
+    return new DiagnoseError("AI 响应超时，请稍后重试；内容较长时可适当精简", status);
+  }
+
+  // 其他 5xx 多为大模型生成失败（JSON 格式偶发崩），错误体通常不可读，统一给人话提示
   if (status >= 500) {
     return new DiagnoseError("AI 正在思考中，请稍后重试", status);
   }
 
   const body = (parsed ?? {}) as ApiErrorBody;
+
+  if (status === 429 && !body.error?.message) {
+    return new DiagnoseError("请求过于频繁，请 1 分钟后再试", status);
+  }
 
   // 契约预留形态：{ error: { code, message } }
   if (body.error?.message) {
@@ -75,7 +85,7 @@ function toDiagnoseError(parsed: unknown, status: number): DiagnoseError {
 
 /**
  * 调用诊断接口。
- * mock 模式下返回内置样例，联调时把 .env 的 VITE_USE_MOCK 改成 false 即可，页面代码零改动。
+ * mock 模式下返回内置样例，离线调 UI 时把 .env 的 VITE_USE_MOCK 设为 true，页面代码零改动。
  */
 export async function diagnose(payload: DiagnoseRequest): Promise<DiagnoseResponse> {
   if (IS_MOCK_MODE) {
@@ -103,7 +113,8 @@ export async function diagnose(payload: DiagnoseRequest): Promise<DiagnoseRespon
       try {
         parsed = JSON.parse(raw);
       } catch {
-        throw new DiagnoseError("诊断服务返回的内容不是合法 JSON");
+        // 网关（Nginx）报错时返回的是 HTML，按状态码给提示即可
+        if (res.ok) throw new DiagnoseError("诊断服务返回的内容不是合法 JSON");
       }
     }
 

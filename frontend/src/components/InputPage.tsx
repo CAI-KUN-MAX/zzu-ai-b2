@@ -99,10 +99,13 @@ export function InputPage({
 }: InputPageProps) {
   const resumeChars = resume.trim().length;
   const jdChars = jd.trim().length;
+  // 上限针对两段合计，单个输入框的 maxLength 拦不住两栏各贴 1.5 万字
+  const totalChars = resumeChars + jdChars;
+  const overLimit = totalChars > MAX_CHARS;
 
   const canSubmit = useMemo(
-    () => resumeChars >= MIN_CHARS && jdChars >= MIN_CHARS && !loading,
-    [resumeChars, jdChars, loading]
+    () => resumeChars >= MIN_CHARS && jdChars >= MIN_CHARS && !overLimit && !loading,
+    [resumeChars, jdChars, overLimit, loading]
   );
 
   const shortHint = useMemo(() => {
@@ -110,6 +113,10 @@ export function InputPage({
     if (jdChars > 0 && jdChars < MIN_CHARS) return "岗位 JD 偏短，至少 30 字";
     return "";
   }, [resumeChars, jdChars]);
+
+  const overHint = overLimit
+    ? `两段合计 ${totalChars.toLocaleString("zh-CN")} 字，超过 ${MAX_CHARS.toLocaleString("zh-CN")} 字上限，请删减 ${(totalChars - MAX_CHARS).toLocaleString("zh-CN")} 字后再提交`
+    : "";
 
   return (
     <main className="mx-auto max-w-6xl px-6 pb-20 pt-12">
@@ -163,8 +170,8 @@ export function InputPage({
       ) : null}
 
       <div className="mt-7 flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-[11px] leading-relaxed text-ink-500">
-          {shortHint || `两段文本各需不少于 ${MIN_CHARS} 字，总字数上限 ${MAX_CHARS.toLocaleString("zh-CN")}`}
+        <p className={`text-[11px] leading-relaxed ${overHint ? "text-rose-600" : "text-ink-500"}`}>
+          {overHint || shortHint || `两段文本各需不少于 ${MIN_CHARS} 字，总字数上限 ${MAX_CHARS.toLocaleString("zh-CN")}`}
         </p>
 
         <button
