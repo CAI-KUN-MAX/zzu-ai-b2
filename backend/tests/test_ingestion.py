@@ -2,6 +2,7 @@ import io
 import json
 import os
 import tempfile
+import threading
 import time
 import unittest
 from pathlib import Path
@@ -103,6 +104,73 @@ class IngestApiTests(unittest.TestCase):
         self.assertEqual(len(list((Path(self.directory.name) / "uploads").iterdir())), 1)
         self.assertFalse(list(Path(self.directory.name).glob("*.tmp")))
 
+    def test_frontend_field_roundtrip_and_legacy_dedup(self):
+        content = docx_bytes()
+        response = self.client.post("/api/resumes/batch", files=[("files", ("前端.docx", content))])
+        self.assertEqual(response.status_code, 202, response.text)
+        result = self.wait(response.json()["task_id"])
+        self.assertEqual(result["status"], "succeeded")
+        self.assertIsNone(result["error"])
+        resume_id = result["items"][0]["resume_id"]
+        self.assertEqual(self.wait(self.upload(content))["items"][0]["resume_id"], resume_id)
+        text = self.client.get(f"/api/resumes/{resume_id}/text")
+        self.assertEqual(text.status_code, 200)
+        self.assertIn("Python", text.json()["text"])
+
+    def test_both_upload_fields_share_validation_limits(self):
+        response = self.client.post("/api/resumes/batch", files=[
+            ("files", ("new.docx", docx_bytes("候选人一，负责后端服务。"))),
+            ("files[]", ("legacy.docx", docx_bytes("候选人二，负责数据库。")))])
+        self.assertEqual(response.status_code, 202, response.text)
+        self.assertEqual(len(self.wait(response.json()["task_id"])["items"]), 2)
+        entries = [("files" if index < 11 else "files[]", (f"{index}.docx", b"x")) for index in range(21)]
+        self.assert_error(self.client.post("/api/resumes/batch", files=entries), 400, "TOO_MANY_RESUMES")
+        self.assert_error(self.client.post("/api/resumes/batch"), 422, "VALIDATION_ERROR")
+        self.assert_error(self.client.post("/api/resumes/batch", files=[("files", ("empty.docx", b""))]),
+                          400, "INVALID_INPUT")
+
+    def test_polling_never_exposes_parsing_items(self):
+        started, release = threading.Event(), threading.Event()
+
+        def blocked_extract(*args):
+            started.set()
+            if not release.wait(10):
+                raise RuntimeError("test extraction was not released")
+            return extract_text(*args)
+
+        with patch("app.ingestion.extract_text", side_effect=blocked_extract):
+            try:
+                first = self.upload(docx_bytes("第一份简历，熟悉Python和MySQL，负责后端开发与测试。"))
+                self.assertTrue(started.wait(3))
+                second = self.upload(docx_bytes("第二份简历，熟悉Java和MySQL，负责后端服务开发。"))
+                for identifier, expected in ((first, "running"), (second, "queued")):
+                    result = self.client.get(f"/api/tasks/{identifier}").json()
+                    self.assertEqual(result["status"], expected)
+                    self.assertEqual(result["items"], [])
+                    self.assertIsNone(result["error"])
+                    with app.state.store.connect() as db:
+                        self.assertGreater(db.execute("SELECT count(*) FROM resumes WHERE status='parsing'").fetchone()[0], 0)
+            finally:
+                release.set()
+            for identifier in (first, second):
+                result = self.wait(identifier)
+                self.assertEqual(result["status"], "succeeded")
+                self.assertTrue(result["items"])
+                self.assertTrue(all(item["status"] in {"ready", "need_review", "failed"} for item in result["items"]))
+
+    def test_restart_error_is_frontend_renderable_string(self):
+        with app.state.store.connect() as db:
+            db.execute("INSERT INTO resumes (id,name,sha256,file_path,source,created_at) VALUES ('interrupted','x','x','x','docx','now')")
+            db.execute("INSERT INTO tasks (id,kind,status,payload,created_at,updated_at) VALUES "
+                       "('interrupted','ingest','running',?,'now','now')", (json.dumps({"resume_ids": ["interrupted"]}),))
+        app.state.store.initialize()
+        result = self.client.get("/api/tasks/interrupted").json()
+        self.assertEqual(result["status"], "failed")
+        self.assertIsInstance(result["error"], str)
+        self.assertIn("服务重启", result["error"])
+        self.assertEqual(result["error_code"], "TASK_INTERRUPTED")
+        self.assertEqual(result["items"][0]["status"], "failed")
+
     def test_text_pdf_magic_over_extension(self):
         content = pdf_bytes("Python MySQL backend engineer with experience in database design and REST APIs. " * 3)
         result = self.wait(self.upload(content, "resume.doc"))
@@ -154,6 +222,9 @@ class IngestApiTests(unittest.TestCase):
             item = result["items"][0]
             self.assertEqual(item["status"], "failed")
             self.assertEqual(item["error"]["code"], code)
+            self.assertIsInstance(result["error"], str)
+            self.assertEqual(result["error"], item["error"]["message"])
+            self.assertEqual(result["error_code"], code)
             response = self.client.get(f'/api/resumes/{item["resume_id"]}/text')
             self.assert_error(response, 503 if code == "OCR_UNAVAILABLE" else 415, code)
 
@@ -173,7 +244,8 @@ class IngestApiTests(unittest.TestCase):
             result = self.wait(self.upload(docx_bytes()))
         self.assertEqual(result["status"], "failed")
         self.assertEqual(result["items"][0]["status"], "failed")
-        self.assertEqual(result["error"]["code"], "INGEST_FAILED")
+        self.assertIsInstance(result["error"], str)
+        self.assertEqual(result["error_code"], "INGEST_FAILED")
 
     def test_missing_ids_docs_disabled_and_not_ready(self):
         self.assert_error(self.client.get("/api/tasks/nope"), 404, "TASK_NOT_FOUND")
@@ -191,10 +263,10 @@ class RecoveryAndCleaningTests(unittest.TestCase):
         body = schema["paths"]["/api/resumes/batch"]["post"]["requestBody"]
         reference = body["content"]["multipart/form-data"]["schema"]["$ref"]
         fields = schema["components"]["schemas"][reference.rsplit("/", 1)[-1]]
-        upload = fields["properties"]["files[]"]
-        self.assertEqual(upload["type"], "array")
-        self.assertEqual(upload["items"]["format"], "binary")
-        self.assertIn("files[]", fields["required"])
+        for name in ("files", "files[]"):
+            upload = fields["properties"][name]
+            self.assertEqual(upload["type"], "array")
+            self.assertEqual(upload["items"]["format"], "binary")
 
     def test_recovery_and_persistence(self):
         with tempfile.TemporaryDirectory() as directory:
