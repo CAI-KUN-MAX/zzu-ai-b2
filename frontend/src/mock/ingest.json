@@ -1,0 +1,64 @@
+{
+  "status": "succeeded",
+  "stage": "解析完成 8/8",
+  "progress": 100,
+  "error": null,
+  "items": [
+    {
+      "resume_id": "r-001",
+      "name": "张明_前端开发_2026.pdf",
+      "chars": 1860,
+      "status": "ready",
+      "preview": "郑州大学 计算机科学与技术 本科｜熟练 React、TypeScript，使用 Vite 搭建过中后台，熟悉 Tailwind 与组件化开发，参与过接口联调。"
+    },
+    {
+      "resume_id": "r-002",
+      "name": "李静_前端实习_2026.docx",
+      "chars": 2104,
+      "status": "ready",
+      "preview": "杭州电子科技大学 软件工程｜Vue3 + TS 项目经验，负责可视化大屏开发，了解 Webpack 构建流程与 Git 协作规范。"
+    },
+    {
+      "resume_id": "r-003",
+      "name": "王磊_扫描件.jpg",
+      "chars": 940,
+      "status": "need_review",
+      "preview": "图像识别质量偏低，部分段落可能缺失：熟悉 JavaScript、CSS，参与过校园二手交易平台前端页面开发……"
+    },
+    {
+      "resume_id": "r-004",
+      "name": "陈晨_web前端.pdf",
+      "chars": 1560,
+      "status": "ready",
+      "preview": "武汉理工大学 计算机｜三年 React 实战，主导过组件库建设，熟悉性能优化与首屏加载指标治理。"
+    },
+    {
+      "resume_id": "r-005",
+      "name": "赵宇_简历_加密.pdf",
+      "chars": 0,
+      "status": "failed",
+      "preview": "文件已加密，无法提取文本内容。"
+    },
+    {
+      "resume_id": "r-006",
+      "name": "孙悦_前端工程师.pdf",
+      "chars": 2380,
+      "status": "ready",
+      "preview": "北京邮电大学 软件工程｜React + Node 全栈经验，负责过管理后台与低代码平台前端，熟悉单元测试与 CI 流程。"
+    },
+    {
+      "resume_id": "r-007",
+      "name": "周航_手写稿.png",
+      "chars": 720,
+      "status": "need_review",
+      "preview": "手写体识别置信度较低，建议核对：熟练掌握 HTML/CSS/JS，做过响应式页面，了解 Vue 基础语法……"
+    },
+    {
+      "resume_id": "r-008",
+      "name": "吴敏_前端校招.pdf",
+      "chars": 1720,
+      "status": "ready",
+      "preview": "南京理工大学 计算机｜前端实习一年，负责营销活动页开发，熟悉 Tailwind 与移动端适配，了解 React 生态。"
+    }
+  ]
+}

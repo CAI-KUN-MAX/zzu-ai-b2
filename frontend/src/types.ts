@@ -99,3 +99,75 @@ export interface ApiErrorBody {
   code?: string | number;
   message?: string;
 }
+
+/* ------------------------------------------------------------------ *
+ * 简历筛选（OCR 解析 + 匹配排序）—— 与后端统一契约，不要单独改字段
+ * ------------------------------------------------------------------ */
+
+/** 异步任务状态 */
+export type TaskStatus = "queued" | "running" | "succeeded" | "failed";
+
+/** 单份简历的解析状态 */
+export type ResumeStatus = "ready" | "need_review" | "failed";
+
+/** 解析批次的单条结果 */
+export interface IngestItem {
+  resume_id: string;
+  name: string;
+  chars: number;
+  status: ResumeStatus;
+  /** 正文预览，用于列表展示 */
+  preview: string;
+}
+
+/** GET /api/tasks/{task_id} */
+export interface IngestTask {
+  status: TaskStatus;
+  /** 面向用户的阶段文案，如「解析 3/8」 */
+  stage: string;
+  /** 0-100 */
+  progress: number;
+  error: string | null;
+  items: IngestItem[];
+}
+
+/** GET /api/resumes/{resume_id}/text */
+export interface ResumeText {
+  resume_id: string;
+  name: string;
+  chars: number;
+  text: string;
+}
+
+export interface MatchSubScore {
+  key: string;
+  label: string;
+  score: number;
+  weight: number;
+}
+
+/** 匹配结果中的单份简历 */
+export interface MatchItem {
+  resume_id: string;
+  name: string;
+  score: number;
+  level: MatchLevel;
+  level_label: string;
+  subscores: MatchSubScore[];
+  matched: string[];
+  missing: string[];
+  reason: string | null;
+  /** true 表示只做了轻量打分，没有 AI 深度分析，此时 report 不存在 */
+  degraded: boolean;
+  /** 与 /api/diagnose 响应结构完全一致，degraded 时为 undefined */
+  report?: DiagnoseResponse;
+}
+
+/** GET /api/match/{task_id} */
+export interface MatchTask {
+  status: TaskStatus;
+  stage: string;
+  progress: number;
+  error: string | null;
+  items: MatchItem[];
+}
