@@ -1,5 +1,6 @@
 import os
 import uuid
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -7,10 +8,24 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers.diagnose import router
+from app.routers.resumes import router as resumes_router
+from app.ingestion import IngestJobs, Store, data_directory
+
+
+@asynccontextmanager
+async def lifespan(app):
+    app.state.store = Store(data_directory())
+    app.state.store.initialize()
+    app.state.ingest_jobs = IngestJobs(app.state.store)
+    try:
+        yield
+    finally:
+        await app.state.ingest_jobs.close()
 
 # 线上默认关闭 /docs、/redoc、/openapi.json，本地调试时设 ENABLE_DOCS=true
 ENABLE_DOCS = os.getenv("ENABLE_DOCS", "false").lower() == "true"
 app = FastAPI(
+    lifespan=lifespan,
     title="简历-JD智能诊断系统",
     docs_url="/docs" if ENABLE_DOCS else None,
     redoc_url="/redoc" if ENABLE_DOCS else None,
@@ -55,6 +70,7 @@ async def handle_validation_error(request: Request, exc: RequestValidationError)
 
 
 app.include_router(router)
+app.include_router(resumes_router)
 
 @app.get("/")
 def read_root():
