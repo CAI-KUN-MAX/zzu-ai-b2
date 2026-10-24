@@ -6,6 +6,7 @@ const MIN_CHARS = 30;
 const MAX_CHARS = 20000;
 
 interface TextPanelProps {
+  inputId: string;
   index: string;
   title: string;
   hint: string;
@@ -16,6 +17,7 @@ interface TextPanelProps {
 }
 
 function TextPanel({
+  inputId,
   index,
   title,
   hint,
@@ -25,6 +27,7 @@ function TextPanel({
   onFillSample,
 }: TextPanelProps) {
   const chars = value.trim().length;
+  const hintId = `${inputId}-hint`;
 
   return (
     <section className="flex flex-col overflow-hidden rounded-xl2 border border-surface-line bg-white shadow-card transition-colors focus-within:border-brand-300">
@@ -33,7 +36,9 @@ function TextPanel({
           <span className="num rounded-md bg-brand-50 px-1.5 py-0.5 text-[11px] font-semibold text-brand-600">
             {index}
           </span>
-          <h2 className="text-sm font-semibold">{title}</h2>
+          <h2 className="text-sm font-semibold">
+            <label htmlFor={inputId}>{title}</label>
+          </h2>
         </div>
         <span
           className={`num text-xs ${chars > MAX_CHARS ? "text-rose-600" : "text-ink-500"}`}
@@ -43,6 +48,8 @@ function TextPanel({
       </div>
 
       <textarea
+        id={inputId}
+        aria-describedby={hintId}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         maxLength={MAX_CHARS}
@@ -52,7 +59,9 @@ function TextPanel({
       />
 
       <div className="flex items-center justify-between border-t border-surface-line bg-surface-soft/60 px-4 py-2">
-        <span className="text-[11px] text-ink-500">{hint}</span>
+        <span id={hintId} className="text-[11px] text-ink-500">
+          {hint}
+        </span>
         <div className="flex items-center gap-1">
           <button
             type="button"
@@ -135,6 +144,7 @@ export function InputPage({
 
       <div className="mt-9 grid gap-5 lg:grid-cols-2">
         <TextPanel
+          inputId="resume-text"
           index="01"
           title="简历内容"
           hint="建议粘贴完整的教育与项目经历"
@@ -144,6 +154,7 @@ export function InputPage({
           onFillSample={() => onResumeChange(SAMPLE_RESUME)}
         />
         <TextPanel
+          inputId="jd-text"
           index="02"
           title="岗位 JD"
           hint="职责与任职要求都要带上"

@@ -11,11 +11,17 @@ const TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT ?? 80000);
 /** 统一的业务异常，页面只需要读 message 做提示 */
 export class DiagnoseError extends Error {
   readonly code: string | number | null;
+  readonly requestId: string | null;
 
-  constructor(message: string, code: string | number | null = null) {
+  constructor(
+    message: string,
+    code: string | number | null = null,
+    requestId: string | null = null
+  ) {
     super(message);
     this.name = "DiagnoseError";
     this.code = code;
+    this.requestId = requestId;
   }
 }
 
@@ -29,28 +35,42 @@ const clampScore = (value: unknown): number => {
 
 /** 后端字段缺失时给出安全默认值，避免整页白屏 */
 function normalize(data: DiagnoseResponse): DiagnoseResponse {
+  const severityRank = { high: 0, medium: 1, low: 2 } as const;
   return {
     ...data,
     overall_score: clampScore(data.overall_score),
     dimension_scores: Array.isArray(data.dimension_scores) ? data.dimension_scores : [],
     highlights: Array.isArray(data.highlights) ? data.highlights : [],
-    gaps: Array.isArray(data.gaps) ? data.gaps : [],
+    gaps: Array.isArray(data.gaps)
+      ? [...data.gaps].sort((a, b) => severityRank[a.severity] - severityRank[b.severity])
+      : [],
   };
 }
 
 /** 后端错误体有三种形态，这里统一成一句可读的中文提示 */
 function toDiagnoseError(parsed: unknown, status: number): DiagnoseError {
+  const body = (parsed ?? {}) as ApiErrorBody;
+  const requestId = body.error?.request_id ?? null;
+  const withRequestId = (message: string) =>
+    requestId ? `${message}（请求编号：${requestId}）` : message;
+
   // 504 是模型确实超时，和生成失败分开提示，用户才知道该等还是该精简内容
   if (status === 504) {
-    return new DiagnoseError("AI 响应超时，请稍后重试；内容较长时可适当精简", status);
+    return new DiagnoseError(
+      withRequestId("AI 响应超时，请稍后重试；内容较长时可适当精简"),
+      body.error?.code ?? status,
+      requestId
+    );
   }
 
-  // 其他 5xx 多为大模型生成失败（JSON 格式偶发崩），错误体通常不可读，统一给人话提示
+  // 其他 5xx 多为大模型生成失败；保留后端请求编号，便于用户反馈后定位日志。
   if (status >= 500) {
-    return new DiagnoseError("AI 正在思考中，请稍后重试", status);
+    return new DiagnoseError(
+      withRequestId("AI 正在思考中，请稍后重试"),
+      body.error?.code ?? status,
+      requestId
+    );
   }
-
-  const body = (parsed ?? {}) as ApiErrorBody;
 
   if (status === 429 && !body.error?.message) {
     return new DiagnoseError("请求过于频繁，请 1 分钟后再试", status);
@@ -58,7 +78,11 @@ function toDiagnoseError(parsed: unknown, status: number): DiagnoseError {
 
   // 契约预留形态：{ error: { code, message } }
   if (body.error?.message) {
-    return new DiagnoseError(body.error.message, body.error.code ?? status);
+    return new DiagnoseError(
+      withRequestId(body.error.message),
+      body.error.code ?? status,
+      requestId
+    );
   }
 
   // FastAPI 默认：{ detail: "..." }

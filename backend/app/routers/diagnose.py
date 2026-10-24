@@ -141,6 +141,23 @@ def fallback_summary(report, language):
             f"识别出 {len(report.highlights)} 项亮点和 {len(report.gaps)} 项待补齐内容。")
 
 
+SEVERITY_ORDER = {"high": 0, "medium": 1, "low": 2}
+
+
+def suggestions_enabled(payload):
+    """未传时保持兼容；只有明确传 false 才关闭改进建议。"""
+    return (payload.options or {}).get("include_suggestions") is not False
+
+
+def apply_response_options(report, payload):
+    """统一响应顺序并落实请求选项，mock 与真实模型走同一套规则。"""
+    report.gaps.sort(key=lambda gap: SEVERITY_ORDER[gap.severity])
+    if not suggestions_enabled(payload):
+        for gap in report.gaps:
+            gap.suggestion = ""
+    return report
+
+
 def parse_report(content, payload, request_id, elapsed_ms):
     if not isinstance(content, str) or not content.strip():
         raise ValueError("empty_content")
@@ -200,7 +217,7 @@ def parse_report(content, payload, request_id, elapsed_ms):
     if len(report.gaps) != original_gap_count:
         language = (payload.options or {}).get("language")
         report.summary = fallback_summary(report, language)
-    return report
+    return apply_response_options(report, payload)
 
 
 def build_user_message(payload, language_name):
@@ -238,7 +255,7 @@ async def diagnose(payload: DiagnoseRequest):
     if os.getenv("MOCK_MODE", "false").lower() == "true":
         res = MOCK_RESPONSES["medium"].model_copy(deep=True)
         res.request_id = request_id
-        return res
+        return apply_response_options(res, payload)
 
     start_time = time.monotonic()
     api_key = os.getenv("LLM_API_KEY")

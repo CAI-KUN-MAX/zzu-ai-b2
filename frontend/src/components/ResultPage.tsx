@@ -163,6 +163,7 @@ export function ResultPage({ data, onReset }: ResultPageProps) {
         <div className="mt-3 space-y-4">
           {data.gaps.map((gap, index) => {
             const severity = severityMeta(gap.severity);
+            const hasSuggestion = Boolean(gap.suggestion?.trim());
             return (
               <article
                 key={`${gap.title}-${index}`}
@@ -183,7 +184,11 @@ export function ResultPage({ data, onReset }: ResultPageProps) {
                   </span>
                 </div>
 
-                <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                <div
+                  className={`mt-4 grid gap-4 ${
+                    hasSuggestion ? "sm:grid-cols-3" : "sm:grid-cols-2"
+                  }`}
+                >
                   <div>
                     <p className="text-[11px] font-medium text-ink-500">JD 要求</p>
                     <p className="mt-1 text-[13px] leading-relaxed text-ink-700">
@@ -196,12 +201,14 @@ export function ResultPage({ data, onReset }: ResultPageProps) {
                       {gap.resume_evidence || "未体现"}
                     </p>
                   </div>
-                  <div className="rounded-xl bg-brand-50/70 p-3">
-                    <p className="text-[11px] font-medium text-brand-700">改进建议</p>
-                    <p className="mt-1 text-[13px] leading-relaxed text-ink-700">
-                      {gap.suggestion}
-                    </p>
-                  </div>
+                  {hasSuggestion ? (
+                    <div className="rounded-xl bg-brand-50/70 p-3">
+                      <p className="text-[11px] font-medium text-brand-700">改进建议</p>
+                      <p className="mt-1 text-[13px] leading-relaxed text-ink-700">
+                        {gap.suggestion}
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
               </article>
             );

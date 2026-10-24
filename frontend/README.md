@@ -78,7 +78,8 @@ src/
 }
 ```
 
-`options` 可省略，后端有默认值。
+`options` 可省略，后端有默认值。`include_suggestions: false` 时，返回的缺口仍保留，
+但 `suggestion` 为空字符串，结果页不会展示改进建议区域。
 
 响应结构见 `src/types.ts` 的 `DiagnoseResponse`。关键字段：
 
@@ -86,15 +87,16 @@ src/
 - `level` / `level_label`：等级枚举 + 展示文案（文案由后端下发，前端不自造）
 - `dimension_scores[]`：`key / label / score / weight`
 - `highlights[]`：`title / evidence / source`
-- `gaps[]`：`title / jd_requirement / resume_evidence / suggestion / severity`，其中 `resume_evidence` 可能为 `null`
+- `gaps[]`：`title / jd_requirement / resume_evidence / suggestion / severity`，其中 `resume_evidence` 可能为 `null`；按 `high → medium → low` 返回和展示
 
 错误约定：后端可能返回三种形态，前端已统一兼容 ——
-FastAPI 默认 `{"detail": "..."}`、422 校验 `{"detail": [{"loc","msg"}]}`、契约预留 `{"error": {"code","message"}}`。
+FastAPI 默认 `{"detail": "..."}`、422 校验 `{"detail": [{"loc","msg"}]}`、标准错误
+`{"error": {"code","message","request_id"}}`。服务端错误会在页面保留 `request_id`，便于按日志排查。
 
 ## 已处理的前端健壮性
 
 - 请求超时（AbortController，默认 45s），避免大模型链路卡死无反馈
-- 5xx 统一提示「AI 正在思考中，请稍后重试」，并给一键重试，输入内容不丢
+- 5xx 统一给出可读提示并保留请求编号，方便用户反馈和服务端查日志
 - 请求期间进入分阶段 Loading（解析简历 → 匹配要求 → 深度诊断），带已等待秒数
 - 响应非 JSON / 空 body / 字段缺失时给出可读提示，不白屏
 - `dimension_scores` 等数组缺失时降级为空列表并给出占位文案
