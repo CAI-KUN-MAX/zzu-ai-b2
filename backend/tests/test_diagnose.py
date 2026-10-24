@@ -135,6 +135,19 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(next(d.score for d in report.dimension_scores if d.key == "education_match"), 100)
         self.assertNotIn("缺乏 React", report.summary)
 
+    def test_gaps_are_sorted_and_suggestions_can_be_disabled(self):
+        payload = PAYLOAD.model_copy(update={"options": {"include_suggestions": False}})
+        data = valid_data()
+        base_gap = data["gaps"][0]
+        data["gaps"] = [
+            {**base_gap, "title": "低优先级", "severity": "low"},
+            {**base_gap, "title": "高优先级", "severity": "high"},
+            {**base_gap, "title": "中优先级", "severity": "medium"},
+        ]
+        report = module.parse_report(json.dumps(data), payload, "id", 0)
+        self.assertEqual([gap.severity for gap in report.gaps], ["high", "medium", "low"])
+        self.assertTrue(all(gap.suggestion == "" for gap in report.gaps))
+
     def test_user_message_isolates_input(self):
         message = module.build_user_message(PAYLOAD, "简体中文")
         self.assertIn(f"<resume>\n{PAYLOAD.resume_text}\n</resume>", message)
@@ -216,6 +229,13 @@ class RouteTests(unittest.IsolatedAsyncioTestCase):
             report = await module.diagnose(PAYLOAD)
         self.assertEqual(report.meta.mode, "mock")
         self.client_class.assert_not_called()
+
+    async def test_mock_honors_include_suggestions_false(self):
+        payload = PAYLOAD.model_copy(update={"options": {"include_suggestions": False}})
+        with patch.dict(os.environ, {"MOCK_MODE": "true"}):
+            report = await module.diagnose(payload)
+        self.assertTrue(report.gaps)
+        self.assertTrue(all(gap.suggestion == "" for gap in report.gaps))
 
     async def test_mock_is_disabled_when_env_is_missing(self):
         self.create.return_value = completion(json.dumps(valid_data()))
