@@ -6,6 +6,7 @@ const MIN_CHARS = 30;
 const MAX_CHARS = 20000;
 
 interface TextPanelProps {
+  inputId: string;
   index: string;
   title: string;
   hint: string;
@@ -16,6 +17,7 @@ interface TextPanelProps {
 }
 
 function TextPanel({
+  inputId,
   index,
   title,
   hint,
@@ -25,6 +27,7 @@ function TextPanel({
   onFillSample,
 }: TextPanelProps) {
   const chars = value.trim().length;
+  const hintId = `${inputId}-hint`;
 
   return (
     <section className="flex flex-col overflow-hidden rounded-xl2 border border-surface-line bg-white shadow-card transition-colors focus-within:border-brand-300">
@@ -33,7 +36,9 @@ function TextPanel({
           <span className="num rounded-md bg-brand-50 px-1.5 py-0.5 text-[11px] font-semibold text-brand-600">
             {index}
           </span>
-          <h2 className="text-sm font-semibold">{title}</h2>
+          <h2 className="text-sm font-semibold">
+            <label htmlFor={inputId}>{title}</label>
+          </h2>
         </div>
         <span
           className={`num text-xs ${chars > MAX_CHARS ? "text-rose-600" : "text-ink-500"}`}
@@ -43,6 +48,8 @@ function TextPanel({
       </div>
 
       <textarea
+        id={inputId}
+        aria-describedby={hintId}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         maxLength={MAX_CHARS}
@@ -52,7 +59,9 @@ function TextPanel({
       />
 
       <div className="flex items-center justify-between border-t border-surface-line bg-surface-soft/60 px-4 py-2">
-        <span className="text-[11px] text-ink-500">{hint}</span>
+        <span id={hintId} className="text-[11px] text-ink-500">
+          {hint}
+        </span>
         <div className="flex items-center gap-1">
           <button
             type="button"
@@ -129,12 +138,14 @@ export function InputPage({
           这份简历，配得上这个岗位吗？
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-ink-500">
-          把简历和岗位 JD 贴进来，30 秒拿到匹配分、维度拆解、亮点与待补齐项。所有分析只针对本次文本，不保存。
+          把简历和岗位 JD 贴进来，获取匹配分、维度拆解、亮点与待补齐项。本应用不持久化输入；
+          提交后，文本会发送至智谱 GLM 大模型服务完成分析。
         </p>
       </div>
 
       <div className="mt-9 grid gap-5 lg:grid-cols-2">
         <TextPanel
+          inputId="resume-text"
           index="01"
           title="简历内容"
           hint="建议粘贴完整的教育与项目经历"
@@ -144,6 +155,7 @@ export function InputPage({
           onFillSample={() => onResumeChange(SAMPLE_RESUME)}
         />
         <TextPanel
+          inputId="jd-text"
           index="02"
           title="岗位 JD"
           hint="职责与任职要求都要带上"
@@ -197,7 +209,8 @@ export function InputPage({
       <p className="mt-10 flex items-start gap-2 text-[11px] leading-relaxed text-ink-500">
         <InfoIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         <span>
-          结果由 AI 生成，仅作为简历优化的参考方向，不代表任何企业的真实录用判断。请勿上传他人隐私信息。
+          结果由 AI 生成，仅作为简历优化参考，不代表任何企业的真实录用判断。请仅提交本人或已获得授权处理的内容，
+          避免填写身份证号、住址等与诊断无关的敏感信息。
         </span>
       </p>
     </main>

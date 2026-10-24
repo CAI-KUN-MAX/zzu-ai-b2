@@ -13,7 +13,7 @@ from app.schemas import DiagnoseRequest
 
 module = importlib.import_module("app.routers.diagnose")
 PAYLOAD = DiagnoseRequest(resume_text="熟悉Python和MySQL，参与过两个校园后端项目，负责接口开发与数据库表设计。",
-                          jd_text="要求Python和MySQL，熟悉Kubernetes容器编排，有后端服务开发与线上运维经验者优先。")
+                          jd_text="本科及以上学历，要求Python和MySQL，熟悉Kubernetes容器编排，有后端服务开发与线上运维经验者优先。")
 
 
 def valid_data(score=65):
@@ -91,17 +91,62 @@ class ParseTests(unittest.TestCase):
         # 简历已写明却说未体现：丢弃
         for req in ("制造业背景优先", "熟悉 HTTP 协议与 RESTful 接口对接；", "熟悉 Git、Vite / Webpack 等构建工具；"):
             self.assertTrue(module.contradicts_resume(gap(req), resume), req)
+        # 复合要求的每个分句都命中可替代项时，也属于“已体现”
+        self.assertTrue(module.contradicts_resume(
+            gap("熟练掌握 JavaScript / TypeScript，熟悉 React 或 Vue；"), resume))
+        # 斜杠不擅自当成二选一；中英文混合分句也不能因为命中英文词就忽略中文要求
+        self.assertFalse(module.contradicts_resume(gap("熟悉 Python / SQL"), "熟悉 Python"))
+        self.assertFalse(module.contradicts_resume(gap("熟悉 Python 并具备数据分析能力"), "熟悉 Python"))
+        self.assertTrue(module.contradicts_resume(gap("熟悉 Python 并具备数据分析能力"),
+                                                  "熟悉 Python，负责数据分析"))
+        # 英文 or 只合并相邻替代项，不能把同句中的其他必选技能一起变成可选。
+        self.assertFalse(module.contradicts_resume(gap("Python and React or Vue"), "熟悉 Vue"))
+        self.assertTrue(module.contradicts_resume(gap("Python and React or Vue"), "熟悉 Python 和 Vue"))
         # 真实缺口、年限要求、已引用简历的程度不足：保留
-        for item in (gap("熟练掌握 JavaScript / TypeScript，熟悉 React 或 Vue；"), gap("有 B 端 / SaaS 产品经验者优先"),
-                     gap("3 年以上总账工作经验"), gap("熟悉 React", "了解 React"), gap("熟悉 Java")):
+        for item in (gap("有 B 端 / SaaS 产品经验者优先"), gap("3 年以上总账工作经验"),
+                     gap("熟悉 React", "了解 React"), gap("熟悉 Java")):
             self.assertFalse(module.contradicts_resume(item, resume + "\nJavaScript 入门"), item.jd_requirement)
 
     def test_contradicting_gap_dropped_from_report(self):
         data = valid_data()
+        data["summary"] = "候选人缺乏MySQL经验"
         data["gaps"].append({"title": "缺乏MySQL", "jd_requirement": "要求Python和MySQL", "resume_evidence": None,
                              "suggestion": "补充数据库项目", "severity": "high"})
         report = module.parse_report(json.dumps(data), PAYLOAD, "id", 0)
         self.assertEqual([g.jd_requirement for g in report.gaps], ["熟悉Kubernetes容器编排"])
+        self.assertNotIn("缺乏MySQL", report.summary)
+
+    def test_live_sample_alternative_requirements_are_not_false_gaps(self):
+        payload = DiagnoseRequest(
+            resume_text="熟练 Python / TypeScript，了解 React\n使用 Vite + React + TypeScript 搭建输入页与结果页",
+            jd_text="熟练掌握 JavaScript / TypeScript，熟悉 React 或 Vue 任一框架；\n熟悉 Kubernetes 容器编排",
+        )
+        data = valid_data(77)
+        data["summary"] = "候选人缺乏 React 或 Vue 框架经验"
+        data["highlights"] = [{"title": "具备 React 项目经验", "evidence": "使用 Vite + React + TypeScript 搭建输入页与结果页", "source": "resume"}]
+        data["gaps"] = [
+            {"title": "缺乏 React 或 Vue 框架经验", "jd_requirement": "熟练掌握 JavaScript / TypeScript，熟悉 React 或 Vue 任一框架；",
+             "resume_evidence": None, "suggestion": "学习 React 或 Vue", "severity": "high"},
+            {"title": "缺乏 Kubernetes 经验", "jd_requirement": "熟悉 Kubernetes 容器编排",
+             "resume_evidence": None, "suggestion": "补充相关项目", "severity": "medium"},
+        ]
+        report = module.parse_report(json.dumps(data), payload, "id", 0)
+        self.assertEqual([gap.title for gap in report.gaps], ["缺乏 Kubernetes 经验"])
+        self.assertEqual(next(d.score for d in report.dimension_scores if d.key == "education_match"), 100)
+        self.assertNotIn("缺乏 React", report.summary)
+
+    def test_gaps_are_sorted_and_suggestions_can_be_disabled(self):
+        payload = PAYLOAD.model_copy(update={"options": {"include_suggestions": False}})
+        data = valid_data()
+        base_gap = data["gaps"][0]
+        data["gaps"] = [
+            {**base_gap, "title": "低优先级", "severity": "low"},
+            {**base_gap, "title": "高优先级", "severity": "high"},
+            {**base_gap, "title": "中优先级", "severity": "medium"},
+        ]
+        report = module.parse_report(json.dumps(data), payload, "id", 0)
+        self.assertEqual([gap.severity for gap in report.gaps], ["high", "medium", "low"])
+        self.assertTrue(all(gap.suggestion == "" for gap in report.gaps))
 
     def test_user_message_isolates_input(self):
         message = module.build_user_message(PAYLOAD, "简体中文")
@@ -185,6 +230,20 @@ class RouteTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(report.meta.mode, "mock")
         self.client_class.assert_not_called()
 
+    async def test_mock_honors_include_suggestions_false(self):
+        payload = PAYLOAD.model_copy(update={"options": {"include_suggestions": False}})
+        with patch.dict(os.environ, {"MOCK_MODE": "true"}):
+            report = await module.diagnose(payload)
+        self.assertTrue(report.gaps)
+        self.assertTrue(all(gap.suggestion == "" for gap in report.gaps))
+
+    async def test_mock_is_disabled_when_env_is_missing(self):
+        self.create.return_value = completion(json.dumps(valid_data()))
+        with patch.dict(os.environ, {"LLM_API_KEY": "test-key"}, clear=True):
+            report = await module.diagnose(PAYLOAD)
+        self.assertEqual(report.meta.mode, "llm")
+        self.client_class.assert_called()
+
     async def test_http_contract(self):
         try:
             import httpx
@@ -228,8 +287,8 @@ class RouteTests(unittest.IsolatedAsyncioTestCase):
             preflight = {"Access-Control-Request-Method": "POST"}
             evil = await client.options("/api/diagnose", headers={"Origin": "https://evil.example", **preflight})
             self.assertNotIn("access-control-allow-origin", evil.headers)
-            own = await client.options("/api/diagnose", headers={"Origin": "http://8.163.105.39", **preflight})
-            self.assertEqual(own.headers["access-control-allow-origin"], "http://8.163.105.39")
+            own = await client.options("/api/diagnose", headers={"Origin": "https://8.163.105.39", **preflight})
+            self.assertEqual(own.headers["access-control-allow-origin"], "https://8.163.105.39")
             self.assertNotIn("access-control-allow-credentials", own.headers)
 
 
