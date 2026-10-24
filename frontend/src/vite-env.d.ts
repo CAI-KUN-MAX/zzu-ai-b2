@@ -7,6 +7,8 @@ interface ImportMetaEnv {
   readonly VITE_API_BASE?: string;
   /** 单次请求超时（毫秒） */
   readonly VITE_API_TIMEOUT?: string;
+  /** 上传类请求超时（毫秒），批量解析比单次诊断慢 */
+  readonly VITE_API_UPLOAD_TIMEOUT?: string;
 }
 
 interface ImportMeta {

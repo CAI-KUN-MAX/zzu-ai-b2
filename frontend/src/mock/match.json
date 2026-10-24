@@ -1,0 +1,602 @@
+{
+  "status": "succeeded",
+  "stage": "匹配完成 7/7",
+  "progress": 100,
+  "error": null,
+  "items": [
+    {
+      "resume_id": "r-001",
+      "name": "张明_前端开发_2026.pdf",
+      "score": 88,
+      "level": "high",
+      "level_label": "强匹配",
+      "subscores": [
+        {
+          "key": "skill_match",
+          "label": "技能匹配",
+          "score": 92,
+          "weight": 0.4
+        },
+        {
+          "key": "experience_relevance",
+          "label": "经历相关",
+          "score": 86,
+          "weight": 0.3
+        },
+        {
+          "key": "keyword_coverage",
+          "label": "关键词覆盖",
+          "score": 88,
+          "weight": 0.2
+        },
+        {
+          "key": "education_match",
+          "label": "教育/证书",
+          "score": 80,
+          "weight": 0.1
+        }
+      ],
+      "matched": [
+        "React",
+        "TypeScript",
+        "Vite",
+        "Tailwind",
+        "接口联调"
+      ],
+      "missing": [
+        "Kubernetes"
+      ],
+      "reason": "技术栈与岗位要求高度吻合，工程化流程完整，唯一缺口是容器编排经验。",
+      "degraded": false,
+      "report": {
+        "request_id": "mock-r-001",
+        "overall_score": 88,
+        "level": "high",
+        "level_label": "强匹配",
+        "dimension_scores": [
+          {
+            "key": "skill_match",
+            "label": "技能匹配",
+            "score": 92,
+            "weight": 0.4
+          },
+          {
+            "key": "experience_relevance",
+            "label": "经历相关",
+            "score": 86,
+            "weight": 0.3
+          },
+          {
+            "key": "keyword_coverage",
+            "label": "关键词覆盖",
+            "score": 88,
+            "weight": 0.2
+          },
+          {
+            "key": "education_match",
+            "label": "教育/证书",
+            "score": 80,
+            "weight": 0.1
+          }
+        ],
+        "highlights": [
+          {
+            "title": "技术栈完全命中",
+            "evidence": "熟练 React、TypeScript，使用 Vite 搭建中后台并接入 Tailwind 组件体系",
+            "source": "resume"
+          },
+          {
+            "title": "有完整联调经验",
+            "evidence": "独立完成过前后端接口联调，能读懂 RESTful 契约",
+            "source": "resume"
+          }
+        ],
+        "gaps": [
+          {
+            "title": "缺少容器化部署经验",
+            "jd_requirement": "熟悉 Kubernetes 容器编排",
+            "resume_evidence": "简历仅提及本地构建与静态部署",
+            "suggestion": "补充一次基于 Docker + K8s 的部署实践，写清镜像构建与滚动发布流程",
+            "severity": "low"
+          }
+        ],
+        "summary": "候选人技术栈与岗位高度契合，工程习惯良好，建议进入面试。",
+        "disclaimer": "AI诊断结果仅供参考，请以实际岗位要求为准。",
+        "meta": {
+          "model": "glm-4-flash",
+          "mode": "llm",
+          "elapsed_ms": 12400
+        }
+      }
+    },
+    {
+      "resume_id": "r-006",
+      "name": "孙悦_前端工程师.pdf",
+      "score": 85,
+      "level": "high",
+      "level_label": "强匹配",
+      "subscores": [
+        {
+          "key": "skill_match",
+          "label": "技能匹配",
+          "score": 88,
+          "weight": 0.4
+        },
+        {
+          "key": "experience_relevance",
+          "label": "经历相关",
+          "score": 86,
+          "weight": 0.3
+        },
+        {
+          "key": "keyword_coverage",
+          "label": "关键词覆盖",
+          "score": 82,
+          "weight": 0.2
+        },
+        {
+          "key": "education_match",
+          "label": "教育/证书",
+          "score": 78,
+          "weight": 0.1
+        }
+      ],
+      "matched": [
+        "React",
+        "Node.js",
+        "单元测试",
+        "CI"
+      ],
+      "missing": [
+        "Tailwind"
+      ],
+      "reason": "全栈背景带来更好的接口理解能力，前端深度略逊于头名。",
+      "degraded": false,
+      "report": {
+        "request_id": "mock-r-006",
+        "overall_score": 85,
+        "level": "high",
+        "level_label": "强匹配",
+        "dimension_scores": [
+          {
+            "key": "skill_match",
+            "label": "技能匹配",
+            "score": 88,
+            "weight": 0.4
+          },
+          {
+            "key": "experience_relevance",
+            "label": "经历相关",
+            "score": 86,
+            "weight": 0.3
+          },
+          {
+            "key": "keyword_coverage",
+            "label": "关键词覆盖",
+            "score": 82,
+            "weight": 0.2
+          },
+          {
+            "key": "education_match",
+            "label": "教育/证书",
+            "score": 78,
+            "weight": 0.1
+          }
+        ],
+        "highlights": [
+          {
+            "title": "全栈视角补齐接口理解",
+            "evidence": "有 Node 服务端经验，能快速定位前后端联调中的问题边界",
+            "source": "resume"
+          }
+        ],
+        "gaps": [
+          {
+            "title": "未体现原子化样式经验",
+            "jd_requirement": "熟悉 Tailwind 或同类原子化 CSS 方案",
+            "resume_evidence": "样式方案为传统 CSS Module",
+            "suggestion": "在项目描述中补充样式方案选型理由，说明可迁移性",
+            "severity": "low"
+          }
+        ],
+        "summary": "工程能力全面，全栈背景对协作有利，进入面试无悬念。",
+        "disclaimer": "AI诊断结果仅供参考，请以实际岗位要求为准。",
+        "meta": {
+          "model": "glm-4-flash",
+          "mode": "llm",
+          "elapsed_ms": 15300
+        }
+      }
+    },
+    {
+      "resume_id": "r-004",
+      "name": "陈晨_web前端.pdf",
+      "score": 81,
+      "level": "high",
+      "level_label": "强匹配",
+      "subscores": [
+        {
+          "key": "skill_match",
+          "label": "技能匹配",
+          "score": 84,
+          "weight": 0.4
+        },
+        {
+          "key": "experience_relevance",
+          "label": "经历相关",
+          "score": 88,
+          "weight": 0.3
+        },
+        {
+          "key": "keyword_coverage",
+          "label": "关键词覆盖",
+          "score": 74,
+          "weight": 0.2
+        },
+        {
+          "key": "education_match",
+          "label": "教育/证书",
+          "score": 72,
+          "weight": 0.1
+        }
+      ],
+      "matched": [
+        "React",
+        "组件库",
+        "性能优化"
+      ],
+      "missing": [
+        "TypeScript",
+        "Vite"
+      ],
+      "reason": "三年实战经验扎实，组件化与性能优化突出，简历未突出 TS 与构建工具。",
+      "degraded": false,
+      "report": {
+        "request_id": "mock-r-004",
+        "overall_score": 81,
+        "level": "high",
+        "level_label": "强匹配",
+        "dimension_scores": [
+          {
+            "key": "skill_match",
+            "label": "技能匹配",
+            "score": 84,
+            "weight": 0.4
+          },
+          {
+            "key": "experience_relevance",
+            "label": "经历相关",
+            "score": 88,
+            "weight": 0.3
+          },
+          {
+            "key": "keyword_coverage",
+            "label": "关键词覆盖",
+            "score": 74,
+            "weight": 0.2
+          },
+          {
+            "key": "education_match",
+            "label": "教育/证书",
+            "score": 72,
+            "weight": 0.1
+          }
+        ],
+        "highlights": [
+          {
+            "title": "组件库建设经验",
+            "evidence": "主导过组件库建设，具备抽象与复用意识",
+            "source": "resume"
+          },
+          {
+            "title": "性能指标治理",
+            "evidence": "负责首屏加载指标优化，有可量化的改善结果",
+            "source": "resume"
+          }
+        ],
+        "gaps": [
+          {
+            "title": "简历未体现 TypeScript 深度",
+            "jd_requirement": "熟练掌握 TypeScript",
+            "resume_evidence": "技能栏仅写 JavaScript",
+            "suggestion": "如实补充 TS 项目占比与类型设计经验，哪怕是渐进式改造",
+            "severity": "medium"
+          }
+        ],
+        "summary": "实战经验是这一批里最扎实的，简历关键词需要补齐。",
+        "disclaimer": "AI诊断结果仅供参考，请以实际岗位要求为准。",
+        "meta": {
+          "model": "glm-4-flash",
+          "mode": "llm",
+          "elapsed_ms": 13800
+        }
+      }
+    },
+    {
+      "resume_id": "r-002",
+      "name": "李静_前端实习_2026.docx",
+      "score": 74,
+      "level": "medium",
+      "level_label": "较匹配",
+      "subscores": [
+        {
+          "key": "skill_match",
+          "label": "技能匹配",
+          "score": 72,
+          "weight": 0.4
+        },
+        {
+          "key": "experience_relevance",
+          "label": "经历相关",
+          "score": 76,
+          "weight": 0.3
+        },
+        {
+          "key": "keyword_coverage",
+          "label": "关键词覆盖",
+          "score": 78,
+          "weight": 0.2
+        },
+        {
+          "key": "education_match",
+          "label": "教育/证书",
+          "score": 70,
+          "weight": 0.1
+        }
+      ],
+      "matched": [
+        "Vue3",
+        "TypeScript",
+        "Git"
+      ],
+      "missing": [
+        "React",
+        "Vite"
+      ],
+      "reason": "技术方向是 Vue 生态，与岗位的 React 要求存在迁移成本。",
+      "degraded": false,
+      "report": {
+        "request_id": "mock-r-002",
+        "overall_score": 74,
+        "level": "medium",
+        "level_label": "较匹配",
+        "dimension_scores": [
+          {
+            "key": "skill_match",
+            "label": "技能匹配",
+            "score": 72,
+            "weight": 0.4
+          },
+          {
+            "key": "experience_relevance",
+            "label": "经历相关",
+            "score": 76,
+            "weight": 0.3
+          },
+          {
+            "key": "keyword_coverage",
+            "label": "关键词覆盖",
+            "score": 78,
+            "weight": 0.2
+          },
+          {
+            "key": "education_match",
+            "label": "教育/证书",
+            "score": 70,
+            "weight": 0.1
+          }
+        ],
+        "highlights": [
+          {
+            "title": "可视化项目经验",
+            "evidence": "负责大屏可视化开发，熟悉图表与响应式布局",
+            "source": "resume"
+          }
+        ],
+        "gaps": [
+          {
+            "title": "框架方向不一致",
+            "jd_requirement": "熟悉 React 或 Vue 任一框架，本项目以 React 为主",
+            "resume_evidence": "项目均使用 Vue3",
+            "suggestion": "补充一段 React 练习项目，或说明 Vue 到 React 的迁移理解",
+            "severity": "medium"
+          }
+        ],
+        "summary": "基础扎实但框架错位，若团队愿意培养可进入二面。",
+        "disclaimer": "AI诊断结果仅供参考，请以实际岗位要求为准。",
+        "meta": {
+          "model": "glm-4-flash",
+          "mode": "llm",
+          "elapsed_ms": 11600
+        }
+      }
+    },
+    {
+      "resume_id": "r-008",
+      "name": "吴敏_前端校招.pdf",
+      "score": 70,
+      "level": "medium",
+      "level_label": "较匹配",
+      "subscores": [
+        {
+          "key": "skill_match",
+          "label": "技能匹配",
+          "score": 68,
+          "weight": 0.4
+        },
+        {
+          "key": "experience_relevance",
+          "label": "经历相关",
+          "score": 72,
+          "weight": 0.3
+        },
+        {
+          "key": "keyword_coverage",
+          "label": "关键词覆盖",
+          "score": 74,
+          "weight": 0.2
+        },
+        {
+          "key": "education_match",
+          "label": "教育/证书",
+          "score": 66,
+          "weight": 0.1
+        }
+      ],
+      "matched": [
+        "Tailwind",
+        "移动端适配",
+        "React"
+      ],
+      "missing": [
+        "工程化",
+        "单元测试"
+      ],
+      "reason": "一年实习偏业务页面，工程化与测试环节参与较少。",
+      "degraded": false,
+      "report": {
+        "request_id": "mock-r-008",
+        "overall_score": 70,
+        "level": "medium",
+        "level_label": "较匹配",
+        "dimension_scores": [
+          {
+            "key": "skill_match",
+            "label": "技能匹配",
+            "score": 68,
+            "weight": 0.4
+          },
+          {
+            "key": "experience_relevance",
+            "label": "经历相关",
+            "score": 72,
+            "weight": 0.3
+          },
+          {
+            "key": "keyword_coverage",
+            "label": "关键词覆盖",
+            "score": 74,
+            "weight": 0.2
+          },
+          {
+            "key": "education_match",
+            "label": "教育/证书",
+            "score": 66,
+            "weight": 0.1
+          }
+        ],
+        "highlights": [
+          {
+            "title": "样式落地能力强",
+            "evidence": "熟练使用 Tailwind，营销页还原度高",
+            "source": "resume"
+          }
+        ],
+        "gaps": [
+          {
+            "title": "工程化参与不足",
+            "jd_requirement": "有工程化意识，熟悉构建与测试",
+            "resume_evidence": "仅描述页面开发，未提及构建配置与测试",
+            "suggestion": "补充一次构建配置或单测实践，注明你负责的具体环节",
+            "severity": "medium"
+          }
+        ],
+        "summary": "业务开发能力达标，工程化短板明显，可作为备选。",
+        "disclaimer": "AI诊断结果仅供参考，请以实际岗位要求为准。",
+        "meta": {
+          "model": "glm-4-flash",
+          "mode": "llm",
+          "elapsed_ms": 10200
+        }
+      }
+    },
+    {
+      "resume_id": "r-007",
+      "name": "周航_手写稿.png",
+      "score": 61,
+      "level": "medium",
+      "level_label": "较匹配",
+      "subscores": [
+        {
+          "key": "skill_match",
+          "label": "技能匹配",
+          "score": 60,
+          "weight": 0.4
+        },
+        {
+          "key": "experience_relevance",
+          "label": "经历相关",
+          "score": 58,
+          "weight": 0.3
+        },
+        {
+          "key": "keyword_coverage",
+          "label": "关键词覆盖",
+          "score": 66,
+          "weight": 0.2
+        },
+        {
+          "key": "education_match",
+          "label": "教育/证书",
+          "score": 62,
+          "weight": 0.1
+        }
+      ],
+      "matched": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "missing": [
+        "React",
+        "TypeScript"
+      ],
+      "reason": "识别文本不完整，分数仅供参考，建议人工核对原始简历。",
+      "degraded": true
+    },
+    {
+      "resume_id": "r-003",
+      "name": "王磊_扫描件.jpg",
+      "score": 52,
+      "level": "low",
+      "level_label": "存在缺口",
+      "subscores": [
+        {
+          "key": "skill_match",
+          "label": "技能匹配",
+          "score": 50,
+          "weight": 0.4
+        },
+        {
+          "key": "experience_relevance",
+          "label": "经历相关",
+          "score": 48,
+          "weight": 0.3
+        },
+        {
+          "key": "keyword_coverage",
+          "label": "关键词覆盖",
+          "score": 58,
+          "weight": 0.2
+        },
+        {
+          "key": "education_match",
+          "label": "教育/证书",
+          "score": 55,
+          "weight": 0.1
+        }
+      ],
+      "matched": [
+        "JavaScript",
+        "CSS"
+      ],
+      "missing": [
+        "React",
+        "TypeScript",
+        "构建工具"
+      ],
+      "reason": "扫描件识别质量偏低，正文可能缺段，建议核对原件后再定。",
+      "degraded": true
+    }
+  ]
+}
