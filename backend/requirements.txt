@@ -7,3 +7,5 @@ openai>=1.0
 python-multipart
 pypdf
 python-docx
+Pillow
+openpyxl

@@ -53,7 +53,7 @@ class IngestApiTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.environment = patch.dict(os.environ, {"DATA_DIR": self.directory.name, "MAX_UPLOAD_MB": "15",
-                                                   "OCR_MAX_PAGES": "10"})
+                                                   "OCR_MAX_PAGES": "10", "OCR_PROVIDER": "stub"})
         self.environment.start()
         self.client_context = TestClient(app)
         self.client = self.client_context.__enter__()

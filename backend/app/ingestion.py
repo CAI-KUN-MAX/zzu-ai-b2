@@ -18,6 +18,7 @@ from docx.oxml.ns import qn
 from docx.table import Table
 from docx.text.paragraph import Paragraph
 from pypdf import PdfReader
+from app.ocr import OcrUnavailable, get_provider, recognize_image
 
 logger = logging.getLogger(__name__)
 RESTART_ERROR = {"code": "TASK_INTERRUPTED", "message": "服务重启，任务已中断，请重试"}
@@ -81,8 +82,10 @@ def extract_text(path, kind, max_pages):
     start = time.monotonic()
     pages = 0
     source = kind
+    provider = "local"
+    low_conf = 0
     try:
-        if kind == "pdf":
+        if kind in {"pdf", "pdf_text", "pdf_ocr"}:
             reader = PdfReader(path)
             if reader.is_encrypted:
                 raise IngestError(415, "UNSUPPORTED_FILE", "PDF 已加密，请解密后重新上传")
@@ -90,9 +93,26 @@ def extract_text(path, kind, max_pages):
             if pages > max_pages:
                 raise IngestError(415, "UNSUPPORTED_FILE", f"PDF 最多支持 {max_pages} 页，请拆分后上传")
             text = "\n".join(page.extract_text() or "" for page in reader.pages)
-            if not pages or len(text.strip()) / pages < 80:
-                raise IngestError(503, "OCR_UNAVAILABLE", "首版尚未启用 OCR，请上传带文本层的 PDF 或 DOCX；扫描件请稍后重试")
             source = "pdf_text"
+            if not pages:
+                raise IngestError(422, "OCR_FAILED", "PDF 没有可读取的页面")
+            if len(text.strip()) / pages < 80:
+                ocr = get_provider()
+                try:
+                    import pymupdf
+                except ImportError:
+                    raise OcrUnavailable("缺少扫描 PDF 渲染依赖，请安装 backend/requirements-ocr.txt") from None
+                parts = []
+                with pymupdf.open(path) as document:
+                    for page in document:
+                        # Avoid allocating unbounded images for malformed page dimensions.
+                        if page.rect.width * page.rect.height * (200 / 72) ** 2 > 25_000_000:
+                            raise IngestError(415, "UNSUPPORTED_FILE", "PDF 页面尺寸过大，请压缩后重试")
+                        recognized = ocr.recognize_png(page.get_pixmap(dpi=200, alpha=False).tobytes("png"))
+                        parts.append(recognized.text)
+                        low_conf += recognized.low_conf
+                text = "\n".join(parts)
+                source, provider = "pdf_ocr", "rapidocr"
         elif kind == "docx":
             document = Document(path)
             blocks = []
@@ -104,7 +124,14 @@ def extract_text(path, kind, max_pages):
                                   for row in Table(element, document).rows)
             text = "\n".join(blocks)
         else:
-            raise IngestError(503, "OCR_UNAVAILABLE", "首版尚未启用 OCR，图片暂不能识别；请上传带文本层的 PDF 或 DOCX")
+            # Check availability before decoding, so unavailable deployments give
+            # the same actionable error for every OCR-only input.
+            get_provider()
+            recognized = recognize_image(path.read_bytes())
+            text, low_conf = recognized.text, recognized.low_conf
+            source, provider, pages = "image", "rapidocr", 1
+    except OcrUnavailable as exc:
+        raise IngestError(503, "OCR_UNAVAILABLE", str(exc)) from None
     except IngestError:
         raise
     except Exception:
@@ -112,9 +139,9 @@ def extract_text(path, kind, max_pages):
     text = clean_text(text)
     if not text:
         raise IngestError(422, "OCR_FAILED", "未识别到任何文字，请检查文件内容后重试")
-    return dict(text=text, chars=len(text), pages=pages, source=source, provider="local",
+    return dict(text=text, chars=len(text), pages=pages, source=source, provider=provider, low_conf=low_conf,
                 elapsed_ms=int((time.monotonic() - start) * 1000),
-                status="need_review" if len(text) < 30 else "ready", error=None)
+                status="need_review" if len(text) < 30 or low_conf else "ready", error=None)
 
 
 class Store:
@@ -147,7 +174,11 @@ class Store:
                     id TEXT PRIMARY KEY, kind TEXT NOT NULL, status TEXT NOT NULL,
                     stage TEXT DEFAULT '', progress INTEGER DEFAULT 0, payload TEXT DEFAULT '{}',
                     result TEXT, error TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS llm_cache (
+                    key TEXT PRIMARY KEY, result TEXT NOT NULL, created_at TEXT NOT NULL);
             """)
+            if "low_conf" not in {row[1] for row in db.execute("PRAGMA table_info(resumes)")}:
+                db.execute("ALTER TABLE resumes ADD COLUMN low_conf INTEGER NOT NULL DEFAULT 0")
         self.interrupt()
 
     def interrupt(self):
@@ -211,6 +242,7 @@ class IngestJobs:
         # Serialize V1 text batches to guarantee concurrent duplicates extract once.
         self.gate = asyncio.Lock()
         self.max_pages = max(1, int(os.getenv("OCR_MAX_PAGES", "10")))
+        self.parse_gate = asyncio.Semaphore(2)
 
     def submit(self, identifier):
         job = asyncio.create_task(self.run(identifier))
@@ -230,17 +262,30 @@ class IngestJobs:
             ids = json.loads(task["payload"])["resume_ids"]
             try:
                 self.store.update("tasks", identifier, status="running", stage=f"解析 0/{len(ids)}")
-                for index, resume_id in enumerate(ids, 1):
-                    resume = self.store.get("resumes", resume_id)
-                    if resume["status"] == "parsing":
-                        try:
-                            fields = await asyncio.to_thread(extract_text, Path(resume["file_path"]),
-                                                             resume["source"], self.max_pages)
-                            self.store.update("resumes", resume_id, **fields)
-                        except IngestError as exc:
-                            self.store.update("resumes", resume_id, status="failed", error=exc.detail)
-                    self.store.update("tasks", identifier, stage=f"解析 {index}/{len(ids)}",
-                                      progress=int(index * 100 / len(ids)))
+                completed = 0
+
+                async def parse_one(resume_id):
+                    nonlocal completed
+                    async with self.parse_gate:
+                        resume = self.store.get("resumes", resume_id)
+                        if resume["status"] == "parsing":
+                            try:
+                                fields = await asyncio.to_thread(extract_text, Path(resume["file_path"]),
+                                                                 resume["source"], self.max_pages)
+                                self.store.update("resumes", resume_id, **fields)
+                            except IngestError as exc:
+                                self.store.update("resumes", resume_id, status="failed", error=exc.detail)
+                            except Exception:
+                                logger.exception("resume extraction failed resume_id=%s", resume_id)
+                                self.store.update("resumes", resume_id, status="failed", error={
+                                    "code": "INGEST_FAILED", "message": "解析暂时失败，请重新上传"})
+                        completed += 1
+                        self.store.update("tasks", identifier, stage=f"解析 {completed}/{len(ids)}",
+                                          progress=int(completed * 100 / len(ids)))
+
+                async with asyncio.TaskGroup() as group:
+                    for resume_id in ids:
+                        group.create_task(parse_one(resume_id))
                 rows = [self.store.get("resumes", resume_id) for resume_id in ids]
                 failed = all(row["status"] == "failed" for row in rows)
                 self.store.update("tasks", identifier, status="failed" if failed else "succeeded",

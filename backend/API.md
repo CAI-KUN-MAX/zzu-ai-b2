@@ -1,15 +1,16 @@
-# 后端 V1：简历批量入库
+# 后端接口：简历解析与匹配排序
 
-本次是第一个可独立验收的小版本，仅修改 `backend/`。完成电子版 PDF / DOCX 的批量上传、文本提取、SQLite 持久化、进度轮询与全文读取。原有 `POST /api/diagnose`、错误响应格式及文档开关保持原样。
+当前版本仅修改 `backend/`，支持 PDF / DOCX / PNG / JPG 批量解析、离线 OCR、SQLite 持久化、进度轮询、全文读取、确定性匹配、AI 精排、结果缓存和 Excel 导出。原有 `POST /api/diagnose`、错误响应格式及文档开关保持原样。
 
-本次不包含真实 OCR、匹配排序、LLM 精排、缓存或 Excel 导出。PNG/JPG 与扫描 PDF 可以进入任务，但会返回中文 `OCR_UNAVAILABLE`，不会生成假识别结果。
+OCR 依赖独立安装；没有 OCR 引擎或设置 `OCR_PROVIDER=stub` 时，图片和扫描件返回 `OCR_UNAVAILABLE`，文本 PDF / DOCX 与匹配功能仍可用。`stub` 不生成虚构识别文字。
 
 ## 启动与验证
 
-在仓库根目录安装后端依赖：
+使用 Python 3.11 或以上版本，在仓库根目录安装后端依赖：
 
 ```bash
 python -m pip install -r backend/requirements.txt
+python -m pip install -r backend/requirements-ocr.txt
 cd backend
 uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1
 ```
@@ -21,9 +22,12 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1
 | `DATA_DIR` | `backend/data` | 相对路径始终基于仓库根目录；也支持绝对路径 |
 | `MAX_UPLOAD_MB` | `15` | 单文件上限，支持 1–15MB，最大不超过 15MB |
 | `OCR_MAX_PAGES` | `10` | PDF 页数上限 |
+| `OCR_PROVIDER` | `auto` | `auto / rapidocr` 使用离线 RapidOCR；`stub` 明确关闭 OCR |
+| `MATCH_LLM_TOP_K` | `8` | AI 分析前 K 份，上限 8；设 0 关闭 AI，仍可排序和导出 |
+| `MATCH_CONCURRENCY` | `3` | 全局 AI 并发，上限 3 |
 | `ENABLE_DOCS` | `false` | 沿用旧开关，生产环境关闭 |
 
-数据目录包含 `app.db` 和 `uploads/`，已通过后端目录内的 `.gitignore` 排除。原文件按 SHA-256 保存，不使用用户文件名作为路径。
+数据目录包含 `app.db` 和 `uploads/`，已通过后端目录内的 `.gitignore` 排除。原文件按 SHA-256 保存，不使用用户文件名作为路径。已有数据库自动增加 `llm_cache` 表和简历 `low_conf` 列，无需清空数据。
 
 测试（在 `backend/` 下）：
 
@@ -84,7 +88,7 @@ curl -X POST http://127.0.0.1:8000/api/resumes/batch \
 - 至少一份可读取时任务为 `succeeded`，仍需逐项检查 `status/error`；全部失败时任务为 `failed`，任务 error 为首份文件错误。
 - 任务级别的 `error` 为中文字符串或 `null`，与前端 `useTask` 的直接渲染方式一致；额外字段 `error_code` 保留错误码，正常时为 `null`。单份项目的额外字段 `error` 仍保留 `{"code":"OCR_UNAVAILABLE","message":"中文提示"}` 对象，供排错使用。数据库仍保存原始错误对象，旧记录无需迁移。HTTP 级别错误沿用原有含 `request_id` 的外层错误体。
 - 进程启动和正常退出都会将未完成任务、仍在解析的简历标记失败，提示“服务重启，任务已中断，请重试”；已经完成的文件保留。
-- 本版同批简历顺序解析，批次排队执行，不阻塞原有诊断接口的模型调用。
+- 同批最多并发解析两份，批次排队执行；OCR 模型延迟加载，文本 PDF/DOCX 不触发加载，不阻塞原有诊断接口的模型调用。项目额外返回 `low_conf`，表示低置信识别行数，大于 0 时标记 `need_review`。
 
 ## 3. 读取全文
 
@@ -98,7 +102,7 @@ curl -X POST http://127.0.0.1:8000/api/resumes/batch \
 
 ## 提取规则与错误
 
-PDF 按平均每页至少 80 字使用文本层；低于阈值视为需要 OCR，本版返回 `OCR_UNAVAILABLE`。加密、损坏或超页数的 PDF 返回明确错误。DOCX 按正文顺序读取段落及表格，表格每行以 ` | ` 分隔，解压总大小限制为 32MB。
+PDF 按平均每页至少 80 字使用文本层；低于阈值时使用 PyMuPDF 200dpi 渲染并逐页离线 OCR。加密、损坏或超页数的 PDF 返回明确错误。PNG/JPG 统一解码为 PNG 后调用 OCR；单张图像或单页渲染不超过 2500 万像素。识别行置信度低于 0.7 时计入 `low_conf` 并提示人工核对。DOCX 按正文顺序读取段落及表格，表格每行以 ` | ` 分隔，解压总大小限制为 32MB。
 
 清洗只移除纯页码、出现至少三次且不超过 20 字的短行，以及独立水印行；归一空白字符、压缩空行，不合并正文短行。
 
@@ -118,16 +122,82 @@ HTTP 错误体沿用：
 | 415 | `UNSUPPORTED_FILE` | 不支持、损坏、加密、PDF 超页数或 DOCX 解压过大 |
 | 422 | `VALIDATION_ERROR` | `files` 和 `files[]` 均未提供，或请求格式错误 |
 | 422 | `OCR_FAILED` | 提取清洗后没有文字 |
-| 503 | `OCR_UNAVAILABLE` | 图片、扫描 PDF 需要 OCR |
+| 503 | `OCR_UNAVAILABLE` | OCR 关闭、缺少引擎或引擎初始化失败 |
 
 `TASK_INTERRUPTED` 和 `INGEST_FAILED` 也会出现在任务/项目错误中，分别代表任务中断和意外解析失败。
 
-## 首版验收与上线边界
+## 4. 创建匹配任务
+
+`POST /api/match`，JSON 请求，返回 **202** `{"task_id":"匹配任务ID"}`：
+
+```json
+{"jd_text":"不少于30字的岗位职责和任职要求全文", "resume_ids":["实际简历ID"]}
+```
+
+JD 去除首尾空白后为 30–20000 字；简历 ID 列表为 1–50 项，重复 ID 合并。不存在的 ID 返回 404 `RESUME_NOT_FOUND`；未解析完成或失败的简历返回 409 `RESUME_NOT_READY`；空文本返回 400 `INVALID_INPUT`；超过 50 项返回 400 `TOO_MANY_RESUMES`。整批校验通过后才创建任务。
+
+基础评分复用旧诊断的关键词提取与边界匹配：技能关键词占 55%，字符 2-gram 余弦相似度占 30%，学历占 15%。关键词按分句出现频次取前 40 项，命中 15 项技能分满分；同分始终按简历 ID 排序。JD 无学历门槛给 100，简历未写学历给 60，达到要求给 100，差一档给 60，更低给 30。
+
+只对基础分前 8 份调用现有 `diagnose()`，沿用原提示词及原文证据校验。AI 完成时最终分数为 `round(0.35 × 基础分 + 0.65 × report.overall_score)`。基础分保存在 `stage1_score`，`subscores` 解释基础分三个维度，`report.dimension_scores` 解释 AI 诊断四个维度。
+
+单条调用上限 90 秒，整批 AI 分析预算 165 秒，全局并发最多 3。失败、超时、未选入前 8 或主动关闭 AI 时保留基础分、`degraded=true`、`reason=null`，不编造 AI 理由。整批预算耗尽会取消未完成 AI 调用并保存已有结果。简历少于 30 字或简历与 JD 总字数超过旧诊断的 20000 字限制时，该份自动降级，不截断原文、不影响其他简历。
+
+缓存键含简历全文、JD 全文、提示词版本和原提示词，不落库原始 JD 请求字段；已验证报告可随任务结果保留 JD 引用片段。只有真实 `meta.mode=llm` 报告写入缓存，mock 不污染真实缓存。
+
+## 5. 查询匹配结果
+
+`GET /api/match/{task_id}`，返回 **200**：
+
+```json
+{
+  "status":"succeeded", "stage":"匹配完成", "progress":100,
+  "error":null, "error_code":null,
+  "items":[{
+    "resume_id":"实际简历ID", "name":"张三.docx",
+    "score":70, "stage1_score":70, "level":"medium", "level_label":"较匹配",
+    "subscores":[
+      {"key":"skill_match","label":"技能关键词匹配","score":70,"weight":0.55},
+      {"key":"text_similarity","label":"文本相似度","score":55,"weight":0.3},
+      {"key":"education_match","label":"学历匹配","score":100,"weight":0.15}
+    ],
+    "matched":["Python","MySQL"], "missing":["Docker"],
+    "reason":null, "degraded":true
+  }]
+}
+```
+
+数值仅用于说明字段，不代表固定评分。`status` 沿用 `queued/running/succeeded/failed`，`error` 为字符串或 null。基础评分完成后即返回完整候选列表，AI 阶段逐份更新，文案如 `深度分析 3/8`。非降级项包含与 `DiagnoseResponse` 完全一致的 `report`，`reason` 来自其中的模型摘要。降级项不返回 `report`，前端现有判空逻辑可直接处理。
+
+`GET /api/tasks/{id}` 仅查询解析任务，`GET /api/match/{id}` 仅查询匹配任务；类型不符或不存在均返回 404。重启后未完成匹配任务按已有机制失败，错误仍为可直接显示的中文字符串。
+
+## 6. 导出 Excel
+
+`GET /api/match/{task_id}/export`，完成后返回 xlsx，包含排名、简历名称、分数、等级、命中/缺失关键词、AI 理由、AI 分析完成标识。使用 UTF-8 中文下载名；文件名和用户文字按字面文本写入单元格，不执行 Excel 公式。任务尚未完成或已失败返回 409 `TASK_NOT_READY`。导出可用于纯确定性排序，不依赖模型密钥。
+
+## 验收与上线边界
 
 1. 上传 20 份电子版简历，轮询直到完成，使用返回的 ID 读取全文。
 2. 重复上传同一文件，验证 ID 相同且不重复提取。
-3. 混合上传有效 DOCX 与扫描 PDF，验证有效文件正常出文本，扫描件有中文提示。
+3. 混合上传有效 DOCX、文本 PDF、扫描 PDF、PNG/JPG，验证全部出文本；OCR 关闭时验证中文错误提示。
 4. 验证空文件、伪造扩展名、超大文件、加密 PDF、空白 DOCX 不会留下永远解析中的记录。
 5. 运行全部后端测试，确认旧诊断接口回归测试通过。
+6. 创建匹配任务、轮询排序结果、展开 AI 报告，再导出 20 条结果。
+7. 关闭 AI 验证全降级排序；开启 AI 验证单条失败降级；重复匹配验证缓存。
+
+额外验证命令，在仓库根目录执行：
+
+```powershell
+$env:ENABLE_DOCS='false'
+$env:TEST_REAL_OCR='1'
+.venv\Scripts\python.exe -m unittest discover -s backend/tests -v
+# 使用临时数据库和虚构的 20 份混合文件，不调用模型
+.venv\Scripts\python.exe backend/scripts/smoke_screening.py
+# 同样的 20 份文件，对前 1 份调用真实模型并验证重复匹配缓存
+.venv\Scripts\python.exe backend/scripts/smoke_screening.py --live-llm
+```
+
+`--live-llm` 读取现有 `backend/.env` 模型配置，只发送脚本内虚构材料；测试目录结束后自动清理。默认 AI 前 8 份的数量限制及最多 3 并发通过自动测试验证。
+
+本地前端联调时，现有 `VITE_API_BASE` 必须指向本次启动的后端，留空才使用 Vite 的 `/api` 代理；仍指向公网时不会测试到本地变更。现有诊断前端超时应大于 75 秒，这属于运行配置，不在此次后端代码修改范围内。
 
 本次不修改前端、Nginx 或线上服务。仓库现有 Nginx 请求体上限为 256KB，轮询也共用接口限流；正式接入上传前需要部署负责人单独调整。批量请求体上限必须覆盖整批文件总量和 multipart 开销，仅设 20MB 无法支持 20 × 15MB 的上传。当前接口沿用已有无鉴权访问方式，不应向公网提供真实简历库，接入真实数据前需另行实现访问控制。
