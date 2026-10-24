@@ -19,7 +19,7 @@ app = FastAPI(
 
 # 只允许自己的前端跨域；多个地址用英文逗号分隔。接口不使用 Cookie，不携带凭据
 CORS_ORIGINS = [origin.strip() for origin in os.getenv(
-    "CORS_ORIGINS", "http://8.163.105.39,http://localhost:5173,http://127.0.0.1:5173"
+    "CORS_ORIGINS", "https://8.163.105.39,http://localhost:5173,http://127.0.0.1:5173"
 ).split(",") if origin.strip()]
 app.add_middleware(
     CORSMiddleware,

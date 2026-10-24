@@ -84,6 +84,10 @@ severity 只能是 high、medium 或 low。
 ASCII_TERM = re.compile(r"[A-Za-z][A-Za-z0-9+#.]*[A-Za-z0-9+#]")
 YEARS = re.compile(r"\d+\s*年|[一二两三四五六七八九十]+年")
 CLAUSE_SEPARATOR = re.compile(r"[，,；;。！？\n]+")
+ALTERNATIVE_SEPARATOR = re.compile(r"(?:或|任一|二选一|\bor\b)", re.IGNORECASE)
+ASCII_STOPWORDS = {"a", "an", "and", "or", "the", "to", "with", "of"}
+# TypeScript 是 JavaScript 的超集；简历明确写 TypeScript 时可视为覆盖 JavaScript 基础要求，反向不成立。
+TERM_IMPLICATIONS = {"javascript": {"typescript"}}
 EDUCATION_REQUIREMENT = re.compile(
     r"学历|本科|大专|专科|硕士|研究生|博士|学位|应届|毕业生|院校|证书|认证|"
     r"CET[- ]?[46]|英语\s*[四六46]级|托福|雅思|TOEFL|IELTS",
@@ -92,30 +96,55 @@ EDUCATION_REQUIREMENT = re.compile(
 # 要求里的修饰词，去掉后剩下的才是要在简历里找的关键词
 REQUIREMENT_WORDS = re.compile(
     r"熟练掌握|熟练|熟悉|掌握|精通|了解|具备|具有|拥有|相关|经验|经历|能力|背景|优先|加分|以上|"
-    r"良好|工作|独立|负责|参与|常用|实际|一定|至少|要求|任职|构建|进行|完成|有|者|的|等|或|与|和|及"
+    r"良好|工作|独立|负责|参与|常用|实际|一定|至少|要求|任职|构建|进行|完成|"
+    r"容器编排|容器|技术栈|技术|接口对接|接口|协议|框架|工具|模式|对接|"
+    r"有|者|的|等|或|与|和|及|并|任一|二选一"
     r"|[^一-鿿]+")
 
 
 def requirement_keywords(requirement):
-    # 有英文技术词时只看英文词（如 RESTful、Vite），否则按修饰词切出中文关键词（如 制造业）
-    terms = {term for term in ASCII_TERM.findall(requirement)}
-    if terms:
-        return terms
-    return {part for part in REQUIREMENT_WORDS.split(requirement) if len(part) >= 2}
+    """同时提取中英文要求，避免出现 Python 后把“数据分析能力”等中文条件漏掉。"""
+    terms = {term for term in ASCII_TERM.findall(requirement) if term.lower() not in ASCII_STOPWORDS}
+    chinese_only = ASCII_TERM.sub(" ", requirement)
+    terms.update(part for part in REQUIREMENT_WORDS.split(chinese_only) if len(part) >= 2)
+    return terms
+
+
+def ascii_requirement_groups(clause):
+    """把明确的 A 或 B 合成可替代组；斜杠保持为同时要求，避免把 Python/SQL 误判成二选一。"""
+    matches = [match for match in ASCII_TERM.finditer(clause)
+               if match.group(0).lower() not in ASCII_STOPWORDS]
+    groups = []
+    previous = None
+    for match in matches:
+        term = match.group(0)
+        separator = clause[previous.end():match.start()] if previous is not None else ""
+        if groups and ALTERNATIVE_SEPARATOR.search(separator):
+            groups[-1].add(term)
+        else:
+            groups.append({term})
+        previous = match
+    return groups
 
 
 def keyword_in_text(keyword, text):
-    return re.search(rf"(?<![A-Za-z0-9]){re.escape(keyword)}(?![A-Za-z0-9])", text, re.IGNORECASE) is not None
+    candidates = {keyword}
+    candidates.update(TERM_IMPLICATIONS.get(keyword.lower(), set()))
+    return any(re.search(rf"(?<![A-Za-z0-9]){re.escape(candidate)}(?![A-Za-z0-9])", text, re.IGNORECASE)
+               is not None for candidate in candidates)
 
 
 def clause_is_covered(clause, resume_text):
-    """判断一个要求分句是否已有简历证据；“或”和技术栈斜杠按可替代项处理。"""
-    keywords = requirement_keywords(clause)
-    if not keywords:
+    """仅当所有必选项、以及每个显式“或”选项组均有证据时，才判定要求已覆盖。"""
+    ascii_groups = ascii_requirement_groups(clause)
+    ascii_terms = {term for group in ascii_groups for term in group}
+    chinese_keywords = requirement_keywords(clause) - ascii_terms
+    if not ascii_groups and not chinese_keywords:
         return False
-    matches = [keyword_in_text(keyword, resume_text) for keyword in keywords]
-    is_alternative = "或" in clause or ("/" in clause and len(keywords) == 2)
-    return any(matches) if is_alternative else all(matches)
+    technical_covered = all(any(keyword_in_text(term, resume_text) for term in group)
+                            for group in ascii_groups)
+    chinese_covered = all(keyword_in_text(keyword, resume_text) for keyword in chinese_keywords)
+    return technical_covered and chinese_covered
 
 
 def contradicts_resume(gap, resume_text):
