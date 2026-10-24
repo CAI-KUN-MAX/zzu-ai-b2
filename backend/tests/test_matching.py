@@ -238,6 +238,20 @@ class ScoringRulesTests(unittest.TestCase):
         self.assertEqual(jd_terms(JD), jd_terms(JD))
         self.assertNotEqual(cache_key(TEXT, JD), cache_key(TEXT, JD + " Linux"))
 
+    def test_ocr_glued_english_terms(self):
+        from app.matching import glued_runs, keyword_in_resume
+        # OCR 把一行英文技能识别成连在一起的串
+        text = "技能PythonFastAPIMySQLGitDocker\n项目使用FastAPI开发接口，部署到Linux"
+        runs = glued_runs(text)
+        for term in ("Python", "FastAPI", "MySQL", "Git", "Docker", "Linux"):
+            self.assertTrue(keyword_in_resume(term, text, runs), term)
+        self.assertFalse(keyword_in_resume("Redis", text, runs))
+        # 普通单词不算粘连：JavaScript 里不能命中 Java，Go 太短也不按子串匹配
+        normal = "熟悉 JavaScript 和 TypeScript，参与 Google 项目"
+        self.assertEqual(glued_runs(normal), [])
+        self.assertFalse(keyword_in_resume("Java", normal, glued_runs(normal)))
+        self.assertFalse(keyword_in_resume("Go", text + "Google", glued_runs(text + "Google")))
+
     def test_diagnose_http_failure_is_normalized(self):
         with patch("app.routers.diagnose.diagnose", new=AsyncMock(side_effect=HTTPException(504))):
             with self.assertRaises(LlmError):

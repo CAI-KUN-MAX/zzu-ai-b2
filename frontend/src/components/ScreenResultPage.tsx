@@ -34,32 +34,54 @@ function KeywordChip({ text, tone }: { text: string; tone: "hit" | "miss" }) {
   );
 }
 
+/** 基础评分的三个分项（与 AI 诊断的四个维度不是一回事，分开展示） */
+function BaseScore({ item }: { item: MatchItem }) {
+  if (item.subscores.length === 0) return null;
+  return (
+    <DimensionBars
+      dimensions={item.subscores}
+      title={`基础评分 ${item.stage1_score ?? item.score} 分`}
+      hint="技能关键词 55% + 文本相似度 30% + 学历 15%"
+      className=""
+    />
+  );
+}
+
 /** 展开行才渲染 report，避免一次性渲染 20 份明细导致卡顿 */
 function ExpandedReport({ item }: { item: MatchItem }) {
-  if (item.degraded) {
+  if (item.degraded || !item.report) {
     return (
-      <p className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] leading-relaxed text-amber-700">
-        <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-        <span>
-          该简历只做了轻量打分，未做 AI 深度分析
-          {item.reason ? `：${item.reason}` : "。"}
-        </span>
-      </p>
+      <div className="space-y-6">
+        <p className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] leading-relaxed text-amber-700">
+          <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>
+            该简历未生成 AI 深度分析，总分即基础评分。可能原因：不在基础分前 8 名、AI
+            分析失败或超时、简历文字过少或与 JD 合计超过 2 万字。
+          </span>
+        </p>
+        <BaseScore item={item} />
+      </div>
     );
   }
 
-  if (!item.report) {
-    return <p className="text-[12px] text-ink-500">该简历没有可展示的详细报告。</p>;
-  }
-
+  const report = item.report;
   return (
     <div className="space-y-6">
       <p className="rounded-xl bg-white px-4 py-3 text-[13px] leading-relaxed text-ink-700 shadow-sm">
-        {item.report.summary}
+        {report.summary}
       </p>
-      <DimensionBars dimensions={item.report.dimension_scores} className="" />
-      <Highlights highlights={item.report.highlights} className="" />
-      <Gaps gaps={item.report.gaps} className="" />
+      <p className="num text-[12px] text-ink-500">
+        总分 {item.score} = 基础评分 {item.stage1_score ?? "—"} × 35% + AI 诊断 {report.overall_score} × 65%（四舍五入）
+      </p>
+      <DimensionBars
+        dimensions={report.dimension_scores}
+        title={`AI 诊断 ${report.overall_score} 分`}
+        hint="四个维度加权得出 AI 分"
+        className=""
+      />
+      <BaseScore item={item} />
+      <Highlights highlights={report.highlights} className="" />
+      <Gaps gaps={report.gaps} className="" />
     </div>
   );
 }
@@ -192,7 +214,7 @@ export function ScreenResultPage({ taskId, jdText, ingest, onReset }: ScreenResu
       {polling ? (
         <p className="mt-4 flex items-center gap-2 rounded-xl bg-brand-50 px-4 py-2.5 text-[12px] text-brand-700">
           <SpinnerIcon className="h-3.5 w-3.5 animate-spin" />
-          {task?.stage ?? "正在匹配"} · 已完成 {items.length} 份
+          {task?.stage ?? "正在匹配"} · 基础评分已出，AI 深度分析完成后排名可能变化
         </p>
       ) : null}
 
@@ -246,10 +268,15 @@ export function ScreenResultPage({ taskId, jdText, ingest, onReset }: ScreenResu
                       </span>
                     </span>
 
-                    <span
-                      className={`inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${tone.chip}`}
-                    >
-                      {item.level_label}
+                    <span className="flex flex-col gap-1">
+                      <span
+                        className={`inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${tone.chip}`}
+                      >
+                        {item.level_label}
+                      </span>
+                      <span className="text-[10px] text-ink-500">
+                        {item.degraded ? "基础评分" : "AI 已分析"}
+                      </span>
                     </span>
 
                     <span className="flex flex-wrap gap-1">
@@ -290,7 +317,8 @@ export function ScreenResultPage({ taskId, jdText, ingest, onReset }: ScreenResu
                   </button>
 
                   {expanded ? (
-                    <div className="border-t border-surface-line bg-surface-soft/40 px-5 py-6">
+                    // 表格在窄屏下横向滚动，详情固定在左侧且不超过可视宽度，避免右侧分数被截断
+                    <div className="sticky left-0 max-w-[calc(100vw-3rem)] border-t border-surface-line bg-surface-soft/40 px-5 py-6">
                       <ExpandedReport item={item} />
                     </div>
                   ) : null}
@@ -304,8 +332,9 @@ export function ScreenResultPage({ taskId, jdText, ingest, onReset }: ScreenResu
       <p className="mt-6 flex items-start gap-2 text-[11px] leading-relaxed text-ink-500">
         <InfoIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         <span>
-          排序按总分降序，分数由技能匹配、经历相关、关键词覆盖、教育背景四项加权得出。AI
-          判断仅供参考，请结合人工复核。
+          排序按总分降序。所有简历先做基础评分（技能关键词 55%、文本相似度 30%、学历
+          15%）；基础分前 8 份再做 AI 深度分析，总分 = 基础分 × 35% + AI 诊断分 × 65%。标有“基础评分”的简历未做 AI
+          分析。AI 判断仅供参考，请结合人工复核。
         </span>
       </p>
     </main>

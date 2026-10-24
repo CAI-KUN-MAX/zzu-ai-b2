@@ -18,6 +18,7 @@ from docx.oxml.ns import qn
 from docx.table import Table
 from docx.text.paragraph import Paragraph
 from pypdf import PdfReader
+from pypdf.errors import DependencyError, FileNotDecryptedError
 from app.ocr import OcrUnavailable, get_provider, recognize_image
 
 logger = logging.getLogger(__name__)
@@ -86,7 +87,11 @@ def extract_text(path, kind, max_pages):
     low_conf = 0
     try:
         if kind in {"pdf", "pdf_text", "pdf_ocr"}:
-            reader = PdfReader(path)
+            try:
+                reader = PdfReader(path)
+            except (DependencyError, FileNotDecryptedError):
+                # AES 加密的 PDF 在构造阶段就会失败，不能误报成“文件损坏”
+                raise IngestError(415, "UNSUPPORTED_FILE", "PDF 已加密，请解密后重新上传") from None
             if reader.is_encrypted:
                 raise IngestError(415, "UNSUPPORTED_FILE", "PDF 已加密，请解密后重新上传")
             pages = len(reader.pages)

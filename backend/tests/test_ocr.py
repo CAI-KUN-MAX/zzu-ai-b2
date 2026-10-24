@@ -61,14 +61,22 @@ class OcrPipelineTests(unittest.TestCase):
                 self.assertEqual(error.exception.status, 415)
 
 
+# Windows / macOS / 常见 Linux 发行版的中文字体，任一存在即可跑中文识别测试
+CHINESE_FONTS = ("C:/Windows/Fonts/msyh.ttc", "/System/Library/Fonts/STHeiti Medium.ttc",
+                 "/System/Library/Fonts/PingFang.ttc", "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+                 "/usr/share/fonts/google-noto-cjk/NotoSansCJK-Regular.ttc",
+                 "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc", "/usr/share/fonts/wqy-microhei/wqy-microhei.ttc")
+CHINESE_FONT = next((path for path in CHINESE_FONTS if Path(path).exists()), None)
+
+
 @unittest.skipUnless(os.getenv("TEST_REAL_OCR") == "1", "set TEST_REAL_OCR=1 after installing requirements-ocr.txt")
 class RealOfflineOcrTests(unittest.TestCase):
-    @unittest.skipUnless(Path("C:/Windows/Fonts/msyh.ttc").exists(), "Chinese test requires Microsoft YaHei")
+    @unittest.skipUnless(CHINESE_FONT, "Chinese test requires a CJK font (YaHei / STHeiti / Noto CJK / WenQuanYi)")
     def test_chinese_resume_offline(self):
         with patch.dict(os.environ, {"OCR_PROVIDER": "rapidocr"}), tempfile.TemporaryDirectory() as directory:
             image = Image.new("RGB", (1200, 500), "white")
             draw = ImageDraw.Draw(image)
-            font = ImageFont.truetype("C:/Windows/Fonts/msyh.ttc", 36)
+            font = ImageFont.truetype(CHINESE_FONT, 36)
             for index, line in enumerate(("张三 后端开发实习生", "郑州大学 计算机科学与技术 本科",
                                           "熟悉 Python 和 MySQL 数据库", "负责接口开发 单元测试与团队协作")):
                 draw.text((40, 40 + index * 100), line, font=font, fill="black")

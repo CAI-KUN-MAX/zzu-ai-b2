@@ -27,11 +27,27 @@ EDUCATION = ((1, r"高中|中专"), (2, r"大专|专科"), (3, r"本科|学士")
              (4, r"硕士|研究生"), (5, r"博士"))
 
 
+# 筛选页把关键词直接展示给 HR：去掉 JD 结构词、通用动词和学历词（学历单独计分），
+# 以及超过 6 个字的中文长短语（多为整句片段，如“公司招聘系统后端开发”）
+SCREENING_STOP_TERMS = {
+    "岗位", "岗位职责", "职责", "任职要求", "职位", "职位描述", "公司", "团队", "实习", "实习生",
+    "使用", "编写", "设计", "优化", "查询", "开发", "配合", "能够", "协作", "协作开发", "学习",
+    "专业", "学历", "本科", "硕士", "博士", "大专", "专科", "研究生", "学士",
+}
+
+
+def is_screening_term(term):
+    if term in SCREENING_STOP_TERMS:
+        return False
+    return term.isascii() or len(term) <= 6
+
+
 def jd_terms(text):
     counts = Counter()
     spelling = {}
     for clause in CLAUSE_SEPARATOR.split(text):
-        for term in sorted(requirement_keywords(clause), key=lambda value: (value.casefold(), value)):
+        terms = filter(is_screening_term, requirement_keywords(clause))
+        for term in sorted(terms, key=lambda value: (value.casefold(), value)):
             key = term.casefold()
             counts[key] += 1
             spelling.setdefault(key, term)
@@ -68,8 +84,26 @@ def level_fields(score):
     return {"level": level, "level_label": {"high": "强匹配", "medium": "较匹配", "low": "存在缺口"}[level]}
 
 
+# OCR 常把同一行的英文词连在一起，如 “PythonFastAPIMySQLGitDocker”。
+# 只把“够长且大小写多次切换”的英文串当作粘连串，避免 JavaScript 误命中 Java。
+GLUED_RUN = re.compile(r"[A-Za-z0-9+#.]{15,}")
+CASE_SWITCH = re.compile(r"[a-z0-9][A-Z]|[A-Z]{2}[a-z]")
+
+
+def glued_runs(text):
+    return [run for run in GLUED_RUN.findall(text) if len(CASE_SWITCH.findall(run)) >= 3]
+
+
+def keyword_in_resume(term, text, runs):
+    if keyword_in_text(term, text):
+        return True
+    # 粘连串里按原大小写精确查找，至少 3 个字符，减少误命中
+    return len(term) >= 3 and term.isascii() and any(term in run for run in runs)
+
+
 def score_resume(jd, row, terms, jd_profile):
-    matched = [term for term in terms if keyword_in_text(term, row["text"])]
+    runs = glued_runs(row["text"])
+    matched = [term for term in terms if keyword_in_resume(term, row["text"], runs)]
     missing = [term for term in terms if term not in matched]
     skill = min(1, len(matched) / min(max(len(terms), 1), 15)) * 100
     similarity = cosine(jd_profile, profile2gram(row["text"])) * 100
