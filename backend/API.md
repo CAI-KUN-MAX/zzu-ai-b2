@@ -40,11 +40,11 @@ python -m unittest discover -s tests -v
 
 ## 1. 上传
 
-`POST /api/resumes/batch`，multipart 字段名为 **`files[]`**，每批 1–20 份、单份最多 15MB。
+`POST /api/resumes/batch`，multipart 主字段名为 **`files`**，与当前前端一致；同时兼容旧字段 **`files[]`**。两种字段合计每批 1–20 份、单份最多 15MB。Swagger 中任选一个字段添加文件即可。
 
 ```bash
 curl -X POST http://127.0.0.1:8000/api/resumes/batch \
-  -F 'files[]=@resume.pdf' -F 'files[]=@resume.docx'
+  -F 'files=@resume.pdf' -F 'files=@resume.docx'
 ```
 
 返回 **202**：
@@ -67,6 +67,7 @@ curl -X POST http://127.0.0.1:8000/api/resumes/batch \
   "stage":"解析完成",
   "progress":100,
   "error":null,
+  "error_code":null,
   "items":[{
     "resume_id":"简历ID",
     "name":"张三.docx",
@@ -79,9 +80,9 @@ curl -X POST http://127.0.0.1:8000/api/resumes/batch \
 ```
 
 - 任务状态：`queued → running → succeeded | failed`。进度 0–100，运行中 stage 如 `解析 3/8`。建议每 1–2 秒轮询。
-- 简历状态：`parsing → ready | need_review | failed`。少于 30 字但非空时标记 `need_review`，全文仍可读取；解析中的项目也会出现在 items 中。
+- 数据库内部简历状态：`parsing → ready | need_review | failed`。对外 `items` 仅包含 `ready / need_review / failed` 三种已结束解析的项目，解析中的项目暂不返回；队列和处理进度通过整体 `status/stage/progress` 展示，初期 `items` 可以为空。少于 30 字但非空时标记 `need_review`，全文仍可读取。
 - 至少一份可读取时任务为 `succeeded`，仍需逐项检查 `status/error`；全部失败时任务为 `failed`，任务 error 为首份文件错误。
-- 异步错误形如 `{"code":"OCR_UNAVAILABLE","message":"中文提示"}`，通过 200 的查询结果返回；HTTP 级别错误则沿用原有含 `request_id` 的外层错误体。
+- 任务级别的 `error` 为中文字符串或 `null`，与前端 `useTask` 的直接渲染方式一致；额外字段 `error_code` 保留错误码，正常时为 `null`。单份项目的额外字段 `error` 仍保留 `{"code":"OCR_UNAVAILABLE","message":"中文提示"}` 对象，供排错使用。数据库仍保存原始错误对象，旧记录无需迁移。HTTP 级别错误沿用原有含 `request_id` 的外层错误体。
 - 进程启动和正常退出都会将未完成任务、仍在解析的简历标记失败，提示“服务重启，任务已中断，请重试”；已经完成的文件保留。
 - 本版同批简历顺序解析，批次排队执行，不阻塞原有诊断接口的模型调用。
 
@@ -115,7 +116,7 @@ HTTP 错误体沿用：
 | 409 | `RESUME_NOT_READY` | 全文仍在解析 |
 | 413 | `FILE_TOO_LARGE` | 单文件超过上限 |
 | 415 | `UNSUPPORTED_FILE` | 不支持、损坏、加密、PDF 超页数或 DOCX 解压过大 |
-| 422 | `VALIDATION_ERROR` | multipart 字段缺失等请求格式错误 |
+| 422 | `VALIDATION_ERROR` | `files` 和 `files[]` 均未提供，或请求格式错误 |
 | 422 | `OCR_FAILED` | 提取清洗后没有文字 |
 | 503 | `OCR_UNAVAILABLE` | 图片、扫描 PDF 需要 OCR |
 

@@ -20,18 +20,25 @@ def fail(status, code, message):
 async def upload_batch(
     request: Request,
     files: list[UploadFile] = File(
-        ...,
-        alias="files[]",
+        default=[],
+        description="简历文件列表，与前端 FormData 的 files 字段一致",
         # Explicit binary format keeps Swagger's file picker compatible with
         # Pydantic versions that emit only contentMediaType for UploadFile.
         json_schema_extra={"items": {"type": "string", "format": "binary"}},
     ),
+    legacy_files: list[UploadFile] = File(
+        default=[],
+        alias="files[]",
+        description="兼容原有客户端；与 files 合计最多 20 份",
+        json_schema_extra={"items": {"type": "string", "format": "binary"}},
+    ),
 ):
+    files = [*files, *legacy_files]
     paths = []
     uploads = []
     try:
         if not files:
-            fail(400, "INVALID_INPUT", "请至少上传一份简历")
+            fail(422, "VALIDATION_ERROR", "请通过 files 或 files[] 字段至少上传一份简历")
         if len(files) > 20:
             fail(400, "TOO_MANY_RESUMES", "每次最多上传 20 份简历")
         limit = min(15, max(1, int(os.getenv("MAX_UPLOAD_MB", "15")))) * 1024 * 1024
@@ -74,11 +81,17 @@ async def get_task(task_id: str, request: Request):
     items = []
     for resume_id in json.loads(task["payload"])["resume_ids"]:
         row = store.get("resumes", resume_id)
+        # The frontend only renders terminal item states. Overall stage/progress
+        # still reflect queued/running work, without pretending parsing is ready.
+        if row["status"] == "parsing":
+            continue
         items.append(dict(resume_id=row["id"], name=row["name"], chars=row["chars"],
                           status=row["status"], preview=row["text"][:60],
                           error=json.loads(row["error"]) if row["error"] else None))
+    error = json.loads(task["error"]) if task["error"] else None
     return dict(status=task["status"], stage=task["stage"], progress=task["progress"],
-                error=json.loads(task["error"]) if task["error"] else None, items=items)
+                error=error["message"] if isinstance(error, dict) else error,
+                error_code=error.get("code") if isinstance(error, dict) else None, items=items)
 
 
 @router.get("/api/resumes/{resume_id}/text")
