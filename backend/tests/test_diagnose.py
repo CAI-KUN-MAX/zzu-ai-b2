@@ -93,7 +93,15 @@ class ParseTests(unittest.TestCase):
             self.assertTrue(module.contradicts_resume(gap(req), resume), req)
         # 复合要求的每个分句都命中可替代项时，也属于“已体现”
         self.assertTrue(module.contradicts_resume(
-            gap("熟练掌握 JavaScript / TypeScript，熟悉 React 或 Vue；"), resume + "\nJavaScript 入门"))
+            gap("熟练掌握 JavaScript / TypeScript，熟悉 React 或 Vue；"), resume))
+        # 斜杠不擅自当成二选一；中英文混合分句也不能因为命中英文词就忽略中文要求
+        self.assertFalse(module.contradicts_resume(gap("熟悉 Python / SQL"), "熟悉 Python"))
+        self.assertFalse(module.contradicts_resume(gap("熟悉 Python 并具备数据分析能力"), "熟悉 Python"))
+        self.assertTrue(module.contradicts_resume(gap("熟悉 Python 并具备数据分析能力"),
+                                                  "熟悉 Python，负责数据分析"))
+        # 英文 or 只合并相邻替代项，不能把同句中的其他必选技能一起变成可选。
+        self.assertFalse(module.contradicts_resume(gap("Python and React or Vue"), "熟悉 Vue"))
+        self.assertTrue(module.contradicts_resume(gap("Python and React or Vue"), "熟悉 Python 和 Vue"))
         # 真实缺口、年限要求、已引用简历的程度不足：保留
         for item in (gap("有 B 端 / SaaS 产品经验者优先"), gap("3 年以上总账工作经验"),
                      gap("熟悉 React", "了解 React"), gap("熟悉 Java")):
@@ -279,8 +287,8 @@ class RouteTests(unittest.IsolatedAsyncioTestCase):
             preflight = {"Access-Control-Request-Method": "POST"}
             evil = await client.options("/api/diagnose", headers={"Origin": "https://evil.example", **preflight})
             self.assertNotIn("access-control-allow-origin", evil.headers)
-            own = await client.options("/api/diagnose", headers={"Origin": "http://8.163.105.39", **preflight})
-            self.assertEqual(own.headers["access-control-allow-origin"], "http://8.163.105.39")
+            own = await client.options("/api/diagnose", headers={"Origin": "https://8.163.105.39", **preflight})
+            self.assertEqual(own.headers["access-control-allow-origin"], "https://8.163.105.39")
             self.assertNotIn("access-control-allow-credentials", own.headers)
 
 
