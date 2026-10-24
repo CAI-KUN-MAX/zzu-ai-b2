@@ -118,6 +118,10 @@ export interface IngestItem {
   status: ResumeStatus;
   /** 正文预览，用于列表展示 */
   preview: string;
+  /** 单份解析失败原因；与任务级 error 不同，这里是对象 */
+  error?: { code: string; message: string } | null;
+  /** OCR 低置信度行数，大于 0 时状态为 need_review */
+  low_conf?: number;
 }
 
 /** GET /api/tasks/{task_id} */
@@ -127,7 +131,11 @@ export interface IngestTask {
   stage: string;
   /** 0-100 */
   progress: number;
+  /** 可直接展示的中文错误，正常时为 null */
   error: string | null;
+  /** 额外错误码，如 OCR_UNAVAILABLE / TASK_INTERRUPTED */
+  error_code?: string | null;
+  /** 解析中的项目暂不返回，只包含 ready / need_review / failed */
   items: IngestItem[];
 }
 
@@ -150,9 +158,13 @@ export interface MatchSubScore {
 export interface MatchItem {
   resume_id: string;
   name: string;
+  /** 最终分：AI 完成时为 0.35×基础分 + 0.65×AI 分，降级时等于基础分 */
   score: number;
+  /** 基础评分（技能关键词 55% + 文本相似度 30% + 学历 15%） */
+  stage1_score?: number;
   level: MatchLevel;
   level_label: string;
+  /** 基础评分的三个分项，与 report.dimension_scores 的 AI 四维度不是一回事 */
   subscores: MatchSubScore[];
   matched: string[];
   missing: string[];
@@ -169,5 +181,6 @@ export interface MatchTask {
   stage: string;
   progress: number;
   error: string | null;
+  error_code?: string | null;
   items: MatchItem[];
 }

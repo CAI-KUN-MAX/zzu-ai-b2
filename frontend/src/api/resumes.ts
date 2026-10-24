@@ -1,6 +1,6 @@
 import type { IngestTask, ResumeStatus, ResumeText } from "../types";
 import ingestMock from "../mock/ingest.json";
-import { IS_MOCK_MODE, UPLOAD_TIMEOUT_MS, request, wait } from "./http";
+import { ApiError, IS_MOCK_MODE, UPLOAD_TIMEOUT_MS, request, wait } from "./http";
 
 /** 单批最多 20 份 */
 export const MAX_FILES = 20;
@@ -64,6 +64,89 @@ export async function uploadResumes(files: File[]): Promise<{ task_id: string }>
   });
 }
 
+export interface UploadedBatch {
+  taskId: string;
+  count: number;
+}
+
+/**
+ * 按 splitIntoBatches() 拆批后逐批串行上传，控制单次请求体积。
+ * 后端是整批校验：某一批有不合格文件只拒绝这一批，其他批照常解析。
+ */
+export async function uploadInBatches(
+  files: File[]
+): Promise<{ batches: UploadedBatch[]; errors: string[] }> {
+  const batches: UploadedBatch[] = [];
+  const errors: string[] = [];
+  const uploadGroup = async (group: File[]) => {
+    try {
+      const { task_id } = await uploadResumes(group);
+      batches.push({ taskId: task_id, count: group.length });
+    } catch (err) {
+      // 后端整批校验：一份伪造扩展名或损坏的文件会让同批全部被拒。
+      // 业务校验失败（4xx，非限流）时逐份重传，只让有问题的那份失败
+      const status = err instanceof ApiError ? Number(err.status) : 0;
+      if (group.length > 1 && status >= 400 && status < 500 && status !== 429) {
+        for (const file of group) await uploadGroup([file]);
+        return;
+      }
+      const names = group.map((file) => file.name).join("、");
+      errors.push(`${names}：${err instanceof Error ? err.message : "上传失败"}`);
+    }
+  };
+
+  for (const group of splitIntoBatches(files)) {
+    await uploadGroup(group);
+  }
+  return { batches, errors };
+}
+
+/** 多个解析任务拼成一个 id 交给 useTask 轮询 */
+export function joinTaskIds(batches: UploadedBatch[]): string {
+  return batches.map((batch) => batch.taskId).join(",");
+}
+
+/**
+ * 同时查询多个解析任务并合并：
+ * - 任一批未结束就是 running；全部失败才算 failed；
+ * - 进度按每批文件数加权；
+ * - 同一份简历（相同内容）跨批出现时按 resume_id 去重。
+ */
+export async function getIngestTasks(
+  batches: UploadedBatch[],
+  signal?: AbortSignal
+): Promise<IngestTask> {
+  const tasks = await Promise.all(batches.map((batch) => getIngestTask(batch.taskId, signal)));
+  if (tasks.length === 1) return tasks[0];
+
+  const total = batches.reduce((sum, batch) => sum + batch.count, 0) || 1;
+  const progress = Math.round(
+    tasks.reduce((sum, task, index) => sum + task.progress * batches[index].count, 0) / total
+  );
+  const finished = tasks.every((task) => task.status === "succeeded" || task.status === "failed");
+  const allFailed = tasks.every((task) => task.status === "failed");
+  const doneBatches = tasks.filter((task) => task.status === "succeeded" || task.status === "failed").length;
+
+  const seen = new Set<string>();
+  const items = tasks
+    .flatMap((task) => task.items)
+    .filter((item) => (seen.has(item.resume_id) ? false : (seen.add(item.resume_id), true)));
+
+  const firstFailed = tasks.find((task) => task.status === "failed");
+  return {
+    status: !finished ? "running" : allFailed ? "failed" : "succeeded",
+    stage: !finished
+      ? `共 ${tasks.length} 批，已完成 ${doneBatches} 批 · ${tasks.find((task) => task.status === "running")?.stage ?? "排队中"}`
+      : allFailed
+        ? "解析失败"
+        : "解析完成",
+    progress: finished ? 100 : progress,
+    error: allFailed ? firstFailed?.error ?? "解析失败，请重新上传" : null,
+    error_code: allFailed ? firstFailed?.error_code ?? null : null,
+    items,
+  };
+}
+
 /** GET /api/tasks/{task_id} */
 export async function getIngestTask(taskId: string, signal?: AbortSignal): Promise<IngestTask> {
   if (IS_MOCK_MODE) {
@@ -106,6 +189,10 @@ export function validateFiles(files: File[]): { ok: File[]; errors: string[] } {
     const matched = ACCEPTED_TYPES.some((ext) => lower.endsWith(ext));
     if (!matched) {
       errors.push(`${file.name}：仅支持 PDF / DOCX / PNG / JPG`);
+      return;
+    }
+    if (file.size === 0) {
+      errors.push(`${file.name}：空文件`);
       return;
     }
     if (file.size > MAX_FILE_SIZE) {

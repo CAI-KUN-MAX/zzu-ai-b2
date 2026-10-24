@@ -19,6 +19,8 @@ export class ApiError extends Error {
   readonly code: string | number | null;
   /** 后端返回的追踪号，便于日志对账 */
   readonly requestId: string | null;
+  /** HTTP 状态码；网络错误、超时等没有响应时为 null */
+  status: number | null = null;
 
   constructor(
     message: string,
@@ -41,6 +43,12 @@ export const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(re
  * 3. FastAPI 422 { detail: [ { loc, msg } ] }
  */
 export function toApiError(parsed: unknown, status: number): ApiError {
+  const error = buildApiError(parsed, status);
+  error.status = status;
+  return error;
+}
+
+function buildApiError(parsed: unknown, status: number): ApiError {
   const body = (parsed ?? {}) as {
     error?: { code?: string | number; message?: string; request_id?: string };
     detail?: string | Array<Record<string, unknown>>;
@@ -62,7 +70,12 @@ export function toApiError(parsed: unknown, status: number): ApiError {
     );
   }
 
-  // 其他 5xx 多为大模型生成失败（JSON 格式偶发崩），错误体通常不可读，统一给人话提示
+  // 后端自己给出的业务错误（如 503 OCR_UNAVAILABLE）保留原意，不能改成“AI 正在思考中”
+  if (status >= 500 && body.error?.message && body.error.code !== "INTERNAL_ERROR") {
+    return new ApiError(withRequestId(body.error.message), body.error.code ?? status, requestId);
+  }
+
+  // 其余 5xx 多为大模型生成失败或网关报错，错误体通常不可读，统一给人话提示
   if (status >= 500) {
     return new ApiError(withRequestId("AI 正在思考中，请稍后重试"), status, requestId);
   }

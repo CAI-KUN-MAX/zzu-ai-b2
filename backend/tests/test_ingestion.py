@@ -228,6 +228,19 @@ class IngestApiTests(unittest.TestCase):
             response = self.client.get(f'/api/resumes/{item["resume_id"]}/text')
             self.assert_error(response, 503 if code == "OCR_UNAVAILABLE" else 415, code)
 
+    def test_aes_encrypted_pdf_reports_encrypted(self):
+        try:
+            import pymupdf
+        except ImportError:
+            self.skipTest("需要 requirements-ocr.txt 中的 PyMuPDF 生成 AES 加密 PDF")
+        document = pymupdf.open()
+        document.new_page().insert_text((72, 72), "Encrypted resume", fontsize=12)
+        content = document.tobytes(encryption=pymupdf.PDF_ENCRYPT_AES_256, owner_pw="owner", user_pw="user")
+        for encrypted in (content, pdf_bytes(encrypted=True)):
+            item = self.wait(self.upload(encrypted))["items"][0]
+            self.assertEqual(item["error"]["code"], "UNSUPPORTED_FILE")
+            self.assertIn("已加密", item["error"]["message"])
+
     def test_partial_success_and_retry_failed(self):
         response = self.client.post("/api/resumes/batch", files=[
             ("files[]", ("ok.docx", docx_bytes())), ("files[]", ("scan.pdf", pdf_bytes()))])

@@ -1,6 +1,13 @@
 import { useMemo, useState } from "react";
 import type { IngestTask, ResumeStatus } from "../types";
-import { STATUS_LABEL, getIngestTask, getResumeText, uploadResumes } from "../api/resumes";
+import {
+  STATUS_LABEL,
+  getIngestTasks,
+  getResumeText,
+  joinTaskIds,
+  uploadInBatches,
+  type UploadedBatch,
+} from "../api/resumes";
 import { createMatch } from "../api/match";
 import { useTask } from "../lib/useTask";
 import { JdPanel } from "./JdPanel";
@@ -23,13 +30,16 @@ export function ScreenPage({ onStartMatch }: ScreenPageProps) {
   const [jdText, setJdText] = useState("");
   const [files, setFiles] = useState<File[]>([]);
 
-  const [ingestTaskId, setIngestTaskId] = useState<string | null>(null);
+  // 拆批上传后每批一个解析任务，合并轮询
+  const [batches, setBatches] = useState<UploadedBatch[]>([]);
+  const [uploadNotes, setUploadNotes] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [matching, setMatching] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const ingestTaskId = batches.length > 0 ? joinTaskIds(batches) : null;
   const { data: ingest, error: pollError, polling } = useTask<IngestTask>(
-    getIngestTask,
+    (_id, signal) => getIngestTasks(batches, signal),
     ingestTaskId
   );
 
@@ -53,8 +63,13 @@ export function ScreenPage({ onStartMatch }: ScreenPageProps) {
     setSubmitting(true);
     setError(null);
     try {
-      const { task_id } = await uploadResumes(files);
-      setIngestTaskId(task_id);
+      const { batches: uploaded, errors } = await uploadInBatches(files);
+      if (uploaded.length === 0) {
+        setError(errors.join("\n") || "上传失败，请重试");
+      } else {
+        setUploadNotes(errors);
+        setBatches(uploaded);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "上传失败，请重试");
     } finally {
@@ -77,7 +92,8 @@ export function ScreenPage({ onStartMatch }: ScreenPageProps) {
   }
 
   function resetAll() {
-    setIngestTaskId(null);
+    setBatches([]);
+    setUploadNotes([]);
     setOpenedId(null);
     setOpenedText(null);
     setError(null);
@@ -106,6 +122,9 @@ export function ScreenPage({ onStartMatch }: ScreenPageProps) {
   if (ingestTaskId) {
     const percent = Math.max(0, Math.min(100, ingest?.progress ?? 0));
     const done = ingest?.status === "succeeded";
+    // 全部失败时任务已停止，不能再显示“正在解析”
+    const allFailed = ingest?.status === "failed";
+    const stopped = done || allFailed || (!polling && Boolean(pollError));
 
     return (
       <main className="mx-auto max-w-4xl px-6 pb-20 pt-10">
@@ -113,10 +132,10 @@ export function ScreenPage({ onStartMatch }: ScreenPageProps) {
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="text-[20px] font-semibold tracking-tight">
-                {done ? "简历解析完成" : "正在解析简历"}
+                {done ? "简历解析完成" : allFailed ? "简历解析失败" : stopped ? "解析状态获取失败" : "正在解析简历"}
               </h1>
               <p className="mt-1.5 text-[13px] text-ink-500">
-                {ingest?.stage || "准备中…"}
+                {allFailed ? "所有文件都未能解析，请根据下方原因处理后重新上传" : ingest?.stage || "准备中…"}
                 {done
                   ? [
                       needReviewCount > 0 ? `其中 ${needReviewCount} 份建议人工核对` : "",
@@ -128,14 +147,18 @@ export function ScreenPage({ onStartMatch }: ScreenPageProps) {
                   : ""}
               </p>
             </div>
-            <span className="num rounded-full bg-brand-50 px-3 py-1 text-[12px] font-semibold text-brand-700">
+            <span
+              className={`num rounded-full px-3 py-1 text-[12px] font-semibold ${
+                allFailed ? "bg-rose-50 text-rose-700" : "bg-brand-50 text-brand-700"
+              }`}
+            >
               {percent}%
             </span>
           </div>
 
           <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-slate-200/70">
             <div
-              className="h-full rounded-full bg-brand-600 transition-[width] duration-500"
+              className={`h-full rounded-full transition-[width] duration-500 ${allFailed ? "bg-rose-500" : "bg-brand-600"}`}
               style={{ width: `${percent}%` }}
             />
           </div>
@@ -147,6 +170,17 @@ export function ScreenPage({ onStartMatch }: ScreenPageProps) {
             </div>
           ) : null}
 
+          {uploadNotes.length > 0 ? (
+            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] leading-relaxed text-amber-700">
+              <p className="font-medium">以下文件所在批次未能上传，其余文件继续解析：</p>
+              <ul className="mt-1 space-y-0.5">
+                {uploadNotes.map((note) => (
+                  <li key={note}>{note}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
           <ul className="mt-6 space-y-2">
             {(ingest?.items ?? []).map((item) => {
               const style = STATUS_STYLE[item.status];
@@ -155,7 +189,11 @@ export function ScreenPage({ onStartMatch }: ScreenPageProps) {
                 <li key={item.resume_id} className="rounded-xl border border-surface-line">
                   <button
                     type="button"
-                    onClick={() => toggleText(item.resume_id)}
+                    onClick={() =>
+                      item.status === "failed"
+                        ? setOpenedId(isOpen ? null : item.resume_id)
+                        : toggleText(item.resume_id)
+                    }
                     className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface-soft/60"
                   >
                     <span className={`h-2 w-2 shrink-0 rounded-full ${style.dot}`} />
@@ -172,7 +210,13 @@ export function ScreenPage({ onStartMatch }: ScreenPageProps) {
                     </span>
                   </button>
 
-                  {isOpen ? (
+                  {item.status === "failed" ? (
+                    <p className="border-t border-surface-line bg-rose-50/60 px-4 py-2.5 text-[12px] leading-relaxed text-rose-700">
+                      {item.error?.message ?? "解析失败，请重新上传"}
+                    </p>
+                  ) : null}
+
+                  {isOpen && item.status !== "failed" ? (
                     <div className="border-t border-surface-line bg-surface-soft/40 px-4 py-3">
                       {textLoading ? (
                         <p className="flex items-center gap-2 text-[12px] text-ink-500">
@@ -183,7 +227,9 @@ export function ScreenPage({ onStartMatch }: ScreenPageProps) {
                         <>
                           {item.status === "need_review" ? (
                             <p className="mb-2 text-[11px] text-amber-700">
-                              识别质量偏低，建议核对原始文件后再确认匹配结果。
+                              {(item.low_conf ?? 0) > 0
+                                ? `有 ${item.low_conf} 行识别置信度偏低，建议核对原始文件后再确认匹配结果。`
+                                : "提取到的文字较少，建议核对原始文件是否完整。"}
                             </p>
                           ) : null}
                           <pre className="max-h-56 overflow-y-auto whitespace-pre-wrap text-[12px] leading-relaxed text-ink-700">
@@ -208,7 +254,7 @@ export function ScreenPage({ onStartMatch }: ScreenPageProps) {
           {error ? (
             <div className="mt-4 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] text-rose-700">
               <AlertIcon className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>{error}</span>
+              <span className="whitespace-pre-line">{error}</span>
             </div>
           ) : null}
 
@@ -216,7 +262,9 @@ export function ScreenPage({ onStartMatch }: ScreenPageProps) {
             <p className="text-[11px] text-ink-500">
               {done
                 ? `${matchableIds.length} 份可用于匹配${needReviewCount > 0 ? `，${needReviewCount} 份建议核对` : ""}${failedCount > 0 ? `，${failedCount} 份解析失败` : ""}`
-                : "解析期间请不要关闭页面"}
+                : stopped
+                  ? "解析已结束，请重新上传"
+                  : "解析期间请不要关闭页面"}
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -275,7 +323,7 @@ export function ScreenPage({ onStartMatch }: ScreenPageProps) {
       {error ? (
         <div className="mt-5 flex items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           <AlertIcon className="mt-0.5 h-4 w-4 shrink-0" />
-          <span className="flex-1 leading-relaxed">{error}</span>
+          <span className="flex-1 whitespace-pre-line leading-relaxed">{error}</span>
         </div>
       ) : null}
 

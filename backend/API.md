@@ -184,12 +184,12 @@ JD 去除首尾空白后为 30–20000 字；简历 ID 列表为 1–50 项，�
 6. 创建匹配任务、轮询排序结果、展开 AI 报告，再导出 20 条结果。
 7. 关闭 AI 验证全降级排序；开启 AI 验证单条失败降级；重复匹配验证缓存。
 
-额外验证命令，在仓库根目录执行：
+额外验证命令。单元测试必须在 `backend/` 下运行，从仓库根目录直接 `discover -s backend/tests` 会找不到 `app` 包；两个脚本在仓库根目录执行：
 
 ```powershell
 $env:ENABLE_DOCS='false'
 $env:TEST_REAL_OCR='1'
-.venv\Scripts\python.exe -m unittest discover -s backend/tests -v
+cd backend; ..\.venv\Scripts\python.exe -m unittest discover -s tests -v; cd ..
 # 使用临时数据库和虚构的 20 份混合文件，不调用模型
 .venv\Scripts\python.exe backend/scripts/smoke_screening.py
 # 同样的 20 份文件，对前 1 份调用真实模型并验证重复匹配缓存
@@ -198,6 +198,16 @@ $env:TEST_REAL_OCR='1'
 
 `--live-llm` 读取现有 `backend/.env` 模型配置，只发送脚本内虚构材料；测试目录结束后自动清理。默认 AI 前 8 份的数量限制及最多 3 并发通过自动测试验证。
 
-本地前端联调时，现有 `VITE_API_BASE` 必须指向本次启动的后端，留空才使用 Vite 的 `/api` 代理；仍指向公网时不会测试到本地变更。现有诊断前端超时应大于 75 秒，这属于运行配置，不在此次后端代码修改范围内。
+中文真实 OCR 测试会依次查找微软雅黑、macOS 黑体/苹方、Noto CJK、文泉驿等字体，任一存在即运行；Linux 服务器可安装 `fonts-noto-cjk` 或 `wqy-microhei`。
 
-本次不修改前端、Nginx 或线上服务。仓库现有 Nginx 请求体上限为 256KB，轮询也共用接口限流；正式接入上传前需要部署负责人单独调整。批量请求体上限必须覆盖整批文件总量和 multipart 开销，仅设 20MB 无法支持 20 × 15MB 的上传。当前接口沿用已有无鉴权访问方式，不应向公网提供真实简历库，接入真实数据前需另行实现访问控制。
+浏览器联调用的虚构文件可用 `python backend/scripts/make_acceptance_files.py <输出目录>` 生成：20 份混合简历（DOCX 6、文本 PDF 6、扫描 PDF 3、PNG 3、JPG 2）及重复、空文件、超大、伪造扩展名、加密/损坏 PDF、空白图片、低置信度图片、空白 DOCX 等异常文件。
+
+## 前端与部署对接（联调分支）
+
+- 本地前端联调时 `VITE_API_BASE` 留空，走 Vite 的 `/api` 代理到本机后端；填公网地址就测不到本地变更。诊断超时默认 80 秒，大于后端 75 秒。
+- 前端按每批最多 5 份、50MB 拆批上传，每批一个解析任务，页面合并轮询多个任务并按 `resume_id` 去重。某一批因伪造扩展名、损坏等原因被整批拒绝（4xx）时，前端会把这批拆成单个文件重传，只有问题文件失败。空文件和超过 15MB 的文件在前端直接拦截。
+- 单份项目失败时，前端直接展示 `items[].error.message`，不再请求全文；`GET /api/resumes/{id}/text` 返回 503 `OCR_UNAVAILABLE` 时显示后端原提示。
+- 匹配结果页把“基础评分”三个分项（`subscores`）与“AI 诊断”四个维度（`report.dimension_scores`）分开展示，并给出 `score = round(0.35 × stage1_score + 0.65 × report.overall_score)` 的计算说明；`degraded=true` 时只展示基础评分和降级原因说明。
+- Nginx 已按接口区分请求体上限与限流（上传 60MB；高成本接口每分钟 10 次；轮询每分钟 240 次），见 `deploy/nginx.conf` 与 `deploy/README.md`。
+- 匹配评分改动：OCR 把英文技能连写（如 `PythonFastAPIMySQL`）时也能命中关键词；关键词列表去掉“岗位职责”“使用”“本科”等非技能词和超过 6 字的中文长句。
+- 当前接口沿用已有无鉴权访问方式，不应向公网提供真实简历库，接入真实数据前需另行实现访问控制。
