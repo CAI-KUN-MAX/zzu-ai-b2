@@ -1,0 +1,3 @@
+# Optional offline OCR. Text PDF/DOCX and matching work without this file.
+PyMuPDF>=1.24
+rapidocr-onnxruntime>=1.2.3,<2

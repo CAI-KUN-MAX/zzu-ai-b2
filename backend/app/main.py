@@ -10,6 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers.diagnose import router
 from app.routers.resumes import router as resumes_router
 from app.ingestion import IngestJobs, Store, data_directory
+from app.matching import MatchJobs
+from app.routers.match import router as match_router
 
 
 @asynccontextmanager
@@ -17,9 +19,11 @@ async def lifespan(app):
     app.state.store = Store(data_directory())
     app.state.store.initialize()
     app.state.ingest_jobs = IngestJobs(app.state.store)
+    app.state.match_jobs = MatchJobs(app.state.store)
     try:
         yield
     finally:
+        await app.state.match_jobs.close()
         await app.state.ingest_jobs.close()
 
 # 线上默认关闭 /docs、/redoc、/openapi.json，本地调试时设 ENABLE_DOCS=true
@@ -71,6 +75,7 @@ async def handle_validation_error(request: Request, exc: RequestValidationError)
 
 app.include_router(router)
 app.include_router(resumes_router)
+app.include_router(match_router)
 
 @app.get("/")
 def read_root():

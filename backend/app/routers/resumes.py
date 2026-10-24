@@ -88,6 +88,7 @@ async def get_task(task_id: str, request: Request):
         items.append(dict(resume_id=row["id"], name=row["name"], chars=row["chars"],
                           status=row["status"], preview=row["text"][:60],
                           error=json.loads(row["error"]) if row["error"] else None))
+        items[-1]["low_conf"] = row["low_conf"]
     error = json.loads(task["error"]) if task["error"] else None
     return dict(status=task["status"], stage=task["stage"], progress=task["progress"],
                 error=error["message"] if isinstance(error, dict) else error,
