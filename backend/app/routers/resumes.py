@@ -17,7 +17,16 @@ def fail(status, code, message):
 
 
 @router.post("/api/resumes/batch", status_code=202)
-async def upload_batch(request: Request, files: list[UploadFile] = File(..., alias="files[]")):
+async def upload_batch(
+    request: Request,
+    files: list[UploadFile] = File(
+        ...,
+        alias="files[]",
+        # Explicit binary format keeps Swagger's file picker compatible with
+        # Pydantic versions that emit only contentMediaType for UploadFile.
+        json_schema_extra={"items": {"type": "string", "format": "binary"}},
+    ),
+):
     paths = []
     uploads = []
     try:

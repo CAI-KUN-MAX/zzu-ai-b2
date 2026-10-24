@@ -186,6 +186,16 @@ class IngestApiTests(unittest.TestCase):
 
 
 class RecoveryAndCleaningTests(unittest.TestCase):
+    def test_upload_schema_uses_binary_file_picker(self):
+        schema = app.openapi()
+        body = schema["paths"]["/api/resumes/batch"]["post"]["requestBody"]
+        reference = body["content"]["multipart/form-data"]["schema"]["$ref"]
+        fields = schema["components"]["schemas"][reference.rsplit("/", 1)[-1]]
+        upload = fields["properties"]["files[]"]
+        self.assertEqual(upload["type"], "array")
+        self.assertEqual(upload["items"]["format"], "binary")
+        self.assertIn("files[]", fields["required"])
+
     def test_recovery_and_persistence(self):
         with tempfile.TemporaryDirectory() as directory:
             store = Store(Path(directory))
