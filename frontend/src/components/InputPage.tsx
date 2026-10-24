@@ -129,7 +129,8 @@ export function InputPage({
           这份简历，配得上这个岗位吗？
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-ink-500">
-          把简历和岗位 JD 贴进来，30 秒拿到匹配分、维度拆解、亮点与待补齐项。所有分析只针对本次文本，不保存。
+          把简历和岗位 JD 贴进来，获取匹配分、维度拆解、亮点与待补齐项。本应用不持久化输入；
+          提交后，文本会发送至智谱 GLM 大模型服务完成分析。
         </p>
       </div>
 
@@ -197,7 +198,8 @@ export function InputPage({
       <p className="mt-10 flex items-start gap-2 text-[11px] leading-relaxed text-ink-500">
         <InfoIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         <span>
-          结果由 AI 生成，仅作为简历优化的参考方向，不代表任何企业的真实录用判断。请勿上传他人隐私信息。
+          结果由 AI 生成，仅作为简历优化参考，不代表任何企业的真实录用判断。请仅提交本人或已获得授权处理的内容，
+          避免填写身份证号、住址等与诊断无关的敏感信息。
         </span>
       </p>
     </main>

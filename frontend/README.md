@@ -16,7 +16,7 @@ cp .env.example .env   # 仓库不提交 .env，首次运行需要复制一份�
 npm run dev            # http://localhost:5173
 ```
 
-默认 **mock 模式**，不依赖后端即可跑通完整交互。
+默认请求真实后端；需要离线调试界面时，显式设置 `VITE_USE_MOCK=true`。
 
 ```bash
 npm run build      # 类型检查 + 生产构建
@@ -30,7 +30,7 @@ npm run typecheck  # 只做类型检查
 | 变量 | 说明 |
 | --- | --- |
 | `VITE_USE_MOCK` | 只有写 `true` 才用本地 mock（`src/mock/response.json`）离线跑 UI；不写或写其他值都请求真实后端 |
-| `VITE_API_BASE` | 后端地址，默认 `http://8.163.105.39:8000`；留空则走 vite 代理（同源 `/api`） |
+| `VITE_API_BASE` | 默认留空并走同源 `/api`：本地由 Vite 代理，线上由 Nginx HTTPS 代理；生产环境禁止直连 `:8000` |
 | `VITE_API_TIMEOUT` | 单次请求超时（ms），默认 80000。需大于后端总超时 75s；实测 GLM-4 单次 15–50s |
 
 默认就请求真实后端；只想离线调 UI 时才把 `VITE_USE_MOCK` 设为 `true`：
@@ -93,7 +93,7 @@ FastAPI 默认 `{"detail": "..."}`、422 校验 `{"detail": [{"loc","msg"}]}`、
 
 ## 已处理的前端健壮性
 
-- 请求超时（AbortController，默认 45s），避免大模型链路卡死无反馈
+- 请求超时（AbortController，默认 80s），避免大模型链路卡死无反馈
 - 5xx 统一提示「AI 正在思考中，请稍后重试」，并给一键重试，输入内容不丢
 - 请求期间进入分阶段 Loading（解析简历 → 匹配要求 → 深度诊断），带已等待秒数
 - 响应非 JSON / 空 body / 字段缺失时给出可读提示，不白屏

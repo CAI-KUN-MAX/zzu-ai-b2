@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DiagnoseError, diagnose } from "./api/diagnose";
 import { Header } from "./components/Header";
 import { InputPage } from "./components/InputPage";
@@ -15,6 +15,8 @@ export default function App() {
   const [jd, setJd] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // state 更新前仍可能收到第二次点击；用同步 ref 锁住请求，避免重复调用付费模型。
+  const requestInFlight = useRef(false);
 
   // 切换页面时回到顶部
   useEffect(() => {
@@ -22,6 +24,8 @@ export default function App() {
   }, [view.name, loading]);
 
   async function runDiagnose() {
+    if (requestInFlight.current) return;
+    requestInFlight.current = true;
     setLoading(true);
     setError(null);
     try {
@@ -33,6 +37,7 @@ export default function App() {
     } catch (err) {
       setError(err instanceof DiagnoseError ? err.message : "诊断失败，请稍后重试");
     } finally {
+      requestInFlight.current = false;
       setLoading(false);
     }
   }
