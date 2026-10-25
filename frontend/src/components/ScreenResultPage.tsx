@@ -1,14 +1,16 @@
 import { useMemo, useState } from "react";
-import type { IngestTask, MatchItem } from "../types";
+import type { IngestTask, MatchItem, ResumeStatus } from "../types";
 import { exportUrl, getMatchTask } from "../api/match";
 import { useTask } from "../lib/useTask";
 import { levelTone, scoreTone } from "../lib/theme";
 import { DimensionBars } from "./report/DimensionBars";
 import { Highlights } from "./report/Highlights";
 import { Gaps } from "./report/Gaps";
+import { InterviewPage } from "./InterviewPage";
 import {
   AlertIcon,
   ArrowLeftIcon,
+  ArrowRightIcon,
   ChevronDownIcon,
   DownloadIcon,
   InfoIcon,
@@ -86,9 +88,48 @@ function ExpandedReport({ item }: { item: MatchItem }) {
   );
 }
 
+/** 展开详情底部的面试入口：只针对这一份简历，不向整批发起 */
+function InterviewEntry({
+  item,
+  resumeStatus,
+  onStart,
+}: {
+  item: MatchItem;
+  resumeStatus: ResumeStatus;
+  onStart: () => void;
+}) {
+  // 准入依据是简历全文可用：解析失败的简历没有文本，无法出题
+  const available = item.subscores.length > 0 || !item.degraded || item.score > 0;
+
+  return (
+    <div className="mt-6 flex flex-col gap-3 border-t border-surface-line pt-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
+        <p className="text-[12px] font-medium text-ink-700">模拟面试</p>
+        <p className="mt-1 text-[11px] leading-relaxed text-ink-500">
+          {available
+            ? `针对「${item.name}」和当前岗位练三轮，答题后立即给反馈`
+            : "这份简历没有可用的文本，无法进入面试"}
+          {available && resumeStatus === "need_review" ? "（识别质量偏低，建议先核对原文）" : ""}
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={onStart}
+        disabled={!available}
+        className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-ink-300 disabled:shadow-none"
+      >
+        开始模拟面试
+        <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+      </button>
+    </div>
+  );
+}
+
 export function ScreenResultPage({ taskId, jdText, ingest, onReset }: ScreenResultPageProps) {
   const { data: task, error, polling } = useTask(getMatchTask, taskId);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  // 面试作为覆盖层打开，本页不卸载，展开状态与已生成的报告都保留
+  const [interviewItem, setInterviewItem] = useState<MatchItem | null>(null);
 
   const failedCount = ingest.items.filter((item) => item.status === "failed").length;
 
@@ -320,6 +361,14 @@ export function ScreenResultPage({ taskId, jdText, ingest, onReset }: ScreenResu
                     // 表格在窄屏下横向滚动，详情固定在左侧且不超过可视宽度，避免右侧分数被截断
                     <div className="sticky left-0 max-w-[calc(100vw-3rem)] border-t border-surface-line bg-surface-soft/40 px-5 py-6">
                       <ExpandedReport item={item} />
+                      <InterviewEntry
+                        item={item}
+                        resumeStatus={
+                          ingest.items.find((it) => it.resume_id === item.resume_id)?.status ??
+                          "ready"
+                        }
+                        onStart={() => setInterviewItem(item)}
+                      />
                     </div>
                   ) : null}
                 </div>
@@ -337,6 +386,18 @@ export function ScreenResultPage({ taskId, jdText, ingest, onReset }: ScreenResu
           分析。AI 判断仅供参考，请结合人工复核。
         </span>
       </p>
+
+      {interviewItem ? (
+        <InterviewPage
+          resumeId={interviewItem.resume_id}
+          resumeName={interviewItem.name}
+          resumeStatus={
+            ingest.items.find((it) => it.resume_id === interviewItem.resume_id)?.status ?? "ready"
+          }
+          jdText={jdText}
+          onExit={() => setInterviewItem(null)}
+        />
+      ) : null}
     </main>
   );
 }
