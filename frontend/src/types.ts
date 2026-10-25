@@ -184,3 +184,45 @@ export interface MatchTask {
   error_code?: string | null;
   items: MatchItem[];
 }
+
+/* ------------------------------------------------------------------ *
+ * 单人模拟面试（最多三轮）—— 契约见 2026-10-25 任务单
+ * ------------------------------------------------------------------ */
+
+export type InterviewStatus = "active" | "completed";
+
+export interface InterviewQuestion {
+  id: string;
+  text: string;
+  /** 这道题考察什么，用于展示标签 */
+  focus: string;
+}
+
+export interface InterviewFeedback {
+  /** 回答中实际体现的优点 */
+  strengths: string[];
+  /** 需要补充的具体内容 */
+  improvements: string[];
+  /** 建议覆盖的要点，不代表候选人已经做过 */
+  reference_points: string[];
+}
+
+/** POST /api/interviews 响应（HTTP 201），round 为当前题号 */
+export interface InterviewSession {
+  interview_id: string;
+  status: InterviewStatus;
+  round: number;
+  max_rounds: number;
+  question: InterviewQuestion | null;
+}
+
+/** POST /api/interviews/{id}/answers 响应（HTTP 200），round 为刚完成的轮次 */
+export interface InterviewAnswerResult {
+  interview_id: string;
+  status: InterviewStatus;
+  round: number;
+  max_rounds: number;
+  feedback: InterviewFeedback;
+  /** 第三轮后为 null */
+  next_question: InterviewQuestion | null;
+}
