@@ -179,6 +179,58 @@ class InterviewTests(unittest.TestCase):
         with app.state.store.connect() as db:
             self.assertEqual(db.execute("SELECT count(*) FROM interviews").fetchone()[0], 1)
 
+    def test_repair_attempt_enables_sampling(self):
+        async def repaired(**kwargs):
+            if len(kwargs["messages"]) == 2:
+                return completion("invalid")
+            return await self.good_completion(**kwargs)
+        self.model.chat.completions.create.side_effect = repaired
+        self.create()
+        first, second = self.model.chat.completions.create.call_args_list
+        self.assertEqual(first.kwargs["extra_body"], {"do_sample": False})
+        self.assertEqual(second.kwargs["extra_body"], {"do_sample": True})
+        self.assertGreater(second.kwargs["temperature"], first.kwargs["temperature"])
+
+    def test_ungrounded_followup_twice_falls_back_to_answer_quote(self):
+        session = self.create()
+        identifier, question_id = session["interview_id"], session["question"]["id"]
+
+        async def drifting(**kwargs):
+            # 反馈合格，但追问两次都转去问与本轮回答无关的话题
+            data = model_output(json.loads(kwargs["messages"][1]["content"]))
+            data["next_question"]["text"] = "你是如何使用Git进行版本控制的？"
+            return completion(data)
+        self.model.chat.completions.create.side_effect = drifting
+        calls = self.model.chat.completions.create.await_count
+        response = self.submit(identifier, question_id)
+        self.assertEqual(response.status_code, 200, response.text)
+        result = response.json()
+        self.assertEqual(self.model.chat.completions.create.await_count, calls + 2)
+        quote = evidence_options(dict(answer=ANSWER.strip()))["a0"]["quote"]
+        self.assertIn(f"你提到“{quote}”", result["next_question"]["text"])
+        # ANSWER 是“我会……”的设想，追问用计划语气，不暗示已经做过
+        self.assertIn("你会如何", result["next_question"]["text"])
+        self.assertEqual(result["feedback"]["improvements"], ["进一步说明异常处理和测试方法。"])
+        self.assertEqual(self.state(identifier)["round"], 2)
+        # 重放返回同一份兜底结果，不再调用模型
+        self.assertEqual(self.submit(identifier, question_id).json(), result)
+        self.assertEqual(self.model.chat.completions.create.await_count, calls + 2)
+        # 兜底追问照常可以回答
+        self.model.chat.completions.create.side_effect = self.good_completion
+        self.assertEqual(self.submit(identifier, result["next_question"]["id"]).status_code, 200)
+
+    def test_invalid_feedback_twice_still_fails_without_advancing(self):
+        session = self.create()
+        identifier, question_id = session["interview_id"], session["question"]["id"]
+
+        async def no_feedback(**kwargs):
+            data = model_output(json.loads(kwargs["messages"][1]["content"]))
+            del data["feedback"]["reference_points"]
+            return completion(data)
+        self.model.chat.completions.create.side_effect = no_feedback
+        self.assert_error(self.submit(identifier, question_id), 502, "INTERVIEW_GENERATION_FAILED")
+        self.assertEqual(self.state(identifier)["round"], 1)
+
     def test_failed_answer_does_not_advance_and_retry_succeeds(self):
         session = self.create()
         identifier, question_id = session["interview_id"], session["question"]["id"]

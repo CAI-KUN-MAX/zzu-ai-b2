@@ -207,7 +207,8 @@ export function InterviewPage({
 
   return (
     <div ref={scrollRef} className="fixed inset-0 z-30 overflow-y-auto bg-surface-soft">
-      <div className="mx-auto max-w-3xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
+      {/* overflow-wrap 可继承：问题、回答、反馈里的长链接或长英文串在任意位置换行，手机上不撑破卡片 */}
+      <div className="mx-auto max-w-3xl px-4 pb-16 pt-6 [overflow-wrap:anywhere] sm:px-6 sm:pt-10">
         {/* 顶部条 */}
         <div className="flex items-center justify-between gap-3">
           <button
