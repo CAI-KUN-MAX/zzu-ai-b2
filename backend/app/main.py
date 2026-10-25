@@ -12,6 +12,8 @@ from app.routers.resumes import router as resumes_router
 from app.ingestion import IngestJobs, Store, data_directory
 from app.matching import MatchJobs
 from app.routers.match import router as match_router
+from app.interviews import InterviewService
+from app.routers.interviews import router as interviews_router
 
 
 @asynccontextmanager
@@ -20,6 +22,7 @@ async def lifespan(app):
     app.state.store.initialize()
     app.state.ingest_jobs = IngestJobs(app.state.store)
     app.state.match_jobs = MatchJobs(app.state.store)
+    app.state.interviews = InterviewService(app.state.store, app.state.match_jobs.llm_gate)
     try:
         yield
     finally:
@@ -76,6 +79,7 @@ async def handle_validation_error(request: Request, exc: RequestValidationError)
 app.include_router(router)
 app.include_router(resumes_router)
 app.include_router(match_router)
+app.include_router(interviews_router)
 
 @app.get("/")
 def read_root():
