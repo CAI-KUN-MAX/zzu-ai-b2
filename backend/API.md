@@ -1,5 +1,7 @@
 # 后端接口：简历解析与匹配排序
 
+新增三轮模拟面试接口，见本文“模拟面试”章节；既有诊断和筛选契约保持不变。
+
 当前版本仅修改 `backend/`，支持 PDF / DOCX / PNG / JPG 批量解析、离线 OCR、SQLite 持久化、进度轮询、全文读取、确定性匹配、AI 精排、结果缓存和 Excel 导出。原有 `POST /api/diagnose`、错误响应格式及文档开关保持原样。
 
 OCR 依赖独立安装；没有 OCR 引擎或设置 `OCR_PROVIDER=stub` 时，图片和扫描件返回 `OCR_UNAVAILABLE`，文本 PDF / DOCX 与匹配功能仍可用。`stub` 不生成虚构识别文字。
@@ -211,3 +213,115 @@ cd backend; ..\.venv\Scripts\python.exe -m unittest discover -s tests -v; cd ..
 - Nginx 已按接口区分请求体上限与限流（上传 60MB；高成本接口每分钟 10 次；轮询每分钟 240 次），见 `deploy/nginx.conf` 与 `deploy/README.md`。
 - 匹配评分改动：OCR 把英文技能连写（如 `PythonFastAPIMySQL`）时也能命中关键词；关键词列表去掉“岗位职责”“使用”“本科”等非技能词和超过 6 字的中文长句。
 - 当前接口沿用已有无鉴权访问方式，不应向公网提供真实简历库，接入真实数据前需另行实现访问控制。
+
+## 模拟面试
+
+新增接口与前端 `feature/interview` 的请求/响应类型一致；该前端分支不在本次后端分支中修改或合并。没有历史列表、会话恢复查询或面试导出接口。
+
+### 创建会话
+
+`POST /api/interviews` 返回 **201**。请求：
+
+```json
+{"resume_id":"已解析简历ID","jd_text":"至少30字的完整岗位要求"}
+```
+
+响应：
+
+```json
+{
+  "interview_id":"服务器生成的会话ID",
+  "status":"active","round":1,"max_rounds":3,
+  "question":{"id":"服务器生成的问题ID","text":"一道岗位与项目相关的问题","focus":"考察点"}
+}
+```
+
+支持 `ready / need_review` 且全文非空的简历，不要求该简历已获得匹配报告。JD 去除首尾空白后为 30–20000 字。会话保存创建时的简历和 JD 快照，后续不依赖原简历行的内容变化。
+
+### 提交本轮回答
+
+`POST /api/interviews/{interview_id}/answers` 返回 **200**。请求：
+
+```json
+{"question_id":"当前问题ID","answer_text":"至少20字的本轮回答"}
+```
+
+第一、二轮响应：
+
+```json
+{
+  "interview_id":"会话ID","status":"active","round":1,"max_rounds":3,
+  "feedback":{
+    "strengths":["回答实际体现的优点"],
+    "improvements":["可执行的改进建议"],
+    "reference_points":["建议覆盖的知识点，不代表候选人已经做过"]
+  },
+  "next_question":{"id":"下一问题ID","text":"结合本轮回答的追问","focus":"考察点"}
+}
+```
+
+第三轮响应为 `status="completed"`、`round=3`、`next_question=null`。创建响应的 round 是当前题号，回答响应的 round 是刚完成的轮次。回答去除首尾空白后为 20–3000 字。客户端不能传入轮次、问题正文或会话状态；未约定字段会返回 422。
+
+### 状态、失败与重试
+
+- 相同会话、问题 ID 和去除首尾空白后的相同回答，返回已保存的完整响应，不重复调用模型或推进轮次。即使面试已完成，也允许重放已回答问题的原响应。
+- 已回答问题改换答案、问题属于其他会话、乱序提交、完成后提交新问题，返回 409。一个会话同时只允许一个回答生成请求，其他并发提交返回 409。
+- 失败、超时、请求取消或服务中断不写入未完成回答，也不推进轮次；重试仍提交原 question_id。持久化提交之后响应丢失，可通过同题同答重放恢复。
+- 会话有效期为创建成功后 24 小时；过期包括重放请求均返回 410。数据库不会自动物理删除会话，本版没有“24小时自动删除”的承诺。
+- 每次生成连同共享并发队列等待、网络请求与一次结构修复，共用 75 秒预算。面试与匹配共用同一个最多 3 并发的信号量；旧文本诊断端点行为不变，不新增限流逻辑。
+- 服务端保留完整原文，同时提供确定性的原文片段选项，由模型选择内部引用编号。第一题须引用简历或 JD；追问须引用本轮回答，并与选中的回答片段有至少四个连续字符的关联（忽略英文大小写），减少突然转到无关技能的话题。无法绑定本轮回答的优点直接剔除，允许 strengths 为空，不为保留优点编造证据。对以“我会/计划”等描述的回答，额外移除常见已完成成果措辞，并将追问中的“你是如何/你使用的”调整为计划语气。第三轮由服务端强制结束，丢弃模型额外生成的下一题。这些内部校验和有限措辞规则不改变前端公开类型，也不能替代人工审核模型语义与内容质量。
+- 面试始终调用真实模型；`MOCK_MODE=true` 不会为面试生成虚构反馈。自动测试通过替换模型客户端验证异常分支，前端本地 mock 独立控制。
+- 格式示例中的占位优点和建议会被过滤，空的参考要点会要求模型修复；仅元数据 focus 缺少有效描述时使用“岗位相关提问”标签，不编造问题或反馈。
+- 不截断简历、JD 或历史回答。含系统提示、问题和回答历史的生成上下文总量超过 20000 字符时返回 413，请精简材料后新建会话。参考答案是回答方向，不是候选人事实，也不是评分或录用概率。
+
+错误体保持 `{"error":{"code":"...","message":"中文提示","request_id":"..."}}`：
+
+| HTTP | code | 场景 |
+|---|---|---|
+| 400 | INVALID_INPUT | 空文本或低于字数下限 |
+| 404 | RESUME_NOT_FOUND / INTERVIEW_NOT_FOUND | 简历或会话不存在 |
+| 409 | RESUME_NOT_READY / INTERVIEW_CONFLICT | 简历不可用、问题冲突或正在处理 |
+| 410 | INTERVIEW_EXPIRED | 会话超过 24 小时 |
+| 413 | TEXT_TOO_LONG | 字段或完整上下文超过限制 |
+| 422 | VALIDATION_ERROR | 请求字段类型、结构错误或多传字段 |
+| 502 | INTERVIEW_GENERATION_FAILED | 两次输出仍未通过校验 |
+| 503 | LLM_UNAVAILABLE | 未配置模型或模型服务不可用 |
+| 504 | LLM_TIMEOUT | 生成或并发排队超时 |
+| 500 | INTERVIEW_FAILED | 意外内部故障，不向客户端泄露原始异常 |
+
+### 数据库与环境
+
+启动时自动 `CREATE TABLE IF NOT EXISTS interviews`，只新增这一张表，不修改既有 resumes、tasks、llm_cache 内容。保存会话 ID、简历 ID、简历/JD 快照、轮次状态及已完成问答响应、创建和过期时间。无需清空现有数据库。
+
+继续要求单 worker，不能让多个进程共用同一数据库并同时服务面试请求。进程内的忙碌标记在请求结束时释放，重启后自然清空；持久化会话不保存永久“处理中”标记。重启不会清空完成的问答。复用原有 `LLM_API_KEY` 和服务地址；可选 `INTERVIEW_MODEL` 独立指定面试模型，默认 `glm-4-flash`，不改变原诊断或匹配模型。无新增必填环境变量；75 秒、三轮、24 小时为本版固定产品参数。
+
+### 本地验证与联调样本
+
+虚构材料和三轮回答见 `backend/examples/interview_request.json`。本地服务启动后，先通过上传接口取得真实 resume_id，再依次调用创建和回答接口；问题 ID 必须从上一次响应复制，不能使用样例占位 ID。
+
+在仓库根目录运行真实模型验证：
+
+```powershell
+.venv\Scripts\python.exe backend/scripts/smoke_interviews.py --output interview-result.json
+```
+
+脚本使用临时数据库，依次上传虚构简历、创建面试、完成三轮，并验证同题同答重放、服务对象重建后持久化、结束后拒绝继续答题。会调用现有模型服务，记录的输出仅含虚构内容，不修改线上服务或实际简历库。结果用于人工检查题目是否贴合岗位、追问是否关联回答、反馈是否把设想当作实际成果。
+
+### 合并后部署注意
+
+本次不直接部署。现有 Nginx 的 `/api/` 兜底规则是查询请求限流和 60 秒超时，不能原样承接最长 75 秒的面试生成。发布负责人应在 HTTPS server 中，为两个面试 POST 路径加入以下规则（沿用已有 llm_limit 区域），并先执行 `nginx -t`：
+
+```nginx
+location ~ ^/api/interviews(?:/[^/]+/answers)?$ {
+    limit_req zone=llm_limit burst=3 nodelay;
+    client_max_body_size 256k;
+    proxy_pass http://127.0.0.1:8000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_read_timeout 85s;
+}
+```
+
+前端面试请求超时应为 90 秒，先合并双方分支并完成真实浏览器三轮联调，再决定发布。现有线上版本不包含这两个新接口。
