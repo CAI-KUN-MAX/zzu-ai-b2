@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { IngestTask, Job, ResumeStatus } from "../types";
 import { STATUS_LABEL, getIngestTask, uploadResumes } from "../api/resumes";
 import { createJobMatch, listJobs } from "../api/jobs";
@@ -48,6 +48,11 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
   const resume = ingest?.items[0] ?? null;
   // 只有一份简历：拿到解析结果（非 failed）就可以发起匹配
   const parsed = !!resume && resume.status !== "failed";
+  // 只有后端明确返回失败才算解析失败；轮询网络错误或等待超时不能证明解析失败
+  const resumeFailed = resume?.status === "failed" || ingest?.status === "failed";
+  const pollUnavailable = !!resumeTaskId && !!pollError && !resumeFailed;
+  // setState 是异步的，同一时刻连点两次都会读到旧的 submitting；用 ref 做同步闸门，只发一次请求
+  const inFlight = useRef(false);
 
   /* 拉岗位目录 */
   useEffect(() => {
@@ -105,6 +110,14 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
     }
   }
 
+  /** 轮询失败（网络异常或等待超时）时，用同一个解析任务重新轮询，不必重新上传 */
+  function retryPoll() {
+    const taskId = resumeTaskId;
+    if (!taskId) return;
+    setResumeTaskId(null);
+    window.setTimeout(() => setResumeTaskId(taskId), 0);
+  }
+
   function toggleJob(jobId: string) {
     setSelected((prev) =>
       prev.includes(jobId) ? prev.filter((id) => id !== jobId) : [...prev, jobId]
@@ -112,7 +125,8 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
   }
 
   async function handleSubmit() {
-    if (!resume || !canSubmit) return;
+    if (!resume || !canSubmit || inFlight.current) return;
+    inFlight.current = true;
 
     setSubmitting(true);
     setError(null);
@@ -122,6 +136,7 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
     } catch (err) {
       setError(err instanceof Error ? err.message : "创建匹配任务失败，请重试");
     } finally {
+      inFlight.current = false;
       setSubmitting(false);
     }
   }
@@ -205,7 +220,16 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
           {pollError ? (
             <p className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-[12px] text-rose-700">
               <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              <span>{pollError}</span>
+              <span className="flex-1">{pollError}</span>
+              {pollUnavailable ? (
+                <button
+                  type="button"
+                  onClick={retryPoll}
+                  className="shrink-0 rounded-md bg-rose-600 px-2.5 py-1 text-[11px] font-medium text-white hover:bg-rose-700"
+                >
+                  重新获取
+                </button>
+              ) : null}
             </p>
           ) : null}
         </section>
@@ -306,11 +330,15 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
         <p className="text-[11px] leading-relaxed text-ink-500">
           {!files.length
             ? "先上传一份简历"
-            : !parsed
-              ? "简历解析中，完成后即可发起匹配"
-              : selected.length === 0
-                ? "请至少勾选 1 个候选岗位"
-                : `已选 ${selected.length} 个岗位，将逐岗给出匹配分与推荐理由`}
+            : resumeFailed
+              ? "简历解析失败，请换一份简历重新上传"
+              : pollUnavailable
+                ? "暂时拿不到解析结果（网络异常或等待超时），可点「重新获取」或稍后再看"
+                : !parsed
+                ? "简历解析中，完成后即可发起匹配"
+                : selected.length === 0
+                  ? "请至少勾选 1 个候选岗位"
+                  : `已选 ${selected.length} 个岗位，将逐岗给出匹配分与推荐理由`}
         </p>
 
         <button
