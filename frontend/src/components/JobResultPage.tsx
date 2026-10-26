@@ -196,7 +196,8 @@ function JobDetail({
               hint="技能关键词 55% + 文本相似度 30% + 学历 15%"
               className=""
             />
-            {item.report ? (
+            {/* 只有真实 AI 成功（analysis_status=succeeded）时总分才按加权公式计算；模拟报告不参与加权 */}
+            {item.report && item.analysis_status === "succeeded" ? (
               <p className="num mt-2 text-[11px] text-ink-500">
                 总分 {item.score} = 基础评分 {item.stage1_score} × 35% + AI 诊断 {item.report.overall_score} × 65%（四舍五入）
               </p>
@@ -436,7 +437,7 @@ export function JobResultPage({
         <InfoIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         <span>
           所有岗位先做基础评分（技能关键词 55%、文本相似度 30%、学历 15%）；排名靠前的岗位（默认前 8 个）再做 AI
-          深度分析，完成后总分 = 基础分 × 35% + AI 诊断分 × 65%。标「基础评分」的岗位未做 AI 分析，总分即基础分。
+          深度分析，成功后总分 = 基础分 × 35% + AI 诊断分 × 65%。标「基础评分」的岗位未获得有效 AI 报告（未入选、分析失败或超时等），总分即基础分。
           AI 判断仅供参考，请结合人工判断。
         </span>
       </p>
