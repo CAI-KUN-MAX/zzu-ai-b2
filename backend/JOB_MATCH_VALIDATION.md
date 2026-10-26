@@ -1,6 +1,6 @@
 # 单简历多岗位匹配验证记录
 
-日期：2026-10-26。代码和接口回归已通过；40 个当前可投岗位的数据结构、类别和学历配额验收已通过，详见 [catalogue/VALIDATION.md](catalogue/VALIDATION.md)。本记录不表示已部署。
+日期：2026-10-26。此前的代码和接口回归记录如下；后续质量复核撤回了“40 岗数据验收通过”的结论。当前岗位集仅 5 条 open、45 条 unverified，详见 [catalogue/VALIDATION.md](catalogue/VALIDATION.md)。本记录不表示已部署。
 
 ## 已执行
 
@@ -11,22 +11,21 @@ $env:ENABLE_DOCS='false'
 ..\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-本轮结果：**105 项通过，4 项真实离线 OCR 测试因未设置 `TEST_REAL_OCR=1` 而跳过**。其余范围包括16项新增专项测试，以及旧简历解析、单 JD 多简历排序、Excel 导出、诊断和三轮面试回归。测试使用临时数据库与虚构简历，不写入实际简历库。
+质量复核后重跑结果：**107 项测试通过，4 项真实离线 OCR 测试因未设置 `TEST_REAL_OCR=1` 而跳过**。新增结构化学历评分和不完整 open JD 拒绝用例；其余范围包括旧简历解析、单 JD 多简历排序、Excel 导出、诊断和三轮面试回归。测试使用临时数据库与虚构简历，不写入实际简历库。
 
 新增专项覆盖：岗位查询及分页、整批校验原子性、任务类型隔离、相关岗位优先和同分稳定、去重、并发重复请求只建一个任务、快照变化产生新任务、原简历 ID 保留、AI 重排、单项失败不影响其他真实结果、Mock 降级、持久缓存、相同输入模型调用合并、单项超时、上游 504、整批超时保留已完成结果、基础评分超时、输入长短限制、前 8 岗限制、失败/重启后重试及独立示例结构校验。
 
 端到端测试实际经过 DOCX 上传解析、岗位排序、上下文获取、原诊断接口、原面试服务创建与三轮回答；只替换模型边界返回虚构测试结果，面试服务本身没有被替换。核对面试持久化的原简历全文和 JD 与匹配快照一致。
 
-仓库根目录执行以下检查均通过：
+仓库根目录编译检查和 `git diff --check` 通过；岗位脚本普通模式结构通过但数量未达标：
 
 ```powershell
 .\.venv\Scripts\python.exe -m compileall -q backend/app backend/scripts backend/tests
 git diff --check
-.\.venv\Scripts\python.exe backend/scripts/make_job_match_examples.py
-.\.venv\Scripts\python.exe backend/scripts/check_job_catalogue.py --as-of 2026-10-26 --require-target
+.\.venv\Scripts\python.exe backend/scripts/check_job_catalogue.py --as-of 2026-10-26
 ```
 
-严格岗位验收输出 structural_validation=passed、records=50、open=40、unverified=10；十类各4条、硕士及以上13条、本科27条，target_met=true，退出码为0。
+此前严格岗位验收输出 records=50、open=40、target_met=true，但脚本没有检查完整 JD 和来源一致性，该结果已作废。质量复核后的结构检查输出 records=50、open=5、unverified=45、target_met=false；严格模式因配额缺口返回非零，符合预期。
 
 BOSS 审计：22,167 条记录，15,413 个唯一岗位 ID；714 条应届且有 JD 的记录，去重后为 **506 个岗位**，其中要求硕士/博士的去重后为 **318 个岗位**。全部岗位记录缺少发布日期，未导入正式目录，也没有复制原始个人信息或访问标识。
 
@@ -41,5 +40,5 @@ BOSS 审计：22,167 条记录，15,413 个唯一岗位 ID；714 条应届且有
 - 未修改前端页面，未运行前端构建；本轮交付 Pydantic/OpenAPI 契约、API 文档和独立 JSON 示例。
 - 仓库无独立后端 linter/formatter 配置，环境没有 ruff/flake8；没有新增依赖，静态检查采用 Python 编译检查及 diff 空白检查。
 - 当前 Windows 环境没有 Nginx，未运行 `nginx -t`，未部署或重载服务器；部署配置只增加新任务入口的高成本限流。
-- 当前目录有40条已核验 open 岗位，默认岗位查询和真实静态岗位排序可直接使用；岗位到达截止日期后仍需滚动复核状态。
+- 当前目录仅 5 条 open 岗位，默认岗位查询和真实静态岗位排序仅能使用这 5 条；40 岗、十类与学历配额尚未达标。岗位到达截止日期后仍需滚动复核状态。
 - 未接入 Embedding。现有算法为关键词、字符 2-gram 余弦相似度、学历规则及可选 LLM 精排，没有语义向量匹配。

@@ -10,7 +10,7 @@ from app.routers.diagnose import MAX_TOTAL_CHARS, MIN_CHARS, SYSTEM_PROMPT
 from app.routers.resumes import fail
 
 logger = logging.getLogger(__name__)
-SCORING_VERSION = "job-ranking-v1"
+SCORING_VERSION = "job-ranking-v2"
 ITEM_TIMEOUT = 90
 TOTAL_TIMEOUT = 165
 
@@ -23,7 +23,8 @@ def base_scores(resume, jobs):
     items = []
     for job in jobs:
         jd = job["jd_text"]
-        item = matching.score_resume(jd, resume, matching.jd_terms(jd), matching.profile2gram(jd))
+        item = matching.score_resume(jd, resume, matching.jd_terms(jd), matching.profile2gram(jd),
+                                     required_education=job["education"])
         item.pop("resume_id")
         item.pop("name")
         item.update(job_id=job["job_id"], title=job["title"], analysis_status="pending", degraded_reason=None)

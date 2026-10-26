@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-26.v1",
+  "version": "2026-10-26.v2",
   "items": [
     {
       "job_id": "bii-2027-software",
@@ -245,8 +245,8 @@
       "publication_type": "repost",
       "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKuLayynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
       "verified_at": "2026-10-26T16:30:00+08:00",
-      "application_status": "open",
-      "verification_note": "高校就业网明示发布时间、岗位方向、专业要求、简历投递邮箱和有效期至2027-06-29。学历字段按页面最低学历硕士保守记录。"
+      "application_status": "unverified",
+      "verification_note": "2026-10-26 质量复核：来源给出方向和专业，但目录未保存可核对的具体岗位职责。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业网明示发布时间、岗位方向、专业要求、简历投递邮箱和有效期至2027-06-29。学历字段按页面最低学历硕士保守记录。"
     },
     {
       "job_id": "cscec4-2027-engineering",
@@ -258,14 +258,14 @@
       "education_requirement": "2027届本科及以上学历",
       "majors": ["土木工程", "岩土工程", "工程力学", "结构工程", "给排水科学与工程", "防灾减灾工程"],
       "graduation_year": "2027",
-      "jd_text": "面向工程技术岗位开展项目施工与技术管理。要求2027届本科及以上学历应届毕业生，专业包括土木工程、岩土工程、工程力学、建筑与土木工程、结构工程、给排水、防灾减灾等；身体健康、品行端正、专业课程无挂科，具备沟通执行、诚信责任和团队协作能力，并能服从公司安排。",
+      "jd_text": "岗位职责：面向工程技术岗位开展项目施工与技术管理。任职要求：2027届本科及以上学历应届毕业生，专业包括土木工程、岩土工程、工程力学、建筑与土木工程、结构工程、给排水、防灾减灾等；身体健康、品行端正、专业课程无挂科，具备沟通执行、诚信责任和团队协作能力，并能服从公司安排。",
       "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-KuLaus3bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
       "published_at": "2026-09-08",
       "publication_type": "repost",
       "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-KuLaus3bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
       "verified_at": "2026-10-26T16:30:00+08:00",
-      "application_status": "open",
-      "verification_note": "四川大学就业网明示发布时间、完整条件与有效期至2027-05-30，核验日仍有效。"
+      "application_status": "unverified",
+      "verification_note": "2026-10-26 质量复核：来源要求通过企业微信公众号投递，目录 application_url 却仅指向来源页，未核验实际投递入口；暂停计入可投候选。四川大学就业网明示发布时间、完整条件与有效期至2027-05-30。"
     },
     {
       "job_id": "anycubic-2027-material-rd",
@@ -295,15 +295,15 @@
       "education": "硕士",
       "education_requirement": "硕士及以上学历",
       "majors": ["化学", "化工", "高分子材料", "材料"],
-      "graduation_year": "2027届校招",
-      "jd_text": "岗位职责：开展光学膜技术调研与产品分析、有机材料工程条件开发和产品不良分析，运用液晶化学或有机化学知识进行新品定制和材料检讨，并参与光学膜产品整合设计。要求化学、化工、高分子材料或材料相关专业硕士及以上学历，具备色谱、光谱、核磁等材料分析仪器经验或合成、配方开发背景者优先。",
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：开展光学膜技术调研与产品分析、有机材料工程条件开发和产品不良分析，运用液晶化学或有机化学知识进行新品定制和材料检讨，并参与光学膜产品整合设计。任职要求：化学、化工、高分子材料或材料相关专业硕士及以上学历，具备色谱、光谱、核磁等材料分析仪器经验或合成、配方开发背景者优先。",
       "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y96KuLa2yWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
       "published_at": "2026-09-01",
       "publication_type": "repost",
       "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y96KuLa2yWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
       "verified_at": "2026-10-26T16:30:00+08:00",
-      "application_status": "open",
-      "verification_note": "高校就业网明示发布时间、职责、学历专业、邮箱投递方式及有效期至2027-01-29。"
+      "application_status": "unverified",
+      "verification_note": "2026-10-26 质量复核：来源提供邮箱投递，但目录 application_url 仅指向来源页，未核验可用的直接投递链接；来源也未限定毕业届别，暂停计入可投候选。高校就业网明示发布时间、职责、学历专业及有效期至2027-01-29。"
     },
     {
       "job_id": "tianjian-sichuan-2027-audit",
@@ -321,8 +321,8 @@
       "publication_type": "repost",
       "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKzrbWynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
       "verified_at": "2026-10-26T16:30:00+08:00",
-      "application_status": "open",
-      "verification_note": "四川大学就业网明示发布时间、任职要求、招聘流程及有效期至2027-04-29。"
+      "application_status": "unverified",
+      "verification_note": "2026-10-26 质量复核：来源未列出具体岗位职责，目录仅有概括性描述。 暂停计入可投候选；需修复并重核来源后再开放。 四川大学就业网明示发布时间、任职要求、招聘流程及有效期至2027-04-29。"
     },
     {
       "job_id": "zhifei-2027-legal",
@@ -359,8 +359,8 @@
       "publication_type": "repost",
       "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKlLayypzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
       "verified_at": "2026-10-26T16:30:00+08:00",
-      "application_status": "open",
-      "verification_note": "四川大学就业网明示发布时间、完整职责、专业范围和有效期至2027-06-29；学历按岗位字段保守记录。"
+      "application_status": "unverified",
+      "verification_note": "2026-10-26 质量复核：目录职责描述需与来源独立岗位内容逐项复核。 暂停计入可投候选；需修复并重核来源后再开放。 四川大学就业网明示发布时间、完整职责、专业范围和有效期至2027-06-29；学历按岗位字段保守记录。"
     },
     {
       "job_id": "tbea-international-2027-market-assistant",
@@ -378,8 +378,8 @@
       "publication_type": "repost",
       "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtrh5eN6K0NS6yGHRp7ugzc-GnZ2skMx9ZMN4gtKLipCwxKF0lZC5sq-0gqJv",
       "verified_at": "2026-10-26T16:30:00+08:00",
-      "application_status": "open",
-      "verification_note": "高校就业网明示发布时间、岗位职责、2027届及语言专业要求，有效期至2027-10-11。"
+      "application_status": "unverified",
+      "verification_note": "2026-10-26 质量复核：目录 application_url 仅指向来源页，尚未核验直接投递入口；暂停计入可投候选。高校就业网明示发布时间、岗位职责、2027届及语言专业要求，有效期至2027-10-11。"
     },
     {
       "job_id": "beisen-2027-ux",
@@ -422,8 +422,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKk7bWsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-08-30，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-08-30，核验日仍有效。"
   },
   {
     "job_id": "cloudcad-2027-algorithm",
@@ -447,8 +447,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKz7bOsobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-10-07，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-10-07，核验日仍有效。"
   },
   {
     "job_id": "liugong-2027-mechanical",
@@ -472,8 +472,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y96KuLbWsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-06-29，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-06-29，核验日仍有效。"
   },
   {
     "job_id": "senci-2027-rd",
@@ -497,8 +497,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y96K0dS2ynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2026-12-01，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2026-12-01，核验日仍有效。"
   },
   {
     "job_id": "wondfo-2027-structure",
@@ -522,8 +522,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZmKk7ayspzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-05-30，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-05-30，核验日仍有效。"
   },
   {
     "job_id": "cscec5-2027-civil",
@@ -547,8 +547,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y96KutSuspzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-01-30，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-01-30，核验日仍有效。"
   },
   {
     "job_id": "cscec4dev-2027-site",
@@ -572,8 +572,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9yKlLbSsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-06-29，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-06-29，核验日仍有效。"
   },
   {
     "job_id": "zhengyu-2027-project",
@@ -597,8 +597,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y92K0NSmyobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-07-30，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-07-30，核验日仍有效。"
   },
   {
     "job_id": "bright-2027-material",
@@ -623,8 +623,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKzra-ynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-03-30，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-03-30，核验日仍有效。"
   },
   {
     "job_id": "jiangfan-2027-binder",
@@ -648,8 +648,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZmK0dS2smHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-06-30，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-06-30，核验日仍有效。"
   },
   {
     "job_id": "mairuidi-2027-pharmacology",
@@ -660,21 +660,21 @@
     ],
     "category": "生物医药",
     "education": "硕士",
-    "education_requirement": "2027届硕士及以上学历",
+    "education_requirement": "硕士及以上学历",
     "majors": [
       "药学",
       "药理学",
       "生物学"
     ],
-    "graduation_year": "2027",
+    "graduation_year": "来源未限定毕业届别",
       "jd_text": "开展核药细胞和动物药理试验，完成数据分析、原始记录与研究报告撰写。",
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5aKu9S6snbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-09-29",
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5aKu9S6snbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-09-28，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-09-28，核验日仍有效。"
   },
   {
     "job_id": "yuandong-2027-clinical",
@@ -697,8 +697,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKzra6yWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-08-31，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-08-31，核验日仍有效。"
   },
   {
     "job_id": "cray-2027-toxicology",
@@ -709,21 +709,21 @@
     ],
     "category": "生物医药",
     "education": "本科",
-    "education_requirement": "2027届本科及以上学历",
+    "education_requirement": "岗位字段为本科；职位要求写专科及以上，来源未限定毕业届别",
     "majors": [
       "动物医学",
       "药学",
       "生物技术"
     ],
-    "graduation_year": "2027",
+    "graduation_year": "来源未限定毕业届别",
       "jd_text": "按GLP原则开展药代和毒理动物试验，完成实验记录、数据整理和样本处理。",
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZmKutSms4bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-10-14",
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZmKutSms4bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-01-30，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-01-30，核验日仍有效。"
   },
   {
     "job_id": "baida-2027-info",
@@ -734,21 +734,21 @@
     ],
     "category": "生物医药",
     "education": "硕士",
-    "education_requirement": "2027届硕士及以上学历",
+    "education_requirement": "硕士及以上学历",
     "majors": [
       "药理学",
       "分子生物学",
       "临床医学"
     ],
-    "graduation_year": "2027",
+    "graduation_year": "来源未限定毕业届别",
       "jd_text": "负责新药立项、专利和研发信息检索分析，使用专业数据库形成调研结论。",
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKzrayyWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-10-09",
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKzrayyWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-05-30，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-05-30，核验日仍有效。"
   },
   {
     "job_id": "travelone-2027-accounting",
@@ -772,8 +772,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKzrbOypzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2026-12-31，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2026-12-31，核验日仍有效。"
   },
   {
     "job_id": "cscec3-2027-finance",
@@ -798,8 +798,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/jobfaircorporationinfo.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh6pt6K0NSyyGHRp7ugzc-GnZ2skMx9ZMN4gtKLipCwxKF0lZC5sq-0gqJv",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-08-26，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-08-26，核验日仍有效。"
   },
   {
     "job_id": "cn15-2027-accounting",
@@ -822,8 +822,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKlLa2yWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-06-29，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-06-29，核验日仍有效。"
   },
   {
     "job_id": "cscec4-2027-legal",
@@ -846,8 +846,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-KuLayypzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-05-30，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-05-30，核验日仍有效。"
   },
   {
     "job_id": "satellite-2027-legal",
@@ -870,8 +870,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y92Ku9Sqsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-06-30，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-06-30，核验日仍有效。"
   },
   {
     "job_id": "cscec3-2027-admin",
@@ -896,8 +896,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/jobfaircorporationinfo.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh6pt6K0NSyyGHRp7ugzc-GnZ2skMx9ZMN4gtKLipCwxKF0lZC5sq-0gqJv",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-08-26，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-08-26，核验日仍有效。"
   },
   {
     "job_id": "crbc-2027-translator",
@@ -921,33 +921,31 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKu9TSsobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2026-12-31，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2026-12-31，核验日仍有效。"
   },
   {
     "job_id": "cscec4dev-2027-overseas",
-    "title": "海外业务岗",
+    "title": "现场工程师（2027届）",
     "company": "中建四局建设发展有限公司",
     "cities": [
-      "海外"
+      "厦门"
     ],
-    "category": "外语传播",
+    "category": "土木建筑",
     "education": "本科",
     "education_requirement": "2027届本科及以上学历",
     "majors": [
-      "英语",
-      "阿拉伯语",
-      "国际贸易"
+      "工程相关专业"
     ],
     "graduation_year": "2027",
-      "jd_text": "支持海外项目市场开发、商务沟通与外语资料处理，并配合项目履约管理。",
+    "jd_text": "协助项目经理准备工程开工、审定图纸及施工方案，编制进度计划，审核进场材料并监督现场质量与安全。",
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9yKlLbSsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-08-24",
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9yKlLbSsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-06-29，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：来源实际职位为现场工程师，海外地区及外语专业属于公司总体招聘说明，并非独立驻外岗位。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-06-29，核验日仍有效。"
   },
   {
     "job_id": "zhangyi-2027-ux",
@@ -971,8 +969,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y92KutTOs3bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-07-30，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-07-30，核验日仍有效。"
   },
   {
     "job_id": "haiyi-2027-ui",
@@ -996,23 +994,26 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y96KubbWs4bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-05-30，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-05-30，核验日仍有效。"
   },
   {
     "job_id": "saic-2027-industrial-design",
-    "title": "研发储备生（工业设计方向）",
+    "title": "研发储备生",
     "company": "上汽红岩汽车有限公司",
     "cities": [
       "重庆"
     ],
-    "category": "艺术设计",
+    "category": "电子机械",
     "education": "本科",
     "education_requirement": "2027届本科及以上学历",
     "majors": [
       "工业设计",
-      "机械设计",
-      "车辆工程"
+      "机械工程",
+      "车辆工程",
+      "动力工程",
+      "自动化",
+      "软件工程"
     ],
     "graduation_year": "2027",
     "jd_text": "参与车型和车身方案设计、样车试制及验证，培养后按研发方向定岗。",
@@ -1021,8 +1022,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKz7bOs4bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-06-29，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：来源实际职位为研发储备生，工业设计仅是列出的专业之一，目录拆分的独立岗位名称不成立。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-06-29，核验日仍有效。"
   },
   {
     "job_id": "chinaecec-2027-env",
@@ -1046,8 +1047,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/jobfaircorporationinfo.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtrh6pt6KuLKXxoi3i7igr7-BZHxnkLZ9i8WGpNOaaKLSxKCalom6mNs",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-02-28，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-02-28，核验日仍有效。"
   },
   {
     "job_id": "chinaecec-2027-water",
@@ -1071,8 +1072,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/jobfaircorporationinfo.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtrh6pt6KuLKXxoi3i7igr7-BZHxnkLZ9i8WGpNOaaKLSxKCalom6mNs",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-02-28，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-02-28，核验日仍有效。"
   },
   {
     "job_id": "satellite-2027-utilities",
@@ -1097,8 +1098,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y92Ku9SuyWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-06-30，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-06-30，核验日仍有效。"
   },
   {
     "job_id": "crccbridge-2027-green",
@@ -1122,8 +1123,8 @@
     "publication_type": "repost",
     "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-Kz7a-smHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "verified_at": "2026-10-26T18:30:00+08:00",
-    "application_status": "open",
-    "verification_note": "高校就业页明示发布时间、职责要求及有效期至2027-09-13，核验日仍有效。"
+    "application_status": "unverified",
+    "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-09-13，核验日仍有效。"
   }
 
   ]

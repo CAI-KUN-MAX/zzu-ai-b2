@@ -6,6 +6,7 @@ import tempfile
 import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
+from datetime import date
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -14,10 +15,12 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.job_repository import JobRepository
+from app.job_matching import base_scores
 from app.job_schemas import Job, JobMatchTask, MatchContext
 from app.mock_data import MOCK_RESPONSES
 from app.schemas import DiagnoseResponse
 from test_interviews import ANSWER, completion, model_output
+from scripts.check_job_catalogue import check as check_catalogue
 
 TEXT = "某大学计算机本科，熟悉Python、MySQL和FastAPI，使用Docker部署后端接口，参与单元测试与团队协作。"
 JD = "本科及以上学历，计算机相关专业，要求熟悉Python和MySQL，掌握FastAPI接口开发，参与Docker部署和单元测试。"
@@ -81,6 +84,23 @@ class JobMatchingTests(unittest.TestCase):
         for query in ("page=0", "page_size=101", "category=其他", "education=高中", "application_status=bad"):
             self.assertEqual(self.client.get("/api/jobs?" + query).status_code, 422)
         self.assertEqual(self.client.get("/api/jobs/nope").status_code, 404)
+
+    def test_structured_education_is_scored_when_jd_omits_it(self):
+        jd = "负责药理实验、细胞活性检测和实验数据整理，熟悉实验室规范及动物伦理要求。"
+        resume = {"id": "r", "name": "", "text": "药学本科毕业，具有细胞实验和数据整理经验。"}
+        bachelor = fixture_job("bachelor", jd, education="本科")
+        master = fixture_job("master", jd, education="硕士")
+        doctorate = fixture_job("doctorate", jd, education="博士")
+        scores = {item["job_id"]: item for item in base_scores(resume, [master, bachelor, doctorate])}
+
+        def education(item):
+            return next(s["score"] for s in item["subscores"] if s["key"] == "education_match")
+        self.assertEqual(education(scores["bachelor"]), 100)
+        self.assertEqual(education(scores["master"]), 60)
+        self.assertEqual(education(scores["doctorate"]), 30)
+        self.assertGreater(scores["bachelor"]["score"], scores["master"]["score"])
+        from app.matching import education_score
+        self.assertEqual(education_score(jd, resume["text"]), 100)  # 旧单 JD 接口保持原规则
 
     def test_sort_ties_duplicates_and_idempotency(self):
         with patch("app.matching.run_diagnose") as model:
@@ -292,6 +312,13 @@ class JobMatchingTests(unittest.TestCase):
         path.write_text(json.dumps({"version": "test", "items": [fixture_job("a"), fixture_job("a")]}), encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "duplicate"):
             JobRepository(app.state.store, path)
+
+    def test_catalogue_acceptance_rejects_incomplete_open_jd(self):
+        path = Path(self.directory.name) / "catalogue.json"
+        path.write_text(json.dumps({"version": "test", "items": [fixture_job("short")]}, ensure_ascii=False),
+                        encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "incomplete open JD"):
+            check_catalogue(path, date(2026, 10, 26))
 
     def test_concurrent_duplicate_requests_create_one_task(self):
         async def fake(resume, jd):

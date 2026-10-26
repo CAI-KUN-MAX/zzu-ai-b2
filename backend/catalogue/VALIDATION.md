@@ -1,14 +1,16 @@
 # 岗位来源核验与数量缺口
 
-核验日期：2026-10-26（Asia/Shanghai）。40 个当前可投岗位的结构及配额自动验收已通过；来源内容仍应随投递截止时间滚动复核。
+质量复核日期：2026-10-26（Asia/Shanghai）。此前声称 40 岗已通过验收有误：数量检查没有发现被截短的 JD，也没有核对来源岗位是否被错误拆分。本次复核后目标未达成。
 
 ## 当前目录
 
-`jobs.v1.json` 有 50 条真实来源记录：40 条当前可投记录和 10 条待核验记录。40 条正式候选覆盖十个专业大类，每类 4 条；最低学历本科 27 条、硕士及以上 13 条。高校页面的日期统一标为转载日期，不当作企业最初发布时间。正文仅整理岗位职责、任职要求和共同招聘条件，不包含公司宣传或来源网站的行为指令。
+`jobs.v1.json` 仍有 50 条来源线索，目前 5 条 `open`、45 条 `unverified`。5 条中最低学历本科 4 条、硕士 1 条；类别和学历配额均未达标。高校页面的日期标为转载日期，不当作企业最初发布时间。
 
-**当前 open 40 条、unverified 10 条。** open 记录均有来源页面明示的未来有效期；仍未实际提交简历、发送邮件或联系招聘者。默认 `GET /api/jobs` 可查询这 40 条 open 记录；通过 `application_status=unverified` 可读取待核验记录，但未核验岗位不能创建匹配任务。独立前端示例均为虚构，不能提升真实岗位数量。
+**当前 open 5 条、unverified 45 条。** 默认 `GET /api/jobs` 只查询 open 记录；待核验记录可显式查询，但不能创建匹配任务。没有实际提交简历、发送邮件或联系招聘者，也没有验证登录后最终能否投递。独立前端示例均为虚构，不能提升真实岗位数量。
 
-本轮新增来源主要为四川大学就业指导中心岗位详情页，页面在 2026-10-26 仍可被公开检索，明示的有效期均晚于核验日期。每条的具体依据及有效期已写入 `verification_note`。严格脚本输出为 open=40、十类各4条、硕博=13、本科=27、target_met=true。
+本次复核发现原 40 条 open 中 29 条 JD 不足 60 字，另有 3 条虽更长但缺少可核对的完整岗位职责或仍需逐项复核，再有 3 条把来源页误写为直接投递链接，合计 35 条退出候选集。尤其是 `saic-2027-industrial-design` 将[来源的“研发储备生”](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKz7bOs4bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)错误拆成工业设计独立岗位；`cscec4dev-2027-overseas` 将[“现场工程师”来源](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9yKlLbSsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)的地区和总体专业信息误当成独立驻外岗位。两条已更正展示字段并标为待核验，不计入配额。来源未限定毕业届别的已核实记录同步更正届别字段。其余 unverified 仍是待复核线索，不能据其摘要推断申请资格。
+
+验收脚本现要求每条 open 的 JD 至少 80 字，并明确包含岗位职责、任职要求两部分；这只是最低结构门槛，来源真实性和投递入口仍需人工核对。当前输出为 records=50、open=5、unverified=45、target_met=false。
 
 | 岗位 ID | 核验结果 |
 |---|---|
@@ -37,7 +39,7 @@
 
 ## 剩余验收
 
-当前静态目录已经满足首批岗位数量和类别、学历配额。10 条 unverified 来源记录仍不计入40条正式候选；岗位到达截止日期或来源状态变化后，应重新核验并调整状态。
+当前静态目录距 40 条可投岗位还缺 35 条；十类及学历配额缺口见验收脚本输出。逐条补齐完整 JD、核对来源职位名称及毕业届别、复核投递入口后，才能将对应记录改回 open。岗位到达截止日期或来源状态变化后也需重新核验。
 
 后续需取得可读取的官方岗位详情与有效投递状态，逐条更新 verification_note、verified_at、application_status；来源不足的类别继续补充完整记录。运行：
 
@@ -45,4 +47,4 @@
 .\.venv\Scripts\python.exe backend/scripts/check_job_catalogue.py --as-of 2026-10-26 --require-target
 ```
 
-验收脚本对结构错误、重复 ID、未来日期报错；数量检查要求 open≥40、十类各≥4、硕博≥12、本科≥20。2026-10-26 实际运行结果为 structural_validation=passed、open=40、target_met=true。
+验收脚本对结构错误、重复 ID、未来日期、open JD 缺少职责或要求报错；数量检查要求 open≥40、十类各≥4、硕博≥12、本科≥20。2026-10-26 复核结果为 structural_validation=passed、open=5、target_met=false；`--require-target` 因数量及配额缺口返回非零，符合预期。

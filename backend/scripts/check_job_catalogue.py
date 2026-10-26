@@ -27,6 +27,12 @@ def check(path, as_of):
         if job.published_at > as_of or job.verified_at.date() > as_of:
             raise ValueError("future catalogue date: " + job.job_id)
     active = [j for j in jobs if j.application_status == "open"]
+    # Open records must contain both parts of the JD. This is a minimum
+    # structural gate; source accuracy still needs manual verification.
+    incomplete = [j.job_id for j in active if len(j.jd_text.strip()) < 80 or
+                  "岗位职责：" not in j.jd_text or "任职要求：" not in j.jd_text]
+    if incomplete:
+        raise ValueError("incomplete open JD: " + ", ".join(incomplete))
     counts = Counter(j.category for j in active)
     graduates = sum(j.education in {"硕士", "博士"} for j in active)
     undergraduates = sum(j.education == "本科" for j in active)
