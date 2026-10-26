@@ -1,9 +1,10 @@
 # 简历诊断 · 前端
 
-两个业务入口：
+三个业务入口（默认主入口是**岗位匹配**）：
 
-1. **文本诊断** —— 粘贴 1 份简历 + 1 份 JD，输出总分、维度得分、亮点与待补齐项
-2. **简历筛选** —— 粘贴 1 份 JD + 上传 N 份简历（PDF/DOCX/图片），解析后按匹配度排序，可展开看详情
+1. **岗位匹配** —— 上传 1 份简历 + 勾选多个候选岗位 → 岗位按匹配度排序 → 点开看诊断与能力缺口 → 针对该岗位练三轮面试
+2. **简历筛选** —— 粘贴 1 份 JD + 上传 N 份简历（PDF/DOCX/图片），解析后按匹配度排序
+3. **文本诊断** —— 粘贴 1 份简历 + 1 份 JD，输出总分、维度得分、亮点与待补齐项
 
 ## 技术栈
 
@@ -154,6 +155,38 @@ FastAPI 默认 `{"detail": "..."}`、422 校验 `{"detail": [{"loc","msg"}]}`、
 - `need_review` 的简历在解析列表里高亮并提示核对；`failed` 的不进入匹配
 - 表格行内展开才渲染 `report`，避免一次渲染 20 份明细卡顿
 - 老功能与筛选页共用 `components/report/*`（维度条 / 亮点 / 缺口），样式完全一致
+
+## 岗位匹配（简历 → 多个岗位）
+
+主入口。上传一份简历，从后端已核验可投的岗位目录中勾选候选岗位，按匹配度排序。当前不支持自定义岗位。
+
+### 流程
+
+上传简历（复用 `POST /api/resumes/batch`，单文件）→ 轮询解析 →
+`POST /api/job-matches` 建任务 → 轮询 `GET /api/job-matches/{id}` →
+岗位排序列表 → 点开岗位看命中项、缺口及可用的 AI 报告 → 从任务上下文获取原简历 ID 和 JD 快照 → `InterviewPage` 练三轮。
+
+### 接口
+
+| 接口 | 说明 |
+| --- | --- |
+| `GET /api/jobs` | 默认只列出 `open` 岗位，可按类别、学历分页筛选 |
+| `POST /api/job-matches` | `{resume_id, job_ids:["岗位ID"]}` → 202 `{task_id}`，最多 50 个岗位 |
+| `GET /api/job-matches/{task_id}` | `{status, stage, progress, error, error_code, items:[{job_id, title, score, stage1_score, subscores, matched, missing, reason, degraded, degraded_reason, analysis_status, report?}]}` |
+| `GET /api/job-matches/{task_id}/items/{job_id}/context` | 返回可直接传给现有诊断和面试接口的 `diagnose_request`、`interview_request` |
+
+真实 AI 成功时，`report` 与 `/api/diagnose` 响应结构一致；降级时只出基础分。面试只使用 context 中的原简历 ID 和 JD 快照。当前目录只有 5 个已核验 `open` 岗位，另有 45 条 `unverified` 线索，尚未达到 40 岗验收目标。基础评分中的 2-gram 是字符文本相似度，当前没有接入 Embedding。
+
+### 层级关系
+
+页面 → 岗位详情（`z-30` 覆盖层）→ 模拟面试（`z-40` 覆盖层）。
+两层都用覆盖层而不是路由，返回时列表与详情状态都不丢，也不会重新拉一次匹配任务。
+
+### 文案口径
+
+- 匹配分：关键词 + 文本相似度等**规则**计算
+- 推荐理由 / 诊断：仅真实 AI 报告存在时展示；面试反馈由面试接口生成
+- `degraded` 的岗位明确标注「只出了基础匹配分，没有做深度诊断」
 
 ## 模拟面试（单人 · 最多三轮）
 

@@ -6,18 +6,38 @@ import { LoadingPage } from "./components/LoadingPage";
 import { ResultPage } from "./components/ResultPage";
 import { ScreenPage } from "./components/ScreenPage";
 import { ScreenResultPage } from "./components/ScreenResultPage";
+import { JobMatchPage } from "./components/JobMatchPage";
+import { JobResultPage } from "./components/JobResultPage";
 import type { AppMode } from "./components/Nav";
-import type { DiagnoseResponse, IngestTask } from "./types";
+import type { DiagnoseResponse, IngestTask, Job, ResumeStatus } from "./types";
 
 type View =
   | { name: "input" }
   | { name: "report"; data: DiagnoseResponse }
   | { name: "screen" }
-  | { name: "screenResult"; taskId: string; jdText: string; ingest: IngestTask };
+  | { name: "screenResult"; taskId: string; jdText: string; ingest: IngestTask }
+  | { name: "job" }
+  | {
+      name: "jobResult";
+      taskId: string;
+      resumeId: string;
+      resumeName: string;
+      resumeStatus: ResumeStatus;
+      jobIndex: Record<string, Job>;
+    };
+
+/** 主入口改为「岗位匹配」：上传一份简历找岗位 */
+const DEFAULT_MODE: AppMode = "job";
+
+const MODE_HOME: Record<AppMode, View> = {
+  job: { name: "job" },
+  screen: { name: "screen" },
+  diagnose: { name: "input" },
+};
 
 export default function App() {
-  const [mode, setMode] = useState<AppMode>("diagnose");
-  const [view, setView] = useState<View>({ name: "input" });
+  const [mode, setMode] = useState<AppMode>(DEFAULT_MODE);
+  const [view, setView] = useState<View>({ name: "job" });
 
   // 文本诊断：输入内容提到 App 层，请求失败或重试时用户已经粘好的文本不会丢
   const [resume, setResume] = useState("");
@@ -51,11 +71,21 @@ export default function App() {
     if (next === mode) return;
     setMode(next);
     setError(null);
-    setView(next === "diagnose" ? { name: "input" } : { name: "screen" });
+    setView(MODE_HOME[next]);
   }
 
-  function handleStartMatch(taskId: string, ingest: IngestTask, jdText: string) {
+  function handleStartScreen(taskId: string, ingest: IngestTask, jdText: string) {
     setView({ name: "screenResult", taskId, jdText, ingest });
+  }
+
+  function handleStartJobMatch(
+    taskId: string,
+    resumeId: string,
+    resumeName: string,
+    resumeStatus: ResumeStatus,
+    jobIndex: Record<string, Job>
+  ) {
+    setView({ name: "jobResult", taskId, resumeId, resumeName, resumeStatus, jobIndex });
   }
 
   function renderView() {
@@ -86,7 +116,7 @@ export default function App() {
           />
         );
       case "screen":
-        return <ScreenPage onStartMatch={handleStartMatch} />;
+        return <ScreenPage onStartMatch={handleStartScreen} />;
       case "screenResult":
         return (
           <ScreenResultPage
@@ -94,6 +124,19 @@ export default function App() {
             jdText={view.jdText}
             ingest={view.ingest}
             onReset={() => setView({ name: "screen" })}
+          />
+        );
+      case "job":
+        return <JobMatchPage onStartMatch={handleStartJobMatch} />;
+      case "jobResult":
+        return (
+          <JobResultPage
+            taskId={view.taskId}
+            resumeId={view.resumeId}
+            resumeName={view.resumeName}
+            resumeStatus={view.resumeStatus}
+            jobIndex={view.jobIndex}
+            onReset={() => setView({ name: "job" })}
           />
         );
     }

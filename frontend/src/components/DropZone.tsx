@@ -6,6 +6,10 @@ interface DropZoneProps {
   files: File[];
   onChange: (files: File[]) => void;
   disabled?: boolean;
+  /** 最多可选文件数，默认 20；岗位匹配场景传 1 */
+  maxFiles?: number;
+  /** 主提示文案，不同场景可覆盖 */
+  title?: string;
 }
 
 function formatSize(bytes: number): string {
@@ -15,7 +19,13 @@ function formatSize(bytes: number): string {
 }
 
 /** 拖拽上传区：支持点击选择、拖入、单条删除，前端先做扩展名与大小预校验 */
-export function DropZone({ files, onChange, disabled = false }: DropZoneProps) {
+export function DropZone({
+  files,
+  onChange,
+  disabled = false,
+  maxFiles = MAX_FILES,
+  title = "拖拽简历到这里，或",
+}: DropZoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
@@ -28,7 +38,7 @@ export function DropZone({ files, onChange, disabled = false }: DropZoneProps) {
     const duplicates: string[] = [];
 
     ok.forEach((file) => {
-      if (next.length >= MAX_FILES) return;
+      if (next.length >= maxFiles) return;
       const exists = next.some((item) => item.name === file.name && item.size === file.size);
       if (exists) {
         duplicates.push(`${file.name}：已在列表中`);
@@ -38,7 +48,7 @@ export function DropZone({ files, onChange, disabled = false }: DropZoneProps) {
     });
 
     const overflow =
-      files.length + ok.length > MAX_FILES ? [`最多 ${MAX_FILES} 份，超出部分已忽略`] : [];
+      files.length + ok.length > maxFiles ? [`最多 ${maxFiles} 份，超出部分已忽略`] : [];
 
     setErrors([...invalid, ...duplicates, ...overflow]);
     onChange(next);
@@ -79,16 +89,18 @@ export function DropZone({ files, onChange, disabled = false }: DropZoneProps) {
           <UploadIcon className="h-5 w-5" />
         </span>
         <p className="text-sm font-medium text-ink-700">
-          拖拽简历到这里，或<span className="text-brand-600">点击选择文件</span>
+          {title}
+          <span className="text-brand-600">点击选择文件</span>
         </p>
         <p className="text-[11px] text-ink-500">
-          支持 PDF / DOCX / PNG / JPG，最多 {MAX_FILES} 份，单份不超过 15MB
+          支持 PDF / DOCX / PNG / JPG，{maxFiles === 1 ? "单个文件" : `最多 ${maxFiles} 份`}
+          ，单份不超过 15MB
         </p>
 
         <input
           ref={inputRef}
           type="file"
-          multiple
+          multiple={maxFiles > 1}
           hidden
           accept=".pdf,.docx,.png,.jpg,.jpeg"
           onChange={(event) => {
@@ -112,7 +124,7 @@ export function DropZone({ files, onChange, disabled = false }: DropZoneProps) {
           <div className="flex items-center justify-between border-b border-surface-line px-4 py-2.5">
             <span className="text-[12px] font-medium text-ink-700">已选文件</span>
             <span className="num text-[11px] text-ink-500">
-              {files.length} / {MAX_FILES}
+              {files.length} / {maxFiles}
             </span>
           </div>
           <ul className="max-h-64 overflow-y-auto">
