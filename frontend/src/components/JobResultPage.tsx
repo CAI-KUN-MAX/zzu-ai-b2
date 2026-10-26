@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Job, JobMatchItem, ResumeStatus } from "../types";
+import type { Job, JobMatchItem, MatchContext, ResumeStatus } from "../types";
 import { getJobMatchTask, getMatchContext } from "../api/jobs";
 import { useTask } from "../lib/useTask";
 import { levelTone, scoreTone } from "../lib/theme";
@@ -56,25 +56,30 @@ function JobDetail({
   onClose: () => void;
 }) {
   const [interviewOpen, setInterviewOpen] = useState(false);
-  // 以岗位目录里的 JD 兜底，再用 context 接口的正式文本覆盖
-  const [jdText, setJdText] = useState(job?.jd_text ?? "");
+  const [interviewRequest, setInterviewRequest] = useState<MatchContext["interview_request"] | null>(null);
+  const [contextError, setContextError] = useState<string | null>(null);
   const tone = levelTone(item.level);
 
   useEffect(() => {
     let cancelled = false;
+    setInterviewRequest(null);
+    setContextError(null);
     getMatchContext(taskId, item.job_id)
       .then((ctx) => {
-        if (!cancelled && ctx.interview_request.jd_text) {
-          setJdText(ctx.interview_request.jd_text);
+        if (cancelled) return;
+        if (ctx.interview_request.resume_id !== resumeId || !ctx.interview_request.jd_text) {
+          setContextError("岗位上下文与当前简历不一致，请重新发起匹配。");
+          return;
         }
+        setInterviewRequest(ctx.interview_request);
       })
-      .catch(() => {
-        /* context 失败时用目录里的 JD，不影响面试 */
+      .catch((error: unknown) => {
+        if (!cancelled) setContextError(error instanceof Error ? error.message : "获取岗位上下文失败");
       });
     return () => {
       cancelled = true;
     };
-  }, [taskId, item.job_id]);
+  }, [taskId, item.job_id, resumeId]);
 
   return (
     <div className="fixed inset-0 z-30 overflow-y-auto bg-surface-soft">
@@ -148,11 +153,13 @@ function JobDetail({
           <button
             type="button"
             onClick={() => setInterviewOpen(true)}
-            className="group mt-5 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-700"
+            disabled={!interviewRequest}
+            className="group mt-5 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            针对这个岗位练三轮
+            {interviewRequest ? "针对这个岗位练三轮" : contextError ? "暂不可开始面试" : "正在确认岗位上下文"}
             <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </button>
+          {contextError ? <p role="alert" className="mt-2 text-[12px] text-rose-700">{contextError}</p> : null}
         </section>
 
         {/* 诊断报告 */}
@@ -161,13 +168,13 @@ function JobDetail({
             <div className="rounded-xl2 border border-surface-line bg-white p-5 shadow-card">
               <p className="text-[13px] leading-relaxed text-ink-700">{item.report.summary}</p>
               <p className="num mt-2 text-[11px] text-ink-500">
-                由 {item.report.meta.model} 生成 · 耗时{" "}
+                {item.degraded_reason === "mock_report" ? "模拟报告" : `由 ${item.report.meta.model} 生成`} · 耗时{" "}
                 {(item.report.meta.elapsed_ms / 1000).toFixed(1)} 秒
               </p>
             </div>
             <DimensionBars
               dimensions={item.report.dimension_scores}
-              title={`AI 诊断 ${item.report.overall_score} 分`}
+              title={`${item.degraded_reason === "mock_report" ? "模拟诊断" : "AI 诊断"} ${item.report.overall_score} 分`}
               hint="四个维度加权得出 AI 分"
               className=""
             />
@@ -189,12 +196,12 @@ function JobDetail({
         </p>
       </div>
 
-      {interviewOpen ? (
+      {interviewOpen && interviewRequest ? (
         <InterviewPage
-          resumeId={resumeId}
+          resumeId={interviewRequest.resume_id}
           resumeName={resumeName}
           resumeStatus={resumeStatus}
-          jdText={jdText}
+          jdText={interviewRequest.jd_text}
           layer={40}
           onExit={() => setInterviewOpen(false)}
         />
@@ -362,7 +369,7 @@ export function JobResultPage({
                     />
                   </span>
                   <span className="mt-0.5 text-[10px] text-ink-500">
-                    {item.report ? "AI 已分析" : "基础评分"}
+                    {item.degraded_reason === "mock_report" ? "模拟报告" : item.report ? "AI 已分析" : "基础评分"}
                   </span>
                   <ChevronDownIcon className="mt-0.5 h-4 w-4 -rotate-90 text-ink-300 transition-transform group-hover:translate-x-0.5" />
                 </div>

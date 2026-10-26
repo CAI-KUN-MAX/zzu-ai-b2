@@ -70,7 +70,8 @@ export async function listJobs(
 function buildMockItem(jobId: string, withReport: boolean): JobMatchItem {
   const score = MOCK_SCORES[jobId];
   const job = MOCK_JOBS.find((item) => item.job_id === jobId);
-  const report = withReport ? MOCK_REPORTS[jobId] ?? null : null;
+  const mockReport = withReport ? MOCK_REPORTS[jobId] ?? null : null;
+  const report = mockReport ? { ...mockReport, meta: { ...mockReport.meta, mode: "mock" } } : null;
 
   return {
     job_id: jobId,
@@ -87,9 +88,9 @@ function buildMockItem(jobId: string, withReport: boolean): JobMatchItem {
     matched: score?.matched ?? [],
     missing: score?.missing ?? [],
     reason: score?.reason ?? null,
-    degraded: !report,
-    degraded_reason: report ? null : "not_selected",
-    analysis_status: report ? "succeeded" : "degraded",
+    degraded: true,
+    degraded_reason: report ? "mock_report" : "not_selected",
+    analysis_status: "degraded",
     report,
   };
 }

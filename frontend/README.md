@@ -158,22 +158,24 @@ FastAPI 默认 `{"detail": "..."}`、422 校验 `{"detail": [{"loc","msg"}]}`、
 
 ## 岗位匹配（简历 → 多个岗位）
 
-主入口。上传一份简历，勾选若干候选岗位（也可自定义岗位），按匹配度排序。
+主入口。上传一份简历，从后端已核验可投的岗位目录中勾选候选岗位，按匹配度排序。当前不支持自定义岗位。
 
 ### 流程
 
 上传简历（复用 `POST /api/resumes/batch`，单文件）→ 轮询解析 →
 `POST /api/job-matches` 建任务 → 轮询 `GET /api/job-matches/{id}` →
-岗位排序列表 → 点开岗位看诊断 + 能力缺口 → `InterviewPage` 练三轮。
+岗位排序列表 → 点开岗位看命中项、缺口及可用的 AI 报告 → 从任务上下文获取原简历 ID 和 JD 快照 → `InterviewPage` 练三轮。
 
 ### 接口
 
 | 接口 | 说明 |
 | --- | --- |
-| `POST /api/job-matches` | `{resume_id, jobs:[{job_id, title, jd_text}]}` → 202 `{task_id}` |
-| `GET /api/job-matches/{task_id}` | `{status, stage, progress, items:[{job_id, title, company, score, level, matched, missing, reason, gaps, degraded, report?}]}` |
+| `GET /api/jobs` | 默认只列出 `open` 岗位，可按类别、学历分页筛选 |
+| `POST /api/job-matches` | `{resume_id, job_ids:["岗位ID"]}` → 202 `{task_id}`，最多 50 个岗位 |
+| `GET /api/job-matches/{task_id}` | `{status, stage, progress, error, error_code, items:[{job_id, title, score, stage1_score, subscores, matched, missing, reason, degraded, degraded_reason, analysis_status, report?}]}` |
+| `GET /api/job-matches/{task_id}/items/{job_id}/context` | 返回可直接传给现有诊断和面试接口的 `diagnose_request`、`interview_request` |
 
-`report` 与该简历 × 该岗位的诊断报告结构一致（即 `/api/diagnose` 响应）；`degraded=true` 时只出基础分。
+真实 AI 成功时，`report` 与 `/api/diagnose` 响应结构一致；降级时只出基础分。面试只使用 context 中的原简历 ID 和 JD 快照。当前目录只有 5 个已核验 `open` 岗位，另有 45 条 `unverified` 线索，尚未达到 40 岗验收目标。基础评分中的 2-gram 是字符文本相似度，当前没有接入 Embedding。
 
 ### 层级关系
 
@@ -183,7 +185,7 @@ FastAPI 默认 `{"detail": "..."}`、422 校验 `{"detail": [{"loc","msg"}]}`、
 ### 文案口径
 
 - 匹配分：关键词 + 文本相似度等**规则**计算
-- 推荐理由 / 诊断 / 面试反馈：AI 生成
+- 推荐理由 / 诊断：仅真实 AI 报告存在时展示；面试反馈由面试接口生成
 - `degraded` 的岗位明确标注「只出了基础匹配分，没有做深度诊断」
 
 ## 模拟面试（单人 · 最多三轮）
