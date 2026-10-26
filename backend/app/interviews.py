@@ -10,12 +10,14 @@ import uuid
 from fastapi import HTTPException
 from openai import AsyncOpenAI, APITimeoutError
 
-from app.interview_schemas import AnswerDraft, FirstQuestionDraft, InterviewAnswerResult, InterviewSession
+from app.interview_schemas import AnswerDraft, FirstQuestionDraft, InterviewAnswerResult, InterviewSession, QuestionDraft
 
 logger = logging.getLogger(__name__)
 TOTAL_TIMEOUT = 75
 CALL_TIMEOUT = 50
 MAX_TOKENS = 2400
+# 第一次关闭采样，结果稳定；修复重试开启采样，否则同一输入每次得到同一份不合格输出，用户怎么重试都会失败
+REPAIR_TEMPERATURE = 0.7
 MAX_CONTEXT_CHARS = 20000
 TTL_SECONDS = 24 * 60 * 60
 MAX_ROUNDS = 3
@@ -114,13 +116,26 @@ def check_context(messages):
         fail(413, "TEXT_TOO_LONG", "面试上下文超过 20000 字符，请精简 JD 或简历后重新开始；回答也会计入总量")
 
 
+class QuestionRejected(ValueError):
+    """回答轮次里只有追问不合格：反馈已通过校验，可以只替换追问。"""
+
+    def __init__(self, check, draft):
+        super().__init__(check)
+        self.draft = draft
+
+
 def parse_output(raw, context):
     draft = (FirstQuestionDraft if context["action"] == "create" else AnswerDraft).model_validate_json(raw)
     options = evidence_options(context)
     question = draft.question if context["action"] == "create" else draft.next_question
+
+    def reject(check):
+        # 反馈已校验完毕时带上 draft，便于服务端兜底生成追问而不是整轮失败
+        if context["action"] == "answer":
+            raise QuestionRejected(check, draft)
+        raise ValueError(check)
+
     if context["action"] == "answer":
-        if question is None and context["round"] < MAX_ROUNDS:
-            raise ValueError("invalid_next_question")
         # Never publish praise grounded only in the JD, resume or invented refs.
         # Empty strengths are valid; retain useful model-generated guidance.
         draft.feedback.strengths = [strength for strength in draft.feedback.strengths
@@ -139,28 +154,48 @@ def parse_output(raw, context):
         # Completion is an authoritative server rule, not a model decision.
         if context["round"] == MAX_ROUNDS:
             draft.next_question = question = None
+        elif question is None:
+            reject("invalid_next_question")
     if question is not None:
         if question.text in PLACEHOLDERS:
-            raise ValueError("question_placeholder")
+            reject("question_placeholder")
         if question.focus in PLACEHOLDERS:
             question.focus = "岗位相关提问"
         for reference in question.evidence_refs:
             if reference not in options:
-                raise ValueError("invalid_question_evidence")
+                reject("invalid_question_evidence")
         grounding = {options[reference]["source"] for reference in question.evidence_refs}
         if context["action"] == "create" and not grounding.intersection({"resume", "jd"}):
-            raise ValueError("question_missing_job_grounding")
+            reject("question_missing_job_grounding")
         if context["action"] == "answer" and "answer" not in grounding:
-            raise ValueError("followup_missing_answer_grounding")
+            reject("followup_missing_answer_grounding")
         if context["action"] == "answer" and not any(
                 options[reference]["source"] == "answer" and any(
                     options[reference]["quote"][index:index + 4].casefold() in question.text.casefold()
                     for index in range(len(options[reference]["quote"]) - 3))
                 for reference in question.evidence_refs):
-            raise ValueError("followup_quote_not_in_question")
+            reject("followup_quote_not_in_question")
         if any(question.text == turn["question"]["text"] for turn in context["history"]):
-            raise ValueError("repeated_question")
+            reject("repeated_question")
     return draft
+
+
+def fallback_question(context, draft):
+    """两次生成的追问都不合格时，用本轮回答的原文片段拼一道追问，保证轮次能推进。
+
+    反馈仍是模型生成且已通过校验；只有追问由服务端按模板生成，并同样引用本轮回答。
+    """
+    asked = {turn["question"]["text"] for turn in context["history"]}
+    planned = hypothetical_answer(context)
+    for reference, option in evidence_options(context).items():
+        if option["source"] != "answer":
+            continue
+        text = (f"你提到“{option['quote']}”，你会如何具体落实？需要注意哪些风险，又打算怎样验证效果？" if planned else
+                f"你提到“{option['quote']}”，请具体说明当时是怎么做的、为什么这样设计，以及如何验证效果？")
+        if text not in asked:
+            draft.next_question = QuestionDraft(text=text, focus="围绕本轮回答追问", evidence_refs=[reference])
+            return draft
+    return None
 
 
 class InterviewService:
@@ -194,7 +229,8 @@ class InterviewService:
                             check_context(messages)
                             response = await client.chat.completions.create(
                                 model=model, messages=messages, response_format={"type": "json_object"},
-                                temperature=.2, max_tokens=MAX_TOKENS, extra_body={"do_sample": False})
+                                temperature=REPAIR_TEMPERATURE if attempt else .2, max_tokens=MAX_TOKENS,
+                                extra_body={"do_sample": bool(attempt)})
                             try:
                                 if not response.choices or response.choices[0].finish_reason != "stop":
                                     raise ValueError("incomplete_output")
@@ -207,12 +243,19 @@ class InterviewService:
                                                 "question_missing_job_grounding", "followup_missing_answer_grounding",
                                                 "repeated_question", "incomplete_output", "followup_quote_not_in_question",
                                                 "empty_reference_points", "question_placeholder"}
-                                check = str(validation_error) if type(validation_error) is ValueError else "schema"
+                                check = str(validation_error) if type(validation_error) in (ValueError, QuestionRejected) else "schema"
                                 if check not in known_checks:
                                     check = "schema"
                                 logger.warning("interview request_id=%s category=invalid_output check=%s attempt=%s",
                                                request_id, check, attempt + 1)
                                 if attempt:
+                                    # 只有追问不合格：保留已校验的反馈，用本轮回答原文拼追问，轮次照常推进
+                                    if isinstance(validation_error, QuestionRejected):
+                                        fallback = fallback_question(context, validation_error.draft)
+                                        if fallback is not None:
+                                            logger.info("interview request_id=%s category=fallback_question check=%s",
+                                                        request_id, check)
+                                            return fallback
                                     fail(502, "INTERVIEW_GENERATION_FAILED", "面试内容生成失败，请重试；本轮尚未推进")
                                 feedback = {
                                     "invalid_next_question": "第三轮 next_question 必须为 null，前两轮必须有下一题。",
@@ -224,7 +267,7 @@ class InterviewService:
                                     "incomplete_output": "输出不完整，请精简内容并返回完整 JSON。",
                                     "empty_reference_points": "reference_points 至少给出一个具体知识点，不要照抄‘建议覆盖的要点’等格式占位文字。",
                                     "question_placeholder": "请返回真实的岗位面试问题，不要复制示例中的占位文字。",
-                                }.get(str(validation_error) if type(validation_error) is ValueError else "",
+                                }.get(str(validation_error) if type(validation_error) in (ValueError, QuestionRejected) else "",
                                       "检查必填字段：feedback 必须包含 reference_points 字符串数组、strengths 的 {text,answer_ref} 对象数组、improvements 字符串数组，不能遗漏或增加字段。")
                                 if hasattr(validation_error, "errors"):
                                     allowed = {"question", "feedback", "next_question", "text", "focus", "evidence_refs",
