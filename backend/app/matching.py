@@ -151,6 +151,7 @@ class MatchJobs:
         self.jobs = set()
         self.llm_gate = asyncio.Semaphore(max(1, min(3, int(os.getenv("MATCH_CONCURRENCY", "3")))))
         self.task_gate = asyncio.Semaphore(2)
+        self.inflight = {}
 
     def enqueue(self, jd, rows):
         identifier = uuid.uuid4().hex
@@ -180,6 +181,26 @@ class MatchJobs:
                 # Ignore a stale/corrupt cached report and use the validated pipeline.
                 return None
         return None
+
+    async def shared_report_for(self, resume, jd):
+        # Share work across job-ranking requests; cancellation of one caller
+        # must not cancel another caller's report. Last waiter cancels the work.
+        key = cache_key(resume, jd)
+        entry = self.inflight.get(key)
+        if entry is None:
+            entry = {"task": asyncio.create_task(self.report_for(resume, jd)), "waiters": 0}
+            self.inflight[key] = entry
+        entry["waiters"] += 1
+        try:
+            return await asyncio.shield(entry["task"])
+        finally:
+            entry["waiters"] -= 1
+            if not entry["waiters"]:
+                if self.inflight.get(key) is entry:
+                    self.inflight.pop(key)
+                if not entry["task"].done():
+                    entry["task"].cancel()
+                await asyncio.gather(entry["task"], return_exceptions=True)
 
     async def report_for(self, resume, jd):
         key = cache_key(resume, jd)
