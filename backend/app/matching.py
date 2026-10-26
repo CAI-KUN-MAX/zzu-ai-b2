@@ -25,6 +25,7 @@ LLM_ITEM_TIMEOUT = 90
 MATCH_TOTAL_TIMEOUT = 165
 EDUCATION = ((1, r"高中|中专"), (2, r"大专|专科"), (3, r"本科|学士"),
              (4, r"硕士|研究生"), (5, r"博士"))
+EDUCATION_RANK = {"专科": 2, "本科": 3, "硕士": 4, "博士": 5}
 
 
 # 筛选页把关键词直接展示给 HR：去掉 JD 结构词、通用动词和学历词（学历单独计分），
@@ -54,10 +55,15 @@ def jd_terms(text):
     return [spelling[key] for key in sorted(counts, key=lambda key: (-counts[key], key))[:40]]
 
 
-def education_score(jd, resume):
-    if not EDUCATION_REQUIREMENT.search(jd):
-        return 100
-    required = [rank for rank, pattern in EDUCATION if re.search(pattern, jd)]
+def education_score(jd, resume, required_education=None):
+    if required_education is not None:
+        if required_education == "不限":
+            return 100
+        required = [EDUCATION_RANK[required_education]]
+    else:
+        if not EDUCATION_REQUIREMENT.search(jd):
+            return 100
+        required = [rank for rank, pattern in EDUCATION if re.search(pattern, jd)]
     if not required:
         # Certificates/subject requirements cannot be ranked as academic degrees.
         return 100
@@ -101,13 +107,13 @@ def keyword_in_resume(term, text, runs):
     return len(term) >= 3 and term.isascii() and any(term in run for run in runs)
 
 
-def score_resume(jd, row, terms, jd_profile):
+def score_resume(jd, row, terms, jd_profile, required_education=None):
     runs = glued_runs(row["text"])
     matched = [term for term in terms if keyword_in_resume(term, row["text"], runs)]
     missing = [term for term in terms if term not in matched]
     skill = min(1, len(matched) / min(max(len(terms), 1), 15)) * 100
     similarity = cosine(jd_profile, profile2gram(row["text"])) * 100
-    education = education_score(jd, row["text"])
+    education = education_score(jd, row["text"], required_education)
     score = round(.55 * skill + .30 * similarity + .15 * education)
     return dict(resume_id=row["id"], name=row["name"], score=score, **level_fields(score),
                 stage1_score=score, matched=matched, missing=missing, reason=None, degraded=True,
@@ -151,6 +157,7 @@ class MatchJobs:
         self.jobs = set()
         self.llm_gate = asyncio.Semaphore(max(1, min(3, int(os.getenv("MATCH_CONCURRENCY", "3")))))
         self.task_gate = asyncio.Semaphore(2)
+        self.inflight = {}
 
     def enqueue(self, jd, rows):
         identifier = uuid.uuid4().hex
@@ -180,6 +187,26 @@ class MatchJobs:
                 # Ignore a stale/corrupt cached report and use the validated pipeline.
                 return None
         return None
+
+    async def shared_report_for(self, resume, jd):
+        # Share work across job-ranking requests; cancellation of one caller
+        # must not cancel another caller's report. Last waiter cancels the work.
+        key = cache_key(resume, jd)
+        entry = self.inflight.get(key)
+        if entry is None:
+            entry = {"task": asyncio.create_task(self.report_for(resume, jd)), "waiters": 0}
+            self.inflight[key] = entry
+        entry["waiters"] += 1
+        try:
+            return await asyncio.shield(entry["task"])
+        finally:
+            entry["waiters"] -= 1
+            if not entry["waiters"]:
+                if self.inflight.get(key) is entry:
+                    self.inflight.pop(key)
+                if not entry["task"].done():
+                    entry["task"].cancel()
+                await asyncio.gather(entry["task"], return_exceptions=True)
 
     async def report_for(self, resume, jd):
         key = cache_key(resume, jd)
