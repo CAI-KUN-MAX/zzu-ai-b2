@@ -17,30 +17,35 @@ const MOCK_TASK: IngestTask = ingestMock as IngestTask;
 
 /** mock 下记录每个任务的轮询次数，用来模拟进度推进 */
 const mockPollCount = new Map<string, number>();
+/** mock 下记录每个任务上传了几份，单份上传时不能返回 8 份样例 */
+const mockFileCount = new Map<string, number>();
 
 function mockIngestStep(taskId: string): IngestTask {
   const times = (mockPollCount.get(taskId) ?? 0) + 1;
   mockPollCount.set(taskId, times);
 
+  const count = mockFileCount.get(taskId) ?? MOCK_TASK.items.length;
+  const pool = MOCK_TASK.items.slice(0, Math.max(1, count));
+
   if (times === 1) {
     return {
       ...MOCK_TASK,
       status: "running",
-      stage: "解析 2/8",
+      stage: `解析 ${Math.min(1, pool.length)}/${pool.length}`,
       progress: 20,
-      items: MOCK_TASK.items.slice(0, 2),
+      items: pool.slice(0, 1),
     };
   }
   if (times === 2) {
     return {
       ...MOCK_TASK,
-      status: "running",
-      stage: "解析 5/8",
-      progress: 62,
-      items: MOCK_TASK.items.slice(0, 5),
+      status: count > 2 ? "running" : "succeeded",
+      stage: `解析 ${Math.min(2, pool.length)}/${pool.length}`,
+      progress: count > 2 ? 62 : 100,
+      items: pool.slice(0, 2),
     };
   }
-  return MOCK_TASK;
+  return { ...MOCK_TASK, stage: `解析完成 ${pool.length}/${pool.length}`, items: pool };
 }
 
 /** POST /api/resumes/batch —— 一次提交整批文件 */
@@ -49,6 +54,7 @@ export async function uploadResumes(files: File[]): Promise<{ task_id: string }>
     await wait(1200);
     const taskId = `mock-ingest-${Date.now()}`;
     mockPollCount.set(taskId, 0);
+    mockFileCount.set(taskId, files.length);
     return { task_id: taskId };
   }
 

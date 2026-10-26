@@ -226,3 +226,114 @@ export interface InterviewAnswerResult {
   /** 第三轮后为 null */
   next_question: InterviewQuestion | null;
 }
+
+/* ------------------------------------------------------------------ *
+ * 岗位目录与「单简历 × 多岗位」匹配
+ * 字段严格对齐 backend/app/job_schemas.py，不要自行加字段
+ * ------------------------------------------------------------------ */
+
+export type JobCategory =
+  | "计算机"
+  | "电子机械"
+  | "土木建筑"
+  | "化工材料"
+  | "生物医药"
+  | "经管财会"
+  | "文法教育"
+  | "外语传播"
+  | "艺术设计"
+  | "农林环境";
+
+export type JobEducation = "不限" | "专科" | "本科" | "硕士" | "博士";
+
+export type JobApplicationStatus = "open" | "closed" | "unverified";
+
+/** GET /api/jobs 返回的岗位 */
+export interface Job {
+  job_id: string;
+  title: string;
+  company: string;
+  cities: string[];
+  category: JobCategory;
+  education: JobEducation;
+  education_requirement: string;
+  majors: string[];
+  graduation_year: string;
+  jd_text: string;
+  source_url: string;
+  published_at: string;
+  publication_type: "original" | "repost";
+  application_url: string;
+  verified_at: string;
+  application_status: JobApplicationStatus;
+  verification_note: string;
+}
+
+export interface JobList {
+  catalogue_version: string;
+  total: number;
+  page: number;
+  page_size: number;
+  items: Job[];
+}
+
+/** POST /api/job-matches 入参：只传 job_ids，JD 由后端按目录补全 */
+export interface JobMatchRequest {
+  resume_id: string;
+  job_ids: string[];
+}
+
+export type JobAnalysisStatus = "pending" | "running" | "succeeded" | "degraded";
+
+export type JobDegradedReason =
+  | "ai_disabled"
+  | "not_selected"
+  | "input_too_short"
+  | "input_too_long"
+  | "model_failed"
+  | "item_timeout"
+  | "batch_timeout"
+  | "mock_report";
+
+/** 单个岗位的匹配结果 */
+export interface JobMatchItem {
+  job_id: string;
+  title: string;
+  /** 最终分：有 AI 报告时为加权分，降级时等于 stage1_score */
+  score: number;
+  stage1_score: number;
+  level: MatchLevel;
+  level_label: string;
+  /** 基础评分的分项，与 report.dimension_scores 不是一回事 */
+  subscores: DimensionScore[];
+  matched: string[];
+  missing: string[];
+  reason: string | null;
+  degraded: boolean;
+  degraded_reason: JobDegradedReason | null;
+  analysis_status: JobAnalysisStatus;
+  report: DiagnoseResponse | null;
+}
+
+export interface JobMatchTask {
+  status: TaskStatus;
+  stage: string;
+  progress: number;
+  error: string | null;
+  error_code: string | null;
+  items: JobMatchItem[];
+}
+
+/** GET /api/job-matches/{task_id}/items/{job_id}/context */
+export interface MatchContext {
+  resume_id: string;
+  job_id: string;
+  diagnose_request: DiagnoseRequest;
+  interview_request: InterviewCreate;
+}
+
+/** POST /api/interviews 入参 */
+export interface InterviewCreate {
+  resume_id: string;
+  jd_text: string;
+}
