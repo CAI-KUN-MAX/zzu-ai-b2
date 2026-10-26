@@ -1,0 +1,57 @@
+{
+  "source": "用户提供的 BOSS直聘数据（泛信管类岗位）",
+  "audit_date": "2026-10-26",
+  "totals": {
+    "records": 22167,
+    "with_jd": 2221,
+    "fresh_graduate": 5271,
+    "fresh_graduate_with_jd": 714,
+    "postgraduate_with_jd": 523,
+    "fresh_postgraduate_with_jd": 452,
+    "with_publication_field": 0
+  },
+  "unique_job_ids": 15413,
+  "unique_fresh_graduate_with_jd": 506,
+  "unique_fresh_postgraduate_with_jd": 318,
+  "by_city": {
+    "上海": 2145,
+    "北京": 2001,
+    "南京": 1868,
+    "广州": 2000,
+    "成都": 1906,
+    "杭州": 2137,
+    "武汉": 1740,
+    "深圳": 2114,
+    "郑州": 4613,
+    "重庆": 1643
+  },
+  "by_degree": {
+    "本科": 7760,
+    "大专": 5628,
+    "学历不限": 4549,
+    "高中": 584,
+    "中专/中技": 607,
+    "硕士": 1518,
+    "初中及以下": 75,
+    "博士": 1446
+  },
+  "by_experience": {
+    "经验不限": 13336,
+    "1年以内": 1266,
+    "在校/应届": 5261,
+    "1-3年": 1630,
+    "3-5年": 463,
+    "10年以上": 30,
+    "应届生": 10,
+    "5-10年": 171
+  },
+  "usable_as": "待补核线索；补齐来源发布日期和当前投递状态后才能进入正式岗位集",
+  "formal_catalogue_imported": 0,
+  "limitations": [
+    "没有岗位发布日期字段，文件时间、头像日期、采集时间不能替代发布日期",
+    "jobValidStatus/bossOnline 是采集时状态，不能证明目前可投",
+    "泛信管类样本不能替代十个专业大类的覆盖",
+    "统计为记录条数，可能跨城市重复；unique_job_ids 单独按岗位ID去重"
+  ],
+  "excluded_fields": "招聘者姓名、头像、个人标识、securityId、位置坐标及所有原始岗位文本不输出"
+}

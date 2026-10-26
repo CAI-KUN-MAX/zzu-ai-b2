@@ -61,11 +61,12 @@ function buildApiError(parsed: unknown, status: number): ApiError {
   const withRequestId = (message: string) =>
     requestId ? `${message}（请求编号：${requestId}）` : message;
 
-  // 504 是模型确实超时，和生成失败分开提示，用户才知道该等还是该精简内容
+  // 504 是模型确实超时，和生成失败分开提示，用户才知道该等还是该精简内容；
+  // 后端给了具体说明（如面试“本轮尚未推进”）就用后端原文
   if (status === 504) {
     return new ApiError(
-      withRequestId("AI 响应超时，请稍后重试；内容较长时可适当精简"),
-      status,
+      withRequestId(body.error?.message ?? "AI 响应超时，请稍后重试；内容较长时可适当精简"),
+      body.error?.code ?? status,
       requestId
     );
   }

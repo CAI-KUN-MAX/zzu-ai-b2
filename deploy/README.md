@@ -1,5 +1,7 @@
 # 部署说明
 
+2026-10-26：`nginx.conf` 为新建岗位匹配任务 `/api/job-matches` 增加独立的高成本限流入口（与诊断、旧匹配和面试共用额度）；岗位查询和任务轮询仍走只读额度。该配置需在部署环境 `nginx -t` 后启用，本地编辑不代表已上线。
+
 ## 1. 首次申请公网 IP 的 HTTPS 证书
 
 Let's Encrypt 已支持公网 IPv4/IPv6 证书。IP 证书有效期约 6 天，必须依赖自动续期；Certbot 需 5.4 或更高版本。
@@ -113,6 +115,7 @@ WantedBy=multi-user.target
 | 接口 | 请求体上限 | 限流（每 IP） |
 |---|---|---|
 | `POST /api/diagnose`、`POST /api/match` | 256KB | 每分钟 10 次，突发 3 |
+| `POST /api/interviews`、`POST /api/interviews/{id}/answers` | 256KB | 与上一行共用每分钟 10 次、突发 3；代理超时 85 秒（后端单轮预算 75 秒） |
 | `POST /api/resumes/batch` | 60MB | 每分钟 12 次，突发 8 |
 | 其余 `/api/`（任务轮询、全文、导出） | 256KB | 每分钟 240 次，突发 60 |
 

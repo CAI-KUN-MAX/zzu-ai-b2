@@ -26,6 +26,8 @@ TOTAL_TIMEOUT = 75
 CALL_TIMEOUT = 50.0
 # 报告 JSON 实测 1000 token 以内，上限调低以缩短生成时间
 MAX_TOKENS = 2048
+# 第一次关闭采样保证分数稳定；修复重试开启采样，否则同一输入每次得到同一份不合格输出
+REPAIR_TEMPERATURE = 0.7
 MIN_CHARS = 30
 MAX_TOTAL_CHARS = 20000
 # 没有任何来自简历的亮点时，技能/经历/关键词三项不可能高分，防止被简历里的指令带偏
@@ -187,7 +189,16 @@ def apply_response_options(report, payload):
     return report
 
 
-def parse_report(content, payload, request_id, elapsed_ms):
+def quoted_from(source, quote):
+    """逐字引用校验，只忽略空白：PDF 提取常在词中间断行（如“Docke\nr”），模型引用时会写成完整的词。"""
+    return re.sub(r"\s+", "", quote) in re.sub(r"\s+", "", source)
+
+
+def parse_report(content, payload, request_id, elapsed_ms, lenient=False):
+    """lenient=True 用于最后一次尝试：引用不合格的个别亮点、缺项直接删掉，其余已核对的内容照常返回。
+
+    只删不改，不会产生没有原文依据的内容；第一次仍严格校验并带着原因让模型重写。
+    """
     if not isinstance(content, str) or not content.strip():
         raise ValueError("empty_content")
     text = content.strip()
@@ -220,21 +231,30 @@ def parse_report(content, payload, request_id, elapsed_ms):
     sources = {"resume": payload.resume_text, "jd": payload.jd_text}
     # 亮点只展示候选人自己的内容，引用 JD 原文的条目直接丢弃
     report.highlights = [highlight for highlight in report.highlights if highlight.source == "resume"]
+    dropped = False
+    if lenient:
+        kept_highlights = [highlight for highlight in report.highlights
+                           if quoted_from(sources[highlight.source], highlight.evidence)]
+        # resume_evidence 对不上原文时删掉整条缺项，不能改成 null（那会变成“简历未体现”，可能无中生有）
+        kept_gaps = [gap for gap in report.gaps if quoted_from(payload.jd_text, gap.jd_requirement)
+                     and (gap.resume_evidence is None or quoted_from(payload.resume_text, gap.resume_evidence))]
+        dropped = len(kept_highlights) != len(report.highlights) or len(kept_gaps) != len(report.gaps)
+        report.highlights, report.gaps = kept_highlights, kept_gaps
     if not report.highlights:
         for dimension in report.dimension_scores:
             if dimension.key in EVIDENCE_DIMENSIONS:
                 dimension.score = min(dimension.score, NO_EVIDENCE_CAP)
     for highlight in report.highlights:
         texts.extend([highlight.title, highlight.evidence])
-        if highlight.evidence not in sources[highlight.source]:
+        if not quoted_from(sources[highlight.source], highlight.evidence):
             raise ValueError("证据必须逐字复制对应原文的连续片段，不得改写、拼接或使用未提及等说明；没有简历证据时 resume_evidence 必须填 null")
     for gap in report.gaps:
         texts.extend([gap.title, gap.jd_requirement, gap.suggestion])
-        if gap.jd_requirement not in payload.jd_text:
+        if not quoted_from(payload.jd_text, gap.jd_requirement):
             raise ValueError("证据必须逐字复制对应原文的连续片段，不得改写、拼接或使用未提及等说明；没有简历证据时 resume_evidence 必须填 null")
         if gap.resume_evidence is not None:
             texts.append(gap.resume_evidence)
-            if gap.resume_evidence not in payload.resume_text:
+            if not quoted_from(payload.resume_text, gap.resume_evidence):
                 raise ValueError("证据必须逐字复制对应原文的连续片段，不得改写、拼接或使用未提及等说明；没有简历证据时 resume_evidence 必须填 null")
     if any(not text.strip() for text in texts):
         raise ValueError("blank_text")
@@ -243,7 +263,8 @@ def parse_report(content, payload, request_id, elapsed_ms):
     report.overall_score = int(sum(d.score * DIMENSIONS[d.key][1] for d in report.dimension_scores) + 0.5)
     report.level = "high" if report.overall_score >= 80 else "medium" if report.overall_score >= 60 else "low"
     report.level_label = {"high": "强匹配", "medium": "较匹配", "low": "存在缺口"}[report.level]
-    if len(report.gaps) != original_gap_count:
+    if dropped or len(report.gaps) != original_gap_count:
+        # 总结可能提到了被删掉的内容，改用基于剩余条目的总结
         language = (payload.options or {}).get("language")
         report.summary = fallback_summary(report, language)
     return apply_response_options(report, payload)
@@ -304,17 +325,19 @@ async def diagnose(payload: DiagnoseRequest):
             async with AsyncOpenAI(api_key=api_key, base_url="https://open.bigmodel.cn/api/paas/v4/",
                                    timeout=CALL_TIMEOUT, max_retries=0) as client:
                 for attempt in range(1, 3):
-                    # do_sample=false 关闭采样，同一输入尽量得到相同分数（此时 temperature 不生效）
+                    # 第一次 do_sample=false，同一输入尽量得到相同分数（此时 temperature 不生效）；
+                    # 修复重试开启采样，避免重复输出同一份不合格结果
+                    repair = attempt > 1
                     response = await client.chat.completions.create(
-                        model=MODEL, messages=messages, temperature=0.2,
+                        model=MODEL, messages=messages, temperature=REPAIR_TEMPERATURE if repair else 0.2,
                         response_format={"type": "json_object"}, max_tokens=MAX_TOKENS,
-                        extra_body={"do_sample": False},
+                        extra_body={"do_sample": repair},
                     )
                     try:
                         if not response.choices or response.choices[0].finish_reason != "stop":
                             raise ValueError("incomplete_response")
                         report = parse_report(response.choices[0].message.content, payload, request_id,
-                                              int((time.monotonic() - start_time) * 1000))
+                                              int((time.monotonic() - start_time) * 1000), lenient=repair)
                         return report
                     except (ValueError, KeyError, TypeError) as validation_error:
                         logger.warning("diagnose request_id=%s category=invalid_output attempt=%s", request_id, attempt)
