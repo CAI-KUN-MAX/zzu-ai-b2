@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Job, JobMatchItem, MatchContext, ResumeStatus } from "../types";
+import type { Job, JobDegradedReason, JobMatchItem, MatchContext, ResumeStatus } from "../types";
 import { getJobMatchTask, getMatchContext } from "../api/jobs";
 import { useTask } from "../lib/useTask";
 import { levelTone, scoreTone } from "../lib/theme";
@@ -35,6 +35,31 @@ function Chip({ text, tone }: { text: string; tone: "hit" | "miss" }) {
       {text}
     </span>
   );
+}
+
+/** 降级原因：卡片上的短标签和详情里的完整说明 */
+const DEGRADED_REASON: Record<JobDegradedReason, { short: string; detail: string }> = {
+  ai_disabled: { short: "未开启 AI", detail: "当前未开启 AI 深度分析" },
+  not_selected: { short: "未入选 AI", detail: "只对基础分排名靠前的岗位（默认前 8 个）做 AI 深度分析，这个岗位未入选" },
+  input_too_short: { short: "简历过短", detail: "简历内容过短，无法做 AI 深度分析" },
+  input_too_long: { short: "内容超长", detail: "简历与 JD 合计超过 2 万字，无法做 AI 深度分析" },
+  model_failed: { short: "AI 失败", detail: "AI 深度分析失败" },
+  item_timeout: { short: "AI 超时", detail: "这个岗位的 AI 深度分析超时" },
+  batch_timeout: { short: "AI 超时", detail: "整批 AI 深度分析超时，这个岗位未完成" },
+  mock_report: { short: "模拟报告", detail: "当前为模拟报告" },
+};
+
+/** 是否还在等 AI：pending / running 时报告可能随后到达，不能当成“没做 AI” */
+function isAnalyzing(item: JobMatchItem): boolean {
+  return item.analysis_status === "pending" || item.analysis_status === "running";
+}
+
+/** 卡片右下角的分析状态 */
+function analysisLabel(item: JobMatchItem): string {
+  if (isAnalyzing(item)) return "AI 分析中";
+  if (item.degraded_reason === "mock_report") return "模拟报告";
+  if (item.report) return "AI 已分析";
+  return item.degraded_reason ? `基础评分 · ${DEGRADED_REASON[item.degraded_reason].short}` : "基础评分";
 }
 
 /** 岗位详情覆盖层：诊断报告 + 模拟面试 */
@@ -162,6 +187,23 @@ function JobDetail({
           {contextError ? <p role="alert" className="mt-2 text-[12px] text-rose-700">{contextError}</p> : null}
         </section>
 
+        {/* 基础评分构成：所有岗位都有，与 AI 诊断的四个维度不是一回事 */}
+        {item.subscores.length > 0 ? (
+          <div className="mt-5">
+            <DimensionBars
+              dimensions={item.subscores}
+              title={`基础评分 ${item.stage1_score} 分`}
+              hint="技能关键词 55% + 文本相似度 30% + 学历 15%"
+              className=""
+            />
+            {item.report ? (
+              <p className="num mt-2 text-[11px] text-ink-500">
+                总分 {item.score} = 基础评分 {item.stage1_score} × 35% + AI 诊断 {item.report.overall_score} × 65%（四舍五入）
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
         {/* 诊断报告 */}
         {item.report ? (
           <div className="mt-5 space-y-6">
@@ -181,11 +223,17 @@ function JobDetail({
             <Highlights highlights={item.report.highlights} className="" />
             <Gaps gaps={item.report.gaps} className="" />
           </div>
+        ) : isAnalyzing(item) ? (
+          <p className="mt-5 flex items-start gap-2 rounded-xl border border-brand-100 bg-brand-50 px-4 py-3 text-[12px] leading-relaxed text-brand-700">
+            <SpinnerIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 animate-spin" />
+            <span>AI 正在分析这个岗位，完成后诊断报告会自动显示在这里；当前总分为基础分。</span>
+          </p>
         ) : (
           <p className="mt-5 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] leading-relaxed text-amber-700">
             <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             <span>
-              这个岗位只出了基础匹配分，没有做 AI 深度诊断（总分即基础分）。命中与缺口已列在上方。
+              这个岗位没有 AI 深度诊断
+              {item.degraded_reason ? `：${DEGRADED_REASON[item.degraded_reason].detail}` : ""}。总分即基础分，命中与缺口已列在上方。
             </span>
           </p>
         )}
@@ -219,12 +267,14 @@ export function JobResultPage({
   onReset,
 }: JobResultPageProps) {
   const { data: task, error, polling } = useTask(getJobMatchTask, taskId);
-  const [detailJob, setDetailJob] = useState<JobMatchItem | null>(null);
+  // 只记岗位 ID，详情始终读最新一次轮询结果：AI 报告在打开详情之后才到达也能自动显示
+  const [detailJobId, setDetailJobId] = useState<string | null>(null);
 
   const items = useMemo(() => {
     const list = task?.items ?? [];
     return [...list].sort((a, b) => b.score - a.score);
   }, [task]);
+  const detailJob = detailJobId ? items.find((item) => item.job_id === detailJobId) ?? null : null;
 
   /* ---------- 加载中 ---------- */
   if (!task && polling) {
@@ -315,7 +365,7 @@ export function JobResultPage({
             <button
               key={item.job_id}
               type="button"
-              onClick={() => setDetailJob(item)}
+              onClick={() => setDetailJobId(item.job_id)}
               className="group block w-full rounded-xl2 border border-surface-line bg-white p-4 text-left shadow-card transition-all hover:border-brand-300 hover:shadow-md sm:p-5"
             >
               <div className="flex items-start gap-3">
@@ -368,8 +418,11 @@ export function JobResultPage({
                       style={{ width: `${Math.max(0, Math.min(100, item.score))}%` }}
                     />
                   </span>
-                  <span className="mt-0.5 text-[10px] text-ink-500">
-                    {item.degraded_reason === "mock_report" ? "模拟报告" : item.report ? "AI 已分析" : "基础评分"}
+                  <span
+                    className={`mt-0.5 inline-flex items-center gap-1 text-[10px] ${isAnalyzing(item) ? "text-brand-600" : "text-ink-500"}`}
+                  >
+                    {isAnalyzing(item) ? <SpinnerIcon className="h-2.5 w-2.5 animate-spin" /> : null}
+                    {analysisLabel(item)}
                   </span>
                   <ChevronDownIcon className="mt-0.5 h-4 w-4 -rotate-90 text-ink-300 transition-transform group-hover:translate-x-0.5" />
                 </div>
@@ -382,7 +435,8 @@ export function JobResultPage({
       <p className="mt-6 flex items-start gap-2 text-[11px] leading-relaxed text-ink-500">
         <InfoIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         <span>
-          匹配分由技能关键词、文本相似度与学历三项规则计算；标「基础评分」的岗位未做 AI 深度分析。
+          所有岗位先做基础评分（技能关键词 55%、文本相似度 30%、学历 15%）；排名靠前的岗位（默认前 8 个）再做 AI
+          深度分析，完成后总分 = 基础分 × 35% + AI 诊断分 × 65%。标「基础评分」的岗位未做 AI 分析，总分即基础分。
           AI 判断仅供参考，请结合人工判断。
         </span>
       </p>
@@ -395,7 +449,7 @@ export function JobResultPage({
           resumeId={resumeId}
           resumeName={resumeName}
           resumeStatus={resumeStatus}
-          onClose={() => setDetailJob(null)}
+          onClose={() => setDetailJobId(null)}
         />
       ) : null}
     </main>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { IngestTask, Job, ResumeStatus } from "../types";
 import { STATUS_LABEL, getIngestTask, uploadResumes } from "../api/resumes";
 import { createJobMatch, listJobs } from "../api/jobs";
@@ -48,6 +48,10 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
   const resume = ingest?.items[0] ?? null;
   // 只有一份简历：拿到解析结果（非 failed）就可以发起匹配
   const parsed = !!resume && resume.status !== "failed";
+  // 解析失败（单份失败或整个任务失败）时不能再提示“解析中”
+  const resumeFailed = resume?.status === "failed" || ingest?.status === "failed" || (!!resumeTaskId && !!pollError);
+  // setState 是异步的，同一时刻连点两次都会读到旧的 submitting；用 ref 做同步闸门，只发一次请求
+  const inFlight = useRef(false);
 
   /* 拉岗位目录 */
   useEffect(() => {
@@ -112,7 +116,8 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
   }
 
   async function handleSubmit() {
-    if (!resume || !canSubmit) return;
+    if (!resume || !canSubmit || inFlight.current) return;
+    inFlight.current = true;
 
     setSubmitting(true);
     setError(null);
@@ -122,6 +127,7 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
     } catch (err) {
       setError(err instanceof Error ? err.message : "创建匹配任务失败，请重试");
     } finally {
+      inFlight.current = false;
       setSubmitting(false);
     }
   }
@@ -306,11 +312,13 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
         <p className="text-[11px] leading-relaxed text-ink-500">
           {!files.length
             ? "先上传一份简历"
-            : !parsed
-              ? "简历解析中，完成后即可发起匹配"
-              : selected.length === 0
-                ? "请至少勾选 1 个候选岗位"
-                : `已选 ${selected.length} 个岗位，将逐岗给出匹配分与推荐理由`}
+            : resumeFailed
+              ? "简历解析失败，请换一份简历重新上传"
+              : !parsed
+                ? "简历解析中，完成后即可发起匹配"
+                : selected.length === 0
+                  ? "请至少勾选 1 个候选岗位"
+                  : `已选 ${selected.length} 个岗位，将逐岗给出匹配分与推荐理由`}
         </p>
 
         <button
