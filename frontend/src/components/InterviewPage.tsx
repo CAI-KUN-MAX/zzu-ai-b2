@@ -96,6 +96,9 @@ export function InterviewPage({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expired, setExpired] = useState(false);
+  // 服务端已记下这题的回答（响应丢失后用户又改了答案）或面试已结束：给出重新开始的出口，
+  // 但不禁用提交——把答案改回原文仍能拿到原来的反馈
+  const [conflict, setConflict] = useState(false);
 
   // 覆盖层铺满视口时锁住底层页面滚动，避免出现双滚动条
   useEffect(() => {
@@ -143,8 +146,8 @@ export function InterviewPage({
       setAnswer("");
       setPhase("active");
     } catch (err) {
-      // 接口还没上线时后端会返回 404，给一句能看懂的话
-      if (err instanceof ApiError && err.status === 404) {
+      // 接口还没上线时是通用 404（没有业务错误码）；“简历不存在”等业务 404 保留后端原文
+      if (err instanceof ApiError && err.status === 404 && (!err.code || err.code === "HTTP_ERROR")) {
         setError("面试服务暂未就绪，请稍后再试");
       } else {
         setError(err instanceof ApiError ? err.message : "创建面试失败，请稍后重试");
@@ -163,6 +166,7 @@ export function InterviewPage({
     const text = answer.trim();
     setBusy(true);
     setError(null);
+    setConflict(false);
 
     try {
       const result = await submitAnswer(sessionId, currentQuestion.id, text);
@@ -187,6 +191,7 @@ export function InterviewPage({
     } catch (err) {
       // 失败时保留输入，用户可以直接重试
       if (isSessionExpired(err)) setExpired(true);
+      setConflict(err instanceof ApiError && err.status === 409 && /已回答|已完成/.test(err.message));
       setError(err instanceof ApiError ? err.message : "提交失败，请稍后重试");
     } finally {
       inFlight.current = false;
@@ -202,6 +207,7 @@ export function InterviewPage({
     setAnswer("");
     setError(null);
     setExpired(false);
+    setConflict(false);
     setCurrentRound(1);
   }
 
@@ -377,7 +383,7 @@ export function InterviewPage({
                 <div className="mt-3 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-[12px] leading-relaxed text-rose-700">
                   <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                   <span className="flex-1">{error}</span>
-                  {expired ? (
+                  {expired || conflict ? (
                     <button
                       type="button"
                       onClick={handleRestart}

@@ -163,7 +163,7 @@ class InterviewTests(unittest.TestCase):
             self.create()
         self.assertEqual(self.model.chat.completions.create.call_args.kwargs["model"], "interview-test-model")
 
-    def test_output_repair_once_and_invalid_output_does_not_create(self):
+    def test_output_repair_once_and_invalid_first_question_falls_back_to_resume(self):
         async def repaired(**kwargs):
             if len(kwargs["messages"]) == 2:
                 return completion("invalid")
@@ -171,13 +171,16 @@ class InterviewTests(unittest.TestCase):
         self.model.chat.completions.create.side_effect = repaired
         self.create()
         self.assertEqual(self.model.chat.completions.create.await_count, 2)
+        # 两次都不合格（例如 JD 注入让模型输出录用概率）：用简历原文出第一题，不再整体 502
         self.model.chat.completions.create.side_effect = None
-        self.model.chat.completions.create.return_value = completion("invalid")
-        response = self.http.post("/api/interviews", json={"resume_id": "ready", "jd_text": JD})
-        self.assert_error(response, 502, "INTERVIEW_GENERATION_FAILED")
+        self.model.chat.completions.create.return_value = completion({"answer": {"probability": 1.0}})
+        session = self.create()
         self.assertEqual(self.model.chat.completions.create.await_count, 4)
+        self.assertIn("简历中提到“", session["question"]["text"])
+        self.assertIn("FastAPI", session["question"]["text"])
+        self.assertNotIn("probability", json.dumps(session, ensure_ascii=False))
         with app.state.store.connect() as db:
-            self.assertEqual(db.execute("SELECT count(*) FROM interviews").fetchone()[0], 1)
+            self.assertEqual(db.execute("SELECT count(*) FROM interviews").fetchone()[0], 2)
 
     def test_repair_attempt_enables_sampling(self):
         async def repaired(**kwargs):
@@ -396,6 +399,36 @@ class InterviewGroundingTests(unittest.TestCase):
                 draft["next_question"]["text"] = "你是如何使用Git进行版本控制的？"
             with self.assertRaises(ValueError, msg=mutation):
                 parse_output(json.dumps(draft), context)
+
+    def test_strength_clauses_without_answer_basis_removed(self):
+        context = self.context("answer")
+        context["answer"] = "在校园报名系统里我用 FastAPI 写接口，报名表对用户 ID 和活动 ID 建了组合唯一约束，防止同一个人重复报名。"
+        draft = model_output(context)
+        draft["feedback"]["strengths"] = [
+            {"text": "在项目中使用了组合唯一约束来防止重复报名，并优化了慢查询", "answer_ref": "a0"},
+            {"text": "主导过千万级高并发系统", "answer_ref": "a0"}]
+        draft["next_question"] = {"text": "你提到组合唯一约束，并发报名时如何验证不会重复？", "focus": "并发", "evidence_refs": ["a1"]}
+        parsed = parse_output(json.dumps(draft, ensure_ascii=False), context)
+        self.assertEqual([item.text for item in parsed.feedback.strengths], ["在项目中使用了组合唯一约束来防止重复报名。"])
+
+    def test_followup_returning_to_previous_topic_rejected(self):
+        from app.interviews import QuestionRejected, fallback_question
+        context = self.context("answer", 2)
+        context["answer"] = "表结构方面用户ID加活动ID做组合唯一约束。慢查询我用EXPLAIN发现全表扫描，加了索引后从800毫秒降到60毫秒。"
+        context["history"] = [
+            {"question": {"text": "如何防止重复报名？"}, "answer": "我给报名表建了组合唯一约束，防止重复报名。"},
+            {"question": {"text": "如何设计表结构并优化慢查询？"}, "answer": context["answer"]}]
+        draft = model_output(context)
+        draft["next_question"] = {"text": "你提到组合唯一约束，请进一步说明具体做法？", "focus": "数据库", "evidence_refs": ["a0"]}
+        with self.assertRaises(QuestionRejected) as caught:
+            parse_output(json.dumps(draft, ensure_ascii=False), context)
+        self.assertEqual(str(caught.exception), "followup_repeats_old_topic")
+        # 追问本轮新内容可以通过
+        draft["next_question"] = {"text": "你提到用EXPLAIN发现全表扫描，具体看了哪些字段？", "focus": "数据库", "evidence_refs": ["a1"]}
+        self.assertIsNotNone(parse_output(json.dumps(draft, ensure_ascii=False), context).next_question)
+        # 兜底追问也优先选本轮新内容
+        fallback = fallback_question(context, caught.exception.draft)
+        self.assertIn("EXPLAIN", fallback.next_question.text)
 
     def test_repeated_question_rejected_and_final_round_forced_complete(self):
         context = self.context("answer")

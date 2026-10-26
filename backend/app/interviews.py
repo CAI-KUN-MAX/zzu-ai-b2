@@ -32,6 +32,8 @@ SYSTEM_PROMPT = """你是帮助求职者练习的中文面试官，只返回一�
 每次只出一道问题，text 不超过 300 字，focus 不超过 30 字。第一题优先询问具体项目的原理、
 设计取舍或测试方法，不要泛泛要求复述简历。后续题必须围绕本轮回答提到的内容追问，
 不能仅因 JD 里出现另一项技能就换话题；未解决当前问题时优先澄清。不要重复历史问题，
+也不要绕回前几轮已经问过、答过的话题，优先追问本轮回答里新出现的内容。
+strengths 只写本轮回答里明确说到的内容，不要把题目或简历里的内容写成候选人的优点。
 不能要求透露密钥或个人隐私。不要给录用建议、通过概率、能力分数。
 服务器在 evidence_options 中提供已从原文摘取的短语，r 开头来自简历，j 来自 JD，a 来自本轮回答。
 每道题的 evidence_refs 必须选择选项中存在的 ID。第一题至少选一个 r 或 j；
@@ -116,6 +118,29 @@ def check_context(messages):
         fail(413, "TEXT_TOO_LONG", "面试上下文超过 20000 字符，请精简 JD 或简历后重新开始；回答也会计入总量")
 
 
+CLAUSE_SPLIT = re.compile(r"[，,；;。！？!?、]|并且|并|同时|以及|此外|另外|这体现了|这表明|说明了")
+
+
+def shares_quote(text, source, size=4):
+    """text 中是否有连续 size 个字符（忽略空白与大小写）出现在 source 里。"""
+    text = re.sub(r"\s+", "", text).casefold()
+    source = re.sub(r"\s+", "", source).casefold()
+    return any(text[index:index + size] in source for index in range(len(text) - size + 1))
+
+
+def grounded_strength(text, answer):
+    """优点逐个小句核对：回答里找不到依据的小句（常是从题目里混进来的内容）直接删掉。"""
+    kept = [clause.strip() for clause in CLAUSE_SPLIT.split(text) if clause.strip() and shares_quote(clause, answer)]
+    return "，".join(kept) + "。" if kept else None
+
+
+def answer_novelty(quote, previous_answers):
+    """本轮回答片段里，前几轮回答没出现过的连续 4 字片段占比（0–1）。"""
+    quote = re.sub(r"\s+", "", quote).casefold()
+    grams = [quote[index:index + 4] for index in range(len(quote) - 3)]
+    return sum(gram not in previous_answers for gram in grams) / len(grams) if grams else 0
+
+
 class QuestionRejected(ValueError):
     """回答轮次里只有追问不合格：反馈已通过校验，可以只替换追问。"""
 
@@ -141,6 +166,10 @@ def parse_output(raw, context):
         draft.feedback.strengths = [strength for strength in draft.feedback.strengths
                                     if options.get(strength.answer_ref, {}).get("source") == "answer"
                                     and strength.text not in PLACEHOLDERS]
+        # 模型常把题目里的内容写成优点（回答没讲慢查询却夸“优化了慢查询”）：只保留回答里有原文依据的小句
+        for strength in draft.feedback.strengths:
+            strength.text = grounded_strength(strength.text, context["answer"]) or ""
+        draft.feedback.strengths = [strength for strength in draft.feedback.strengths if strength.text]
         draft.feedback.improvements = [text for text in draft.feedback.improvements if text not in PLACEHOLDERS]
         draft.feedback.reference_points = [text for text in draft.feedback.reference_points if text not in PLACEHOLDERS]
         if not draft.feedback.reference_points:
@@ -175,9 +204,37 @@ def parse_output(raw, context):
                     for index in range(len(options[reference]["quote"]) - 3))
                 for reference in question.evidence_refs):
             reject("followup_quote_not_in_question")
+        if context["action"] == "answer":
+            # 追问对上本轮回答的那些片段，如果前几轮回答里早就出现过，就是绕回了旧话题
+            previous = re.sub(r"\s+", "", "".join(turn["answer"] for turn in context["history"][:-1])).casefold()
+            asked = re.sub(r"\s+", "", question.text).casefold()
+            anchors = {gram for reference in question.evidence_refs if options[reference]["source"] == "answer"
+                       for quote in [re.sub(r"\s+", "", options[reference]["quote"]).casefold()]
+                       for gram in (quote[index:index + 4] for index in range(len(quote) - 3)) if gram in asked}
+            # 本轮回答没有任何新内容时（如重复上一轮的话），追问只能围绕旧内容，不算绕回
+            if (previous and anchors and all(gram in previous for gram in anchors)
+                    and answer_novelty(context["answer"], previous) > 0):
+                reject("followup_repeats_old_topic")
         if any(question.text == turn["question"]["text"] for turn in context["history"]):
             reject("repeated_question")
     return draft
+
+
+def fallback_first_question(context):
+    """创建面试两次都没生成合格题目时（如 JD 里的注入指令让模型输出了别的东西），用简历原文出第一题。"""
+    resume = [(reference, option["quote"]) for reference, option in evidence_options(context).items()
+              if option["source"] == "resume" and len(option["quote"]) >= 8]
+    if not resume:
+        return None
+
+    # 优先挑项目和技术相关的片段，避免拿“计算机科学与技术本科”这类学历信息出题；max 同分取原文靠前的
+    def substance(item):
+        quote = item[1]
+        return len(re.findall(r"项目|开发|负责|设计|实现|使用|参与|优化|搭建|编写", quote)) * 2 + len(re.findall(r"[A-Za-z]{2,}", quote))
+    reference, quote = max(resume, key=substance)
+    return FirstQuestionDraft(question=QuestionDraft(
+        text=f"简历中提到“{quote}”，请介绍你在其中负责的部分、关键设计取舍，以及如何验证结果？",
+        focus="简历项目深挖", evidence_refs=[reference]))
 
 
 def fallback_question(context, draft):
@@ -187,9 +244,10 @@ def fallback_question(context, draft):
     """
     asked = {turn["question"]["text"] for turn in context["history"]}
     planned = hypothetical_answer(context)
-    for reference, option in evidence_options(context).items():
-        if option["source"] != "answer":
-            continue
+    previous = re.sub(r"\s+", "", "".join(turn["answer"] for turn in context["history"][:-1])).casefold()
+    answers = [(reference, option) for reference, option in evidence_options(context).items() if option["source"] == "answer"]
+    # 优先选前几轮没讲过的片段，避免模板追问也绕回旧话题；sorted 稳定，同分保持原文顺序
+    for reference, option in sorted(answers, key=lambda item: -answer_novelty(item[1]["quote"], previous)):
         text = (f"你提到“{option['quote']}”，你会如何具体落实？需要注意哪些风险，又打算怎样验证效果？" if planned else
                 f"你提到“{option['quote']}”，请具体说明当时是怎么做的、为什么这样设计，以及如何验证效果？")
         if text not in asked:
@@ -242,13 +300,19 @@ class InterviewService:
                                 known_checks = {"invalid_next_question", "invalid_question_evidence",
                                                 "question_missing_job_grounding", "followup_missing_answer_grounding",
                                                 "repeated_question", "incomplete_output", "followup_quote_not_in_question",
-                                                "empty_reference_points", "question_placeholder"}
+                                                "empty_reference_points", "question_placeholder", "followup_repeats_old_topic"}
                                 check = str(validation_error) if type(validation_error) in (ValueError, QuestionRejected) else "schema"
                                 if check not in known_checks:
                                     check = "schema"
                                 logger.warning("interview request_id=%s category=invalid_output check=%s attempt=%s",
                                                request_id, check, attempt + 1)
                                 if attempt:
+                                    if context["action"] == "create":
+                                        fallback = fallback_first_question(context)
+                                        if fallback is not None:
+                                            logger.info("interview request_id=%s category=fallback_first_question check=%s",
+                                                        request_id, check)
+                                            return fallback
                                     # 只有追问不合格：保留已校验的反馈，用本轮回答原文拼追问，轮次照常推进
                                     if isinstance(validation_error, QuestionRejected):
                                         fallback = fallback_question(context, validation_error.draft)
@@ -264,6 +328,7 @@ class InterviewService:
                                     "followup_missing_answer_grounding": "后续问题必须通过有效的 a 选项引用本轮 answer，并保持岗位关联。",
                                     "followup_quote_not_in_question": "围绕所选 a 选项追问，在问题 text 中使用它原文至少连续四个字符的关键词或短语，并返回该 a 选项 ID；不要切换到不相关技能。",
                                     "repeated_question": "下一题不能重复已问过的问题。",
+                                    "followup_repeats_old_topic": "追问回到了前几轮已经讨论过的话题。请围绕本轮回答里新出现的内容追问。",
                                     "incomplete_output": "输出不完整，请精简内容并返回完整 JSON。",
                                     "empty_reference_points": "reference_points 至少给出一个具体知识点，不要照抄‘建议覆盖的要点’等格式占位文字。",
                                     "question_placeholder": "请返回真实的岗位面试问题，不要复制示例中的占位文字。",

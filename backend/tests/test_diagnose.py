@@ -48,6 +48,32 @@ class ParseTests(unittest.TestCase):
             with self.subTest(content=content), self.assertRaises((ValueError, KeyError, TypeError)):
                 module.parse_report(content, PAYLOAD, "id", 0)
 
+    def test_evidence_ignores_pdf_line_breaks_only(self):
+        # PDF 提取在词中间断行：模型引用完整的词也算逐字引用
+        wrapped = PAYLOAD.model_copy(update={"resume_text": PAYLOAD.resume_text.replace("Python", "Pyth\non")})
+        report = module.parse_report(json.dumps(valid_data()), wrapped, "id", 0)
+        self.assertEqual(report.highlights[0].evidence, "熟悉Python和MySQL")
+        # 改了标点或用词仍然拒绝
+        data = valid_data()
+        data["highlights"][0]["evidence"] = "熟悉Python、MySQL"
+        with self.assertRaises(ValueError):
+            module.parse_report(json.dumps(data), wrapped, "id", 0)
+
+    def test_lenient_parse_drops_only_unquoted_items(self):
+        data = valid_data()
+        data["highlights"].append({"title": "改写的亮点", "evidence": "精通Python与MySQL", "source": "resume"})
+        data["gaps"].append({"title": "改写的要求", "jd_requirement": "精通Kubernetes", "resume_evidence": None,
+                             "suggestion": "补充项目", "severity": "low"})
+        data["gaps"].append({"title": "证据对不上", "jd_requirement": "熟悉Kubernetes容器编排",
+                             "resume_evidence": "做过K8s", "suggestion": "补充项目", "severity": "low"})
+        with self.assertRaises(ValueError):
+            module.parse_report(json.dumps(data), PAYLOAD, "id", 0)
+        report = module.parse_report(json.dumps(data), PAYLOAD, "id", 0, lenient=True)
+        self.assertEqual([h.evidence for h in report.highlights], ["熟悉Python和MySQL"])
+        self.assertEqual([g.title for g in report.gaps], [valid_data()["gaps"][0]["title"]])
+        # 总结可能提到被删掉的条目，改用基于剩余内容的总结
+        self.assertNotEqual(report.summary, data["summary"])
+
     def test_invalid_business_fields(self):
         mutations = [
             lambda d: d.update(dimension_scores=[]),
@@ -176,6 +202,19 @@ class RouteTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(report.overall_score, 65)
         self.assertEqual(self.create.await_count, 2)
         self.assertEqual(self.client_class.call_args.kwargs["max_retries"], 0)
+        # 修复重试开启采样，不再重复同一份不合格输出
+        first, second = self.create.call_args_list
+        self.assertEqual(first.kwargs["extra_body"], {"do_sample": False})
+        self.assertEqual(second.kwargs["extra_body"], {"do_sample": True})
+        self.assertGreater(second.kwargs["temperature"], first.kwargs["temperature"])
+
+    async def test_final_attempt_keeps_verified_items(self):
+        data = valid_data()
+        data["highlights"].append({"title": "改写的亮点", "evidence": "精通Python与MySQL", "source": "resume"})
+        self.create.side_effect = [completion(json.dumps(data)), completion(json.dumps(data))]
+        report = await module.diagnose(PAYLOAD)
+        self.assertEqual(self.create.await_count, 2)
+        self.assertEqual([h.evidence for h in report.highlights], ["熟悉Python和MySQL"])
 
     async def test_deterministic_and_timeouts(self):
         self.create.return_value = completion(json.dumps(valid_data()))
