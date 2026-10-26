@@ -234,6 +234,26 @@ class InterviewTests(unittest.TestCase):
         self.assert_error(self.submit(identifier, question_id), 502, "INTERVIEW_GENERATION_FAILED")
         self.assertEqual(self.state(identifier)["round"], 1)
 
+    def test_max_length_strength_does_not_break_response(self):
+        session = self.create()
+        identifier, question_id = session["interview_id"], session["question"]["id"]
+        answer = "熟练使用Redis缓存" * 75
+
+        async def long_strength(**kwargs):
+            data = model_output(json.loads(kwargs["messages"][1]["content"]))
+            data["feedback"]["strengths"] = [{"text": answer[:600], "answer_ref": "a0"}]
+            return completion(data)
+        self.model.chat.completions.create.side_effect = long_strength
+        calls = self.model.chat.completions.create.await_count
+        response = self.submit(identifier, question_id, answer)
+        self.assertEqual(response.status_code, 200, response.text)
+        result = response.json()
+        InterviewAnswerResult.model_validate(result)
+        self.assertEqual(len(result["feedback"]["strengths"][0]), 600)
+        self.assertEqual(self.model.chat.completions.create.await_count, calls + 1)
+        self.assertEqual(self.state(identifier)["round"], 2)
+        self.assertEqual(self.submit(identifier, question_id, answer).json(), result)
+
     def test_failed_answer_does_not_advance_and_retry_succeeds(self):
         session = self.create()
         identifier, question_id = session["interview_id"], session["question"]["id"]
@@ -399,6 +419,40 @@ class InterviewGroundingTests(unittest.TestCase):
                 draft["next_question"]["text"] = "你是如何使用Git进行版本控制的？"
             with self.assertRaises(ValueError, msg=mutation):
                 parse_output(json.dumps(draft), context)
+
+    def test_strength_length_stays_within_public_limit(self):
+        from app.interviews import grounded_strength
+        answer = "熟练使用Redis缓存" * 75
+        for text in (answer[:599], answer[:600], answer[:599] + "。", answer[:300] + "，" + answer[300:599]):
+            with self.subTest(length=len(text)):
+                result = grounded_strength(text, answer)
+                self.assertLessEqual(len(result), 600)
+                self.assertTrue(result.startswith(answer[:100]))
+        self.assertTrue(grounded_strength(answer[:599], answer).endswith("。"))
+        self.assertEqual(grounded_strength(answer[:600], answer), answer[:600])
+
+    def test_negated_experience_is_not_kept_as_strength(self):
+        from app.interviews import grounded_strength
+        for strength, answer in (
+                ("熟练使用Redis实现了缓存优化", "我没有使用Redis，也没有做过缓存优化。"),
+                ("做过压力测试", "压力测试我没做过，只看过资料。"),
+                ("实现了缓存一致性方案", "缓存一致性方案尚未实现，目前只做了设计。"),
+                ("熟悉MySQL和Redis", "我没有使用 Redis，但使用过 MySQL 完成报名表建表。")):
+            with self.subTest(answer=answer):
+                self.assertIsNone(grounded_strength(strength, answer))
+        # 混合表述：被否认的删掉，真实经验保留
+        mixed = "我没有使用 Redis，但使用过 MySQL 完成报名表建表。"
+        self.assertEqual(grounded_strength("使用过MySQL完成建表", mixed), "使用过MySQL完成建表。")
+        self.assertEqual(grounded_strength("使用MySQL完成报名表建表，熟练使用Redis", mixed), "使用MySQL完成报名表建表。")
+        # “不会出现重复”是结果描述，不是否认经历
+        self.assertEqual(grounded_strength("保证并发下不会出现重复记录", "建了组合唯一约束，并发下也不会出现重复记录。"),
+                         "保证并发下不会出现重复记录。")
+
+    def test_clause_split_keeps_compound_words(self):
+        from app.interviews import grounded_strength
+        answer = "我用队列支持同时在线报名，并行处理请求；报名表建了组合唯一约束。"
+        self.assertEqual(grounded_strength("支持同时在线报名的并行处理", answer), "支持同时在线报名的并行处理。")
+        self.assertEqual(grounded_strength("使用组合唯一约束并优化了慢查询", answer), "使用组合唯一约束。")
 
     def test_strength_clauses_without_answer_basis_removed(self):
         context = self.context("answer")

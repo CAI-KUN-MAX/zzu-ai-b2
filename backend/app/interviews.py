@@ -10,7 +10,8 @@ import uuid
 from fastapi import HTTPException
 from openai import AsyncOpenAI, APITimeoutError
 
-from app.interview_schemas import AnswerDraft, FirstQuestionDraft, InterviewAnswerResult, InterviewSession, QuestionDraft
+from app.interview_schemas import (AnswerDraft, Feedback, FirstQuestionDraft, InterviewAnswerResult,
+                                   InterviewSession, QuestionDraft)
 
 logger = logging.getLogger(__name__)
 TOTAL_TIMEOUT = 75
@@ -118,7 +119,8 @@ def check_context(messages):
         fail(413, "TEXT_TOO_LONG", "面试上下文超过 20000 字符，请精简 JD 或简历后重新开始；回答也会计入总量")
 
 
-CLAUSE_SPLIT = re.compile(r"[，,；;。！？!?、]|并且|并|同时|以及|此外|另外|这体现了|这表明|说明了")
+# “并”“同时”作连接词时切开（“使用了唯一约束并优化了慢查询”），但跳过“并发、并行、并非、同时在线”等词
+CLAUSE_SPLIT = re.compile(r"[，,；;。！？!?、]|并且|并(?![发行列非存购入网不])|同时(?![在段期间刻])|以及|此外|另外|这体现了|这表明|说明了")
 
 
 def shares_quote(text, source, size=4):
@@ -128,10 +130,32 @@ def shares_quote(text, source, size=4):
     return any(text[index:index + size] in source for index in range(len(text) - size + 1))
 
 
+# 回答按小句拆分；“但/不过/而是”前后常是一否一肯（“没有使用 Redis，但使用过 MySQL”）
+ANSWER_CLAUSE_SPLIT = re.compile(r"[，,；;。！？!?\n]|但是|但|不过|而是")
+# 否认自身经历的说法。只认“否定词 + 动作”，避免把“并发下也不会出现重复”这类结果描述当成否认
+NEGATED_EXPERIENCE = re.compile(
+    r"(?:没有|没|未曾|尚未|从未|还没|并未|未)有?(?:用|使用|做|接触|学|实现|写|参与|部署|掌握|涉及|配置|搭建|开发|处理|优化|设计|过)"
+    r"|不(?:会用|会使用|懂|熟悉|了解|太了解|太会|擅长)")
+STRENGTH_MAX = 600
+
+
 def grounded_strength(text, answer):
-    """优点逐个小句核对：回答里找不到依据的小句（常是从题目里混进来的内容）直接删掉。"""
-    kept = [clause.strip() for clause in CLAUSE_SPLIT.split(text) if clause.strip() and shares_quote(clause, answer)]
-    return "，".join(kept) + "。" if kept else None
+    """优点逐个小句核对：只保留在回答“肯定小句”里有原文依据的小句。
+
+    - 回答里找不到依据的（常是从题目里混进来的内容）删掉；
+    - 和回答里否认经历的小句有重合的也删掉：宁可少写，也不能把用户明确否认的经验写成优点。
+    """
+    clauses = [clause for clause in ANSWER_CLAUSE_SPLIT.split(answer) if clause.strip()]
+    # 用“|”分隔，避免跨小句拼出原文里不存在的连续片段
+    negated = "|".join(clause for clause in clauses if NEGATED_EXPERIENCE.search(clause))
+    affirmed = "|".join(clause for clause in clauses if not NEGATED_EXPERIENCE.search(clause))
+    kept = [clause.strip() for clause in CLAUSE_SPLIT.split(text)
+            if clause.strip() and shares_quote(clause, affirmed) and not shares_quote(clause, negated)]
+    if not kept:
+        return None
+    joined = "，".join(kept)
+    # 原文最长 600 字，拼接后不会更长；只有补句号可能超出，超出时不补
+    return joined + "。" if len(joined) < STRENGTH_MAX else joined[:STRENGTH_MAX]
 
 
 def answer_novelty(quote, previous_answers):
@@ -180,6 +204,12 @@ def parse_output(raw, context):
                                         if not re.search(r"已经|成功|实现了|设计了|完成了|进行了|验证了|取得了|确保了|提高了|证明了|获得了", strength.text)]
             if question is not None:
                 question.text = question.text.replace("你是如何", "你会如何").replace("你使用的", "你计划使用的")
+        # 字段赋值不会再触发校验：处理完后按对外结构再验一次，不合格交给修复重试，避免组装响应时才报 500
+        try:
+            Feedback(strengths=[strength.text for strength in draft.feedback.strengths],
+                     improvements=draft.feedback.improvements, reference_points=draft.feedback.reference_points)
+        except ValueError:
+            raise ValueError("invalid_feedback") from None
         # Completion is an authoritative server rule, not a model decision.
         if context["round"] == MAX_ROUNDS:
             draft.next_question = question = None
@@ -300,7 +330,8 @@ class InterviewService:
                                 known_checks = {"invalid_next_question", "invalid_question_evidence",
                                                 "question_missing_job_grounding", "followup_missing_answer_grounding",
                                                 "repeated_question", "incomplete_output", "followup_quote_not_in_question",
-                                                "empty_reference_points", "question_placeholder", "followup_repeats_old_topic"}
+                                                "empty_reference_points", "question_placeholder", "followup_repeats_old_topic",
+                                                "invalid_feedback"}
                                 check = str(validation_error) if type(validation_error) in (ValueError, QuestionRejected) else "schema"
                                 if check not in known_checks:
                                     check = "schema"
@@ -328,6 +359,7 @@ class InterviewService:
                                     "followup_missing_answer_grounding": "后续问题必须通过有效的 a 选项引用本轮 answer，并保持岗位关联。",
                                     "followup_quote_not_in_question": "围绕所选 a 选项追问，在问题 text 中使用它原文至少连续四个字符的关键词或短语，并返回该 a 选项 ID；不要切换到不相关技能。",
                                     "repeated_question": "下一题不能重复已问过的问题。",
+                                    "invalid_feedback": "反馈每项需简短清楚、不超过 600 字，三个数组各最多五项。",
                                     "followup_repeats_old_topic": "追问回到了前几轮已经讨论过的话题。请围绕本轮回答里新出现的内容追问。",
                                     "incomplete_output": "输出不完整，请精简内容并返回完整 JSON。",
                                     "empty_reference_points": "reference_points 至少给出一个具体知识点，不要照抄‘建议覆盖的要点’等格式占位文字。",
