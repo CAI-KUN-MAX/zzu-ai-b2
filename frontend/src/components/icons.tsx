@@ -192,3 +192,33 @@ export function DownloadIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function MicIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
+      <rect
+        x="7.5"
+        y="2.5"
+        width="5"
+        height="9"
+        rx="2.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M4.5 9.5a5.5 5.5 0 0 0 11 0M10 15v2.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function StopIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
+      <rect x="6" y="6" width="8" height="8" rx="1.5" fill="currentColor" />
+    </svg>
+  );
+}

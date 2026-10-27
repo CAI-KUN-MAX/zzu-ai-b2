@@ -26,6 +26,8 @@ const MOCK_VERSION = jobsMock.catalogue_version as string;
 
 /** mock 下记录每个任务选中的岗位与轮询次数 */
 const mockSelected = new Map<string, string[]>();
+/** mock 下记录任务对应的简历 ID，context 要回传同一个 ID 才通过前端一致性校验 */
+const mockResumeOf = new Map<string, string>();
 const mockPoll = new Map<string, number>();
 
 export interface ListJobsParams {
@@ -106,6 +108,9 @@ function mockStep(taskId: string): JobMatchTask {
       status: "running",
       stage: `基础评分 ${Math.min(2, total)}/${total}`,
       progress: 35,
+      analysis_completed: 0,
+      analysis_total: Math.min(2, total),
+      analysis_started_at: null,
       error: null,
       error_code: null,
       items: jobIds.slice(0, 2).map((id) => buildMockItem(id, false)),
@@ -116,6 +121,9 @@ function mockStep(taskId: string): JobMatchTask {
       status: "running",
       stage: `生成推荐理由 ${Math.min(3, total)}/${total}`,
       progress: 78,
+      analysis_completed: 1,
+      analysis_total: Math.min(2, total),
+      analysis_started_at: new Date(Date.now() - 8000).toISOString(),
       error: null,
       error_code: null,
       items: jobIds.slice(0, 3).map((id, index) => buildMockItem(id, index < 2)),
@@ -126,6 +134,9 @@ function mockStep(taskId: string): JobMatchTask {
     status: "succeeded",
     stage: `匹配完成 ${total}/${total}`,
     progress: 100,
+    analysis_completed: Math.min(2, total),
+    analysis_total: Math.min(2, total),
+    analysis_started_at: new Date(Date.now() - 20000).toISOString(),
     error: null,
     error_code: null,
     // 前两个岗位给完整报告，其余降级，用来演示两种展示形态
@@ -144,6 +155,7 @@ export async function createJobMatch(
     await wait(900);
     const taskId = `mock-job-${Date.now()}`;
     mockSelected.set(taskId, jobIds);
+    mockResumeOf.set(taskId, resumeId);
     mockPoll.set(taskId, 0);
     return { task_id: taskId };
   }
@@ -177,7 +189,7 @@ export async function getMatchContext(
   if (IS_MOCK_MODE) {
     await wait(300);
     const job = MOCK_JOBS.find((item) => item.job_id === jobId);
-    const resumeId = "mock-resume";
+    const resumeId = mockResumeOf.get(taskId) ?? "mock-resume";
     return {
       resume_id: resumeId,
       job_id: jobId,

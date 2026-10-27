@@ -10,6 +10,12 @@ from app.job_schemas import Job
 CATALOGUE_PATH = Path(__file__).resolve().parents[1] / "catalogue" / "jobs.v1.json"
 
 
+def test_ready(job):
+    jd = job.jd_text.strip()
+    return (job.application_status in {"open", "unverified"} and len(jd) >= 80
+            and "岗位职责：" in jd and "任职要求：" in jd)
+
+
 class JobRepository:
     def __init__(self, store, path=CATALOGUE_PATH):
         self.store = store
@@ -25,6 +31,14 @@ class JobRepository:
                         if (category is None or job.category == category)
                         and (education is None or job.education == education)
                         and (application_status is None or job.application_status == application_status)),
+                       key=lambda job: job.job_id)
+        return dict(catalogue_version=self.version, total=len(items), page=page, page_size=page_size,
+                    items=items[(page - 1) * page_size:page * page_size])
+
+    def testing_pool(self, category=None, education=None, page=1, page_size=20):
+        items = sorted((job for job in self.jobs.values()
+                        if test_ready(job) and (category is None or job.category == category)
+                        and (education is None or job.education == education)),
                        key=lambda job: job.job_id)
         return dict(catalogue_version=self.version, total=len(items), page=page, page_size=page_size,
                     items=items[(page - 1) * page_size:page * page_size])
@@ -54,4 +68,6 @@ class JobRepository:
         return identifier, True
 
     def update(self, identifier, **fields):
+        if "payload" in fields:
+            fields["payload"] = json.dumps(fields["payload"], ensure_ascii=False)
         self.store.update("tasks", identifier, **fields)

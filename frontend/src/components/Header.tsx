@@ -1,12 +1,10 @@
 import { LogoIcon } from "./icons";
-import { Nav, type AppMode } from "./Nav";
 
-interface HeaderProps {
-  mode: AppMode;
-  onModeChange: (mode: AppMode) => void;
-}
-
-export function Header({ mode, onModeChange }: HeaderProps) {
+/**
+ * 主导航已收敛为「岗位匹配」一项，不再渲染可切换的导航条，右侧只保留静态模块标识。
+ * 文本诊断与简历筛选的页面文件仍保留在仓库中，只是不作为主导航入口。
+ */
+export function Header() {
   return (
     <header className="sticky top-0 z-20 border-b border-surface-line bg-white/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
@@ -22,7 +20,9 @@ export function Header({ mode, onModeChange }: HeaderProps) {
           </div>
         </div>
 
-        <Nav value={mode} onChange={onModeChange} />
+        <span className="shrink-0 rounded-full bg-brand-50 px-3 py-1 text-[12px] font-medium text-brand-700 ring-1 ring-inset ring-brand-100">
+          岗位匹配
+        </span>
       </div>
     </header>
   );

@@ -6,7 +6,7 @@ import tempfile
 import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -81,9 +81,32 @@ class JobMatchingTests(unittest.TestCase):
         self.assertEqual(self.client.get("/api/jobs?application_status=closed").json()["total"], 1)
         self.assertEqual(len(self.client.get("/api/jobs?page=2&page_size=2").json()["items"]), 1)
         self.assertEqual(self.client.get("/api/jobs/a").json()["jd_text"], JD)
+        detail = self.client.get("/api/jobs/a").json()
+        self.assertEqual(detail["source_url"], "https://example.com/a")
+        self.assertEqual(detail["application_url"], "https://example.com/apply")
+        self.assertNotEqual(detail["source_url"], detail["application_url"])
+        self.assertEqual(detail["application_status"], "open")
+        self.assertTrue(detail["verified_at"])
         for query in ("page=0", "page_size=101", "category=其他", "education=高中", "application_status=bad"):
             self.assertEqual(self.client.get("/api/jobs?" + query).status_code, 422)
         self.assertEqual(self.client.get("/api/jobs/nope").status_code, 404)
+
+    def test_testing_pool_requires_explicit_match_opt_in(self):
+        jd = "岗位职责：参与分子检测实验、整理数据并优化试验流程，与研发团队核对分析结果，记录样本处理和检测质量问题。任职要求：生物学硕士，掌握分子实验和数据分析方法，能够阅读英文文献并编写报告，具备跨团队沟通能力。"
+        candidate = fixture_job("candidate", jd, "生物医药", "硕士", "unverified")
+        candidate["application_url"] = None
+        app.state.job_repository.jobs["candidate"] = Job.model_validate(candidate)
+        listing = self.client.get("/api/jobs/testing-pool").json()
+        self.assertEqual(listing["total"], 1)
+        self.assertIsNone(listing["items"][0]["application_url"])
+        request = {"resume_id": "r", "job_ids": ["candidate"]}
+        self.assertEqual(self.client.post("/api/job-matches", json=request).status_code, 409)
+        request["allow_unverified_for_testing"] = True
+        response = self.client.post("/api/job-matches", json=request)
+        self.assertEqual(response.status_code, 202, response.text)
+        self.assertEqual(self.wait(response.json()["task_id"])["status"], "succeeded")
+        request["job_ids"] = ["closed"]
+        self.assertEqual(self.client.post("/api/job-matches", json=request).status_code, 409)
 
     def test_structured_education_is_scored_when_jd_omits_it(self):
         jd = "负责药理实验、细胞活性检测和实验数据整理，熟悉实验室规范及动物伦理要求。"
@@ -116,6 +139,8 @@ class JobMatchingTests(unittest.TestCase):
             self.assertEqual(item["analysis_status"], "degraded")
             self.assertNotIn("report", item)
             self.assertEqual(item["score"], item["stage1_score"])
+        self.assertEqual((result["analysis_completed"], result["analysis_total"]), (0, 0))
+        self.assertIsNone(result["analysis_started_at"])
 
     def test_errors_are_atomic_and_task_types_isolated(self):
         for payload, status, code in [({}, 422, "VALIDATION_ERROR"),
@@ -159,6 +184,8 @@ class JobMatchingTests(unittest.TestCase):
             self.assertFalse(item["degraded"])
             DiagnoseResponse.model_validate(item["report"])
             self.assertEqual(item["score"], round(.35 * item["stage1_score"] + .65 * item["report"]["overall_score"]))
+        self.assertEqual((first["analysis_completed"], first["analysis_total"]), (3, 3))
+        self.assertEqual(datetime.fromisoformat(first["analysis_started_at"]).tzinfo, timezone.utc)
 
     def test_partial_failure_and_mock_are_degraded(self):
         async def fake(resume, jd):
@@ -170,6 +197,7 @@ class JobMatchingTests(unittest.TestCase):
         self.assertEqual(result["status"], "succeeded")
         reasons = {i["job_id"]: i["degraded_reason"] for i in result["items"]}
         self.assertEqual(reasons, {"a": "mock_report", "b": "mock_report", "c": "model_failed"})
+        self.assertEqual((result["analysis_completed"], result["analysis_total"]), (3, 3))
         with app.state.store.connect() as db:
             self.assertEqual(db.execute("SELECT count(*) FROM llm_cache").fetchone()[0], 0)
 
@@ -215,10 +243,13 @@ class JobMatchingTests(unittest.TestCase):
             report = MOCK_RESPONSES["medium"].model_copy(deep=True)
             report.meta.mode = "llm"
             return report
-        with patch.dict(os.environ, {"MATCH_LLM_TOP_K": "8"}), patch("app.job_matching.TOTAL_TIMEOUT", .08), \
+        with patch.dict(os.environ, {"MATCH_LLM_TOP_K": "8"}), patch("app.job_matching.TOTAL_TIMEOUT", .5), \
                 patch("app.matching.run_diagnose", side_effect=fake):
             result = self.wait(self.create())
-        self.assertEqual(result["status"], "succeeded")
+        self.assertEqual(result["status"], "failed")
+        self.assertEqual(result["error_code"], "JOB_MATCH_TIMEOUT")
+        self.assertEqual(result["analysis_completed"], 3)
+        self.assertEqual(result["analysis_total"], 3)
         self.assertEqual(sum(not i["degraded"] for i in result["items"]), 2)
         self.assertEqual(next(i for i in result["items"] if i["job_id"] == "c")["degraded_reason"], "batch_timeout")
         self.assertFalse(app.state.match_jobs.inflight)
@@ -280,7 +311,7 @@ class JobMatchingTests(unittest.TestCase):
             self.assertEqual(stored["jd_text"], JD)
             self.assertEqual(stored["resume_text"], TEXT)
             question = session["question"]
-            for round_number in range(1, 4):
+            for round_number in range(1, 6):
                 answer = self.client.post(f"/api/interviews/{session['interview_id']}/answers", json={
                     "question_id": question["id"], "answer_text": ANSWER})
                 self.assertEqual(answer.status_code, 200, answer.text)
@@ -378,6 +409,10 @@ class JobMatchingTests(unittest.TestCase):
         self.assertGreater(len(catalogue.jobs), 0)
         # Coverage is an explicit acceptance report, never silently treated as met by unit tests.
         self.assertEqual(len(catalogue.jobs), len(set(catalogue.jobs)))
+        report = check_catalogue(root / "catalogue" / "jobs.v1.json", date(2026, 10, 27))
+        self.assertTrue(report["testing_target_met"])
+        self.assertEqual(report["testing_pool"], 40)
+        self.assertFalse(report["target_met"])
 
 
 if __name__ == "__main__":

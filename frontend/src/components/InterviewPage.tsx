@@ -13,13 +13,16 @@ import {
   submitAnswer,
 } from "../api/interviews";
 import { ApiError } from "../api/http";
-import { AlertIcon, ArrowLeftIcon, CheckIcon, InfoIcon, SpinnerIcon } from "./icons";
+import { useSpeechRecognition } from "../lib/useSpeechRecognition";
+import { AlertIcon, ArrowLeftIcon, CheckIcon, InfoIcon, MicIcon, SpinnerIcon, StopIcon } from "./icons";
 
 interface InterviewPageProps {
   resumeId: string;
   resumeName: string;
   resumeStatus: ResumeStatus;
   jdText: string;
+  /** 岗位名称（如“后端开发 · 某公司”），有则在确认页展示，否则退回 JD 首行 */
+  jobTitle?: string;
   /** 返回筛选结果页；原页面不卸载，展开状态与报告都还在 */
   onExit: () => void;
   /** 覆盖层层级：默认 30；嵌在岗位详情里时传 40，避免被详情盖住 */
@@ -81,11 +84,15 @@ function FeedbackBlock({ feedback }: { feedback: InterviewFeedback }) {
   );
 }
 
+/** 创建会话前先按当前契约展示，拿到响应后一律以接口的 max_rounds 为准 */
+const DEFAULT_MAX_ROUNDS = 5;
+
 export function InterviewPage({
   resumeId,
   resumeName,
   resumeStatus,
   jdText,
+  jobTitle,
   onExit,
   layer = 30,
 }: InterviewPageProps) {
@@ -93,7 +100,16 @@ export function InterviewPage({
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<InterviewQuestion | null>(null);
   const [currentRound, setCurrentRound] = useState(1);
-  const [maxRounds, setMaxRounds] = useState(3);
+  const [maxRounds, setMaxRounds] = useState(DEFAULT_MAX_ROUNDS);
+
+  // 语音识别只负责把最终文本追加进输入框，提交仍需用户手动点击
+  const speech = useSpeechRecognition({
+    onFinal: (text) =>
+      setAnswer((prev) => {
+        const merged = prev.trim() ? `${prev.trimEnd()} ${text}` : text;
+        return merged.slice(0, ANSWER_MAX + 200);
+      }),
+  });
   const [rounds, setRounds] = useState<RoundRecord[]>([]);
   const [answer, setAnswer] = useState("");
   const [busy, setBusy] = useState(false);
@@ -122,6 +138,12 @@ export function InterviewPage({
   // 用 ref 做同步闸门，保证同一时刻只发一次请求
   const inFlight = useRef(false);
 
+  // 换题或进入完成页时停止识别，避免继续往已清空的输入框里追加文字
+  useEffect(() => {
+    speech.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentRound, phase]);
+
   const words = answerLength(answer);
   const overLimit = words > ANSWER_MAX;
   const canSubmit = useMemo(
@@ -130,9 +152,10 @@ export function InterviewPage({
   );
 
   const jdSummary = useMemo(() => {
+    if (jobTitle) return jobTitle;
     const firstLine = jdText.split("\n").find((line) => line.trim().length > 0) ?? jdText;
     return firstLine.length > 48 ? `${firstLine.slice(0, 48)}…` : firstLine;
-  }, [jdText]);
+  }, [jdText, jobTitle]);
 
   async function handleStart() {
     if (inFlight.current) return;
@@ -164,6 +187,8 @@ export function InterviewPage({
   async function handleSubmit() {
     if (!sessionId || !currentQuestion) return;
     if (inFlight.current) return;
+    // 提交后本轮结束，先关掉麦克风
+    speech.stop();
     inFlight.current = true;
 
     const text = answer.trim();
@@ -246,7 +271,7 @@ export function InterviewPage({
               模拟面试
             </span>
             <h1 className="mt-4 text-[22px] font-semibold tracking-tight sm:text-[26px]">
-              针对这份简历，练三轮
+              针对这份简历，练 {maxRounds} 轮
             </h1>
 
             <dl className="mt-5 space-y-3 rounded-xl bg-surface-soft/70 p-4">
@@ -264,7 +289,7 @@ export function InterviewPage({
               </div>
               <div className="flex gap-3">
                 <dt className="w-16 shrink-0 text-[12px] text-ink-500">轮次</dt>
-                <dd className="text-[13px] text-ink-700">最多 3 轮，每轮一个问题，回答后立即给反馈</dd>
+                <dd className="text-[13px] text-ink-700">共 {maxRounds} 轮，每轮一个问题，回答后立即给反馈</dd>
               </div>
             </dl>
 
@@ -351,9 +376,40 @@ export function InterviewPage({
               </p>
 
               <div className="mt-4">
-                <label htmlFor="interview-answer" className="text-[11px] font-medium text-ink-500">
-                  你的回答
-                </label>
+                <div className="flex items-center justify-between gap-3">
+                  <label
+                    htmlFor="interview-answer"
+                    className="text-[11px] font-medium text-ink-500"
+                  >
+                    你的回答
+                  </label>
+                  <button
+                    type="button"
+                    onClick={speech.toggle}
+                    disabled={busy || !speech.supported}
+                    aria-pressed={speech.listening}
+                    title={
+                      speech.supported
+                        ? speech.listening
+                          ? "停止语音识别"
+                          : "开始语音识别（简体中文）"
+                        : "当前浏览器不支持语音识别"
+                    }
+                    className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                      speech.listening
+                        ? "bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200 hover:bg-rose-100"
+                        : "bg-surface-soft text-ink-700 ring-1 ring-inset ring-surface-line hover:bg-slate-100"
+                    }`}
+                  >
+                    {speech.listening ? (
+                      <StopIcon className="h-3.5 w-3.5" />
+                    ) : (
+                      <MicIcon className="h-3.5 w-3.5" />
+                    )}
+                    {speech.listening ? "停止识别" : "语音输入"}
+                  </button>
+                </div>
+
                 <textarea
                   id="interview-answer"
                   value={answer}
@@ -367,6 +423,33 @@ export function InterviewPage({
                       : "border-surface-line focus:border-brand-300"
                   } ${busy ? "bg-surface-soft/60" : "bg-white"}`}
                 />
+
+                {/* 语音状态：识别中显示实时片段，失败/不支持时仍可手动打字 */}
+                {!speech.supported ? (
+                  <p className="mt-1.5 text-[11px] leading-relaxed text-ink-500">
+                    当前浏览器不支持语音识别，请直接打字输入。
+                  </p>
+                ) : speech.status === "denied" ? (
+                  <p role="alert" className="mt-1.5 flex items-start gap-1.5 text-[11px] leading-relaxed text-rose-600">
+                    <AlertIcon className="mt-0.5 h-3 w-3 shrink-0" />
+                    <span>{speech.errorMessage}；仍可正常打字并提交。</span>
+                  </p>
+                ) : speech.status === "error" ? (
+                  <p role="alert" className="mt-1.5 flex items-start gap-1.5 text-[11px] leading-relaxed text-amber-700">
+                    <AlertIcon className="mt-0.5 h-3 w-3 shrink-0" />
+                    <span>{speech.errorMessage}</span>
+                  </p>
+                ) : speech.listening ? (
+                  <p className="mt-1.5 text-[11px] leading-relaxed text-brand-700">
+                    正在识别{speech.interim ? `：「${speech.interim}」` : "…"}
+                    <span className="text-ink-500">识别结果会追加到上方输入框，请检查后手动提交。</span>
+                  </p>
+                ) : (
+                  <p className="mt-1.5 text-[10px] leading-relaxed text-ink-500">
+                    语音识别由浏览器自带的识别服务完成，部分浏览器（如 Chrome）会把语音发送到其在线服务转写，网络不通时可能无法使用；本站不保存录音，识别文字需你确认后手动提交。
+                  </p>
+                )}
+
                 <div className="mt-1.5 flex items-center justify-between gap-3">
                   <span
                     className={`text-[11px] ${
@@ -439,7 +522,7 @@ export function InterviewPage({
               </div>
 
               <p className="mt-4 rounded-xl bg-surface-soft/80 px-4 py-3 text-[12px] leading-relaxed text-ink-700">
-                三轮反馈都在下面。建议先把「可以补充」里的点挑两条写进回答，再重新练一遍同样的题。
+                全部 {rounds.length} 轮反馈都在下面。建议先把「可以补充」里的点挑两条写进回答，再重新练一遍同样的题。
               </p>
 
               <div className="mt-5 flex flex-col gap-2 sm:flex-row">

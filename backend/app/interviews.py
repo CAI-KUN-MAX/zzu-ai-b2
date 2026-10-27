@@ -1,4 +1,4 @@
-"""Three-round, evidence-grounded interview sessions with durable replay."""
+"""Five-round, evidence-grounded interview sessions with durable replay."""
 import asyncio
 import json
 import logging
@@ -21,7 +21,7 @@ MAX_TOKENS = 2400
 REPAIR_TEMPERATURE = 0.7
 MAX_CONTEXT_CHARS = 20000
 TTL_SECONDS = 24 * 60 * 60
-MAX_ROUNDS = 3
+MAX_ROUNDS = 5
 BASE_URL = "https://open.bigmodel.cn/api/paas/v4/"
 DEFAULT_MODEL = "glm-4-flash"
 PLACEHOLDERS = {"有原文依据的优点", "建议", "建议覆盖的要点", "考察点", "一道问题", "与回答相关的追问"}
@@ -60,8 +60,8 @@ ANSWER_FORMAT = """服务器阶段要求：本次不是最后一轮，必须返�
 "strengths":[{"text":"有原文依据的优点","answer_ref":"a0"}],"improvements":["建议"]},
 "next_question":{"text":"你提到‘a0选项的quote原文’，请进一步说明具体做法？","focus":"考察点","evidence_refs":["a0","j0"]}}
 """
-FINAL_FORMAT = """服务器阶段要求：这是第三轮也是最后一轮。本次只生成反馈，绝对不要继续出题。
-next_question 必须为 JSON null。不要因为全局提问规则生成第四题。只返回如下结构：
+FINAL_FORMAT = """服务器阶段要求：这是第五轮也是最后一轮。本次只生成反馈，绝对不要继续出题。
+next_question 必须为 JSON null。不要因为全局提问规则生成第六题。只返回如下结构：
 {"feedback":{"reference_points":["建议覆盖的要点"],
 "strengths":[{"text":"有原文依据的优点","answer_ref":"a0"}],"improvements":["建议"]},"next_question":null}
 """
@@ -137,6 +137,8 @@ NEGATED_EXPERIENCE = re.compile(
     r"(?:没有|没|未曾|尚未|从未|还没|并未|未)有?(?:用|使用|做|接触|学|实现|写|参与|部署|掌握|涉及|配置|搭建|开发|处理|优化|设计|过)"
     r"|不(?:会用|会使用|懂|熟悉|了解|太了解|太会|擅长)")
 STRENGTH_MAX = 600
+# 依附于前一小句的开头：方式（通过/借助/利用）、目的（来/以便/从而/用于）、承接（然后/进而）
+DEPENDENT_CLAUSE = re.compile(r"(?:通过|借助|利用|来|以便|从而|进而|用于|用来|使得|然后)")
 
 
 def grounded_strength(text, answer):
@@ -149,8 +151,18 @@ def grounded_strength(text, answer):
     # 用“|”分隔，避免跨小句拼出原文里不存在的连续片段
     negated = "|".join(clause for clause in clauses if NEGATED_EXPERIENCE.search(clause))
     affirmed = "|".join(clause for clause in clauses if not NEGATED_EXPERIENCE.search(clause))
-    kept = [clause.strip() for clause in CLAUSE_SPLIT.split(text)
-            if clause.strip() and shares_quote(clause, affirmed) and not shares_quote(clause, negated)]
+    kept = []
+    head_dropped = False
+    for clause in (clause.strip() for clause in CLAUSE_SPLIT.split(text)):
+        if not clause:
+            continue
+        grounded = shares_quote(clause, affirmed) and not shares_quote(clause, negated)
+        # 前一个小句被删时，“通过…/来…/从而…”这类依附小句单独留下会变成半句话，一并删掉
+        if grounded and not (head_dropped and DEPENDENT_CLAUSE.match(clause)):
+            kept.append(clause)
+            head_dropped = False
+        else:
+            head_dropped = True
     if not kept:
         return None
     joined = "，".join(kept)
@@ -353,7 +365,7 @@ class InterviewService:
                                             return fallback
                                     fail(502, "INTERVIEW_GENERATION_FAILED", "面试内容生成失败，请重试；本轮尚未推进")
                                 feedback = {
-                                    "invalid_next_question": "第三轮 next_question 必须为 null，前两轮必须有下一题。",
+                                    "invalid_next_question": "第五轮 next_question 必须为 null，前四轮必须有下一题。",
                                     "invalid_question_evidence": "问题 evidence_refs 必须选择 evidence_options 中确实存在的 ID，不要自行摘录或编造 ID。",
                                     "question_missing_job_grounding": "问题至少引用一条 resume 或 jd 证据。",
                                     "followup_missing_answer_grounding": "后续问题必须通过有效的 a 选项引用本轮 answer，并保持岗位关联。",

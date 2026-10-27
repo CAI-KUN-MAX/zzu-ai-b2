@@ -2,7 +2,7 @@
 from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, model_validator
 
 from app.interview_schemas import InterviewCreate
 from app.schemas import DiagnoseRequest, DiagnoseResponse, DimensionScore
@@ -31,10 +31,16 @@ class Job(Contract):
     source_url: str = Field(pattern=r"^https://")
     published_at: date
     publication_type: Literal["original", "repost"]
-    application_url: str = Field(pattern=r"^https://")
+    application_url: str | None = Field(default=None, pattern=r"^https://")
     verified_at: datetime
     application_status: ApplicationStatus
     verification_note: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def open_requires_application_url(self):
+        if self.application_status == "open" and self.application_url is None:
+            raise ValueError("open job requires an application URL")
+        return self
 
 
 class JobList(Contract):
@@ -48,6 +54,7 @@ class JobList(Contract):
 class JobMatchRequest(Contract):
     resume_id: StrictStr
     job_ids: list[StrictStr]
+    allow_unverified_for_testing: bool = False
 
 
 class TaskCreated(Contract):
@@ -76,6 +83,9 @@ class JobMatchTask(Contract):
     status: Literal["queued", "running", "succeeded", "failed"]
     stage: str
     progress: int = Field(ge=0, le=100)
+    analysis_completed: int = Field(ge=0)
+    analysis_total: int = Field(ge=0)
+    analysis_started_at: datetime | None
     error: str | None
     error_code: str | None
     items: list[JobMatchItem]

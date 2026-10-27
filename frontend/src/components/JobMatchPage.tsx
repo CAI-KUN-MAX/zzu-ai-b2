@@ -4,6 +4,7 @@ import { STATUS_LABEL, getIngestTask, uploadResumes } from "../api/resumes";
 import { createJobMatch, listJobs } from "../api/jobs";
 import { useTask } from "../lib/useTask";
 import { DropZone } from "./DropZone";
+import { JobJdDialog } from "./JobJdDialog";
 import {
   AlertIcon,
   ArrowRightIcon,
@@ -13,14 +14,41 @@ import {
   SpinnerIcon,
 } from "./icons";
 
+/** 返回首页或刷新后保留的输入：已上传的简历（解析任务 ID）和已选岗位 */
+export interface JobMatchDraft {
+  resumeTaskId: string | null;
+  selected: string[];
+  /** File 对象只在内存里保留，刷新后无法恢复，但简历卡片仍可通过解析任务显示 */
+  files: File[];
+}
+
+/** 上一次发起的匹配，用于“继续查看” */
+export interface LastMatchSummary {
+  resumeName: string;
+  jobCount: number;
+  savedAt: number;
+}
+
 interface JobMatchPageProps {
   onStartMatch: (
     taskId: string,
     resumeId: string,
     resumeName: string,
     resumeStatus: ResumeStatus,
-    jobIndex: Record<string, Job>
+    jobIndex: Record<string, Job>,
+    jobIds: string[]
   ) => void;
+  draft: JobMatchDraft;
+  onDraftChange: (draft: JobMatchDraft) => void;
+  lastMatch: LastMatchSummary | null;
+  onOpenLastMatch: () => void;
+}
+
+function formatSavedAt(savedAt: number): string {
+  const date = new Date(savedAt);
+  const sameDay = new Date().toDateString() === date.toDateString();
+  const time = date.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+  return sameDay ? `今天 ${time}` : `${date.getMonth() + 1} 月 ${date.getDate()} 日 ${time}`;
 }
 
 const RESUME_STATUS_STYLE: Record<ResumeStatus, string> = {
@@ -30,27 +58,48 @@ const RESUME_STATUS_STYLE: Record<ResumeStatus, string> = {
 };
 
 /** 主入口：上传一份简历，从岗位目录里勾选多个岗位发起匹配 */
-export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
-  const [files, setFiles] = useState<File[]>([]);
-  const [resumeTaskId, setResumeTaskId] = useState<string | null>(null);
+export function JobMatchPage({
+  onStartMatch,
+  draft,
+  onDraftChange,
+  lastMatch,
+  onOpenLastMatch,
+}: JobMatchPageProps) {
+  // 从“换个岗位再匹配”返回或刷新页面时，沿用已上传的简历和已选岗位
+  const [files, setFiles] = useState<File[]>(draft.files);
+  const [resumeTaskId, setResumeTaskId] = useState<string | null>(draft.resumeTaskId);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobTotal, setJobTotal] = useState(0);
   const [jobsLoading, setJobsLoading] = useState(true);
   const [jobsError, setJobsError] = useState<string | null>(null);
   const [category, setCategory] = useState<string>("全部");
 
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>(draft.selected);
   const [submitting, setSubmitting] = useState(false);
+  const [jdJob, setJdJob] = useState<Job | null>(null);
 
-  const { data: ingest, error: pollError } = useTask<IngestTask>(getIngestTask, resumeTaskId);
+  const {
+    data: ingest,
+    error: pollError,
+    transient: pollTransient,
+    retry: retryIngest,
+  } = useTask<IngestTask>(getIngestTask, resumeTaskId);
+
+  const onDraftChangeRef = useRef(onDraftChange);
+  onDraftChangeRef.current = onDraftChange;
+  useEffect(() => {
+    onDraftChangeRef.current({ resumeTaskId, selected, files });
+  }, [resumeTaskId, selected, files]);
   const resume = ingest?.items[0] ?? null;
   // 只有一份简历：拿到解析结果（非 failed）就可以发起匹配
   const parsed = !!resume && resume.status !== "failed";
   // 只有后端明确返回失败才算解析失败；轮询网络错误或等待超时不能证明解析失败
   const resumeFailed = resume?.status === "failed" || ingest?.status === "failed";
-  const pollUnavailable = !!resumeTaskId && !!pollError && !resumeFailed;
+  const pollUnavailable = !!resumeTaskId && !!pollError && pollTransient && !resumeFailed;
+  const hasResume = files.length > 0 || !!resumeTaskId;
   // setState 是异步的，同一时刻连点两次都会读到旧的 submitting；用 ref 做同步闸门，只发一次请求
   const inFlight = useRef(false);
 
@@ -62,7 +111,12 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
 
     listJobs({ page: 1, page_size: 50 })
       .then((data) => {
-        if (!cancelled) setJobs(data.items);
+        if (cancelled) return;
+        setJobs(data.items);
+        setJobTotal(data.total);
+        // 目录更新后已下架的岗位不能再保留在已选里
+        const ids = new Set(data.items.map((job) => job.job_id));
+        setSelected((prev) => prev.filter((id) => ids.has(id)));
       })
       .catch((err: unknown) => {
         if (!cancelled) setJobsError(err instanceof Error ? err.message : "岗位目录加载失败");
@@ -110,12 +164,9 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
     }
   }
 
-  /** 轮询失败（网络异常或等待超时）时，用同一个解析任务重新轮询，不必重新上传 */
+  /** 轮询失败（网络异常或等待超时）时，用同一个解析任务立即重新查询，不必重新上传 */
   function retryPoll() {
-    const taskId = resumeTaskId;
-    if (!taskId) return;
-    setResumeTaskId(null);
-    window.setTimeout(() => setResumeTaskId(taskId), 0);
+    retryIngest();
   }
 
   function toggleJob(jobId: string) {
@@ -132,7 +183,7 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
     setError(null);
     try {
       const { task_id } = await createJobMatch(resume.resume_id, selected);
-      onStartMatch(task_id, resume.resume_id, resume.name, resume.status, jobIndex);
+      onStartMatch(task_id, resume.resume_id, resume.name, resume.status, jobIndex, selected);
     } catch (err) {
       setError(err instanceof Error ? err.message : "创建匹配任务失败，请重试");
     } finally {
@@ -152,9 +203,26 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
           上传一份简历，寻找适合的岗位
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-ink-500">
-          上传简历并勾选多个候选岗位，按匹配度排序并给出推荐理由与缺口。点开岗位可看诊断报告，并针对该岗位练三轮模拟面试。
+          上传简历并勾选多个候选岗位，按匹配度排序并给出推荐理由与缺口。点开岗位可看诊断报告，并针对该岗位练五轮模拟面试。
         </p>
       </div>
+
+      {lastMatch ? (
+        <div className="mt-6 flex flex-col gap-2 rounded-xl border border-brand-100 bg-brand-50/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="min-w-0 text-[12px] leading-relaxed text-brand-800">
+            上次匹配：<span className="font-medium">{lastMatch.resumeName}</span> · {lastMatch.jobCount} 个岗位 ·{" "}
+            {formatSavedAt(lastMatch.savedAt)}
+          </p>
+          <button
+            type="button"
+            onClick={onOpenLastMatch}
+            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-[12px] font-medium text-white hover:bg-brand-700"
+          >
+            继续查看结果
+            <ArrowRightIcon className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ) : null}
 
       <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
         {/* 左：简历 */}
@@ -218,14 +286,20 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
           ) : null}
 
           {pollError ? (
-            <p className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-[12px] text-rose-700">
+            <p
+              className={`flex items-start gap-2 rounded-xl border px-3.5 py-2.5 text-[12px] ${
+                pollUnavailable
+                  ? "border-amber-200 bg-amber-50 text-amber-700"
+                  : "border-rose-200 bg-rose-50 text-rose-700"
+              }`}
+            >
               <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               <span className="flex-1">{pollError}</span>
               {pollUnavailable ? (
                 <button
                   type="button"
                   onClick={retryPoll}
-                  className="shrink-0 rounded-md bg-rose-600 px-2.5 py-1 text-[11px] font-medium text-white hover:bg-rose-700"
+                  className="shrink-0 rounded-md bg-amber-600 px-2.5 py-1 text-[11px] font-medium text-white hover:bg-amber-700"
                 >
                   重新获取
                 </button>
@@ -243,7 +317,7 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
               </span>
               <h2 className="text-sm font-semibold">候选岗位</h2>
               <span className="num text-[11px] text-ink-500">
-                已选 {selected.length} / {jobs.length}
+                可投 {jobTotal} 个 · 已选 {selected.length}
               </span>
             </div>
           </div>
@@ -280,20 +354,31 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
                 })}
               </div>
 
+              {visibleJobs.length === 0 ? (
+                <p className="rounded-xl border border-surface-line bg-white px-4 py-6 text-center text-[12px] leading-relaxed text-ink-500">
+                  {jobs.length === 0
+                    ? "当前没有已核验可投的岗位，暂不能用待核验线索替代。岗位核验通过后会陆续出现在这里。"
+                    : "该分类下暂无已核验可投岗位，换个分类看看。"}
+                </p>
+              ) : null}
+
               <div className="grid max-h-[420px] gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
                 {visibleJobs.map((job) => {
                   const active = selected.includes(job.job_id);
                   return (
-                    <button
+                    <div
                       key={job.job_id}
-                      type="button"
-                      onClick={() => toggleJob(job.job_id)}
-                      aria-pressed={active}
-                      className={`flex items-start gap-2.5 rounded-xl border p-3 text-left transition-all ${
+                      className={`flex items-start gap-1 rounded-xl border transition-all ${
                         active
                           ? "border-brand-400 bg-brand-50/50 shadow-sm"
                           : "border-surface-line bg-white hover:border-brand-200 hover:bg-brand-50/20"
                       }`}
+                    >
+                    <button
+                      type="button"
+                      onClick={() => toggleJob(job.job_id)}
+                      aria-pressed={active}
+                      className="flex min-w-0 flex-1 items-start gap-2.5 p-3 text-left"
                     >
                       <span
                         className={`mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded border ${
@@ -311,6 +396,16 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
                         </span>
                       </span>
                     </button>
+                    {/* 选之前先看 JD：独立按钮，不和勾选混在一起 */}
+                    <button
+                      type="button"
+                      onClick={() => setJdJob(job)}
+                      aria-label={`查看 ${job.title} 的 JD`}
+                      className="m-2 shrink-0 rounded-md px-2 py-1 text-[11px] font-medium text-brand-600 hover:bg-brand-50"
+                    >
+                      查看 JD
+                    </button>
+                    </div>
                   );
                 })}
               </div>
@@ -328,9 +423,11 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
 
       <div className="mt-7 flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-[11px] leading-relaxed text-ink-500">
-          {!files.length
+          {!hasResume
             ? "先上传一份简历"
-            : resumeFailed
+            : !uploading && !resumeTaskId
+              ? "简历上传未成功，请按提示换一份文件重新上传"
+              : resumeFailed
               ? "简历解析失败，请换一份简历重新上传"
               : pollUnavailable
                 ? "暂时拿不到解析结果（网络异常或等待超时），可点「重新获取」或稍后再看"
@@ -368,6 +465,15 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
           推荐理由与诊断建议由 AI 生成，仅供参考，不构成录用判断。
         </span>
       </p>
+
+      {jdJob ? (
+        <JobJdDialog
+          job={jdJob}
+          selected={selected.includes(jdJob.job_id)}
+          onToggle={() => toggleJob(jdJob.job_id)}
+          onClose={() => setJdJob(null)}
+        />
+      ) : null}
     </main>
   );
 }

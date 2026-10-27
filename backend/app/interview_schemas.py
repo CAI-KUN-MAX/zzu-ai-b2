@@ -38,15 +38,15 @@ class InterviewSession(StrictModel):
     interview_id: str
     status: Literal["active"] = "active"
     round: Literal[1] = 1
-    max_rounds: Literal[3] = 3
+    max_rounds: Literal[5] = 5
     question: Question
 
 
 class InterviewAnswerResult(StrictModel):
     interview_id: str
     status: Literal["active", "completed"]
-    round: int = Field(ge=1, le=3)
-    max_rounds: Literal[3] = 3
+    round: int = Field(ge=1, le=5)
+    max_rounds: Literal[5] = 5
     feedback: Feedback
     next_question: Question | None
 

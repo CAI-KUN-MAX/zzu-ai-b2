@@ -1,81 +1,72 @@
-import { useEffect, useState } from "react";
-import { DiagnoseError, diagnose } from "./api/diagnose";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Header } from "./components/Header";
-import { InputPage } from "./components/InputPage";
-import { LoadingPage } from "./components/LoadingPage";
-import { ResultPage } from "./components/ResultPage";
-import { ScreenPage } from "./components/ScreenPage";
-import { ScreenResultPage } from "./components/ScreenResultPage";
-import { JobMatchPage } from "./components/JobMatchPage";
+import { JobMatchPage, type JobMatchDraft } from "./components/JobMatchPage";
 import { JobResultPage } from "./components/JobResultPage";
-import type { AppMode } from "./components/Nav";
-import type { DiagnoseResponse, IngestTask, Job, ResumeStatus } from "./types";
+import {
+  type StoredJobMatch,
+  loadDraft,
+  loadLastMatch,
+  saveDraft,
+  saveLastMatch,
+} from "./lib/jobMatchStorage";
+import type { Job, ResumeStatus } from "./types";
 
-type View =
-  | { name: "input" }
-  | { name: "report"; data: DiagnoseResponse }
-  | { name: "screen" }
-  | { name: "screenResult"; taskId: string; jdText: string; ingest: IngestTask }
-  | { name: "job" }
-  | {
-      name: "jobResult";
-      taskId: string;
-      resumeId: string;
-      resumeName: string;
-      resumeStatus: ResumeStatus;
-      jobIndex: Record<string, Job>;
-    };
+/**
+ * 主导航收敛为「岗位匹配」一条链路：上传简历 → 选岗位 → 排序结果 → 详情（诊断 + 面试）。
+ * 文本诊断与简历筛选的页面文件仍在仓库里，只是不再作为主导航入口。
+ */
+type View = { name: "job" } | ({ name: "jobResult" } & StoredJobMatch);
 
-/** 主入口改为「岗位匹配」：上传一份简历找岗位 */
-const DEFAULT_MODE: AppMode = "job";
+/** 结果页挂在 #result 上：刷新能恢复，手机返回手势能回到选岗页 */
+const RESULT_HASH = "#result";
 
-const MODE_HOME: Record<AppMode, View> = {
-  job: { name: "job" },
-  screen: { name: "screen" },
-  diagnose: { name: "input" },
-};
+function initialView(last: StoredJobMatch | null): View {
+  if (window.location.hash === RESULT_HASH && last) return { name: "jobResult", ...last };
+  return { name: "job" };
+}
+
+function clearHash() {
+  if (window.location.hash) {
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+  }
+}
 
 export default function App() {
-  const [mode, setMode] = useState<AppMode>(DEFAULT_MODE);
-  const [view, setView] = useState<View>({ name: "job" });
-
-  // 文本诊断：输入内容提到 App 层，请求失败或重试时用户已经粘好的文本不会丢
-  const [resume, setResume] = useState("");
-  const [jd, setJd] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [lastMatch, setLastMatch] = useState<StoredJobMatch | null>(() => loadLastMatch());
+  const [view, setView] = useState<View>(() => initialView(lastMatch));
+  // 草稿只在切页时读一次，用 ref 存避免每次勾选都让 App 重渲染
+  const draftRef = useRef<JobMatchDraft>({ ...loadDraft(), files: [] });
 
   // 切换页面时回到顶部
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [view.name, loading]);
+  }, [view.name]);
 
-  async function runDiagnose() {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await diagnose({
-        resume_text: resume.trim(),
-        jd_text: jd.trim(),
-      });
-      setView({ name: "report", data });
-    } catch (err) {
-      setError(err instanceof DiagnoseError ? err.message : "诊断失败，请稍后重试");
-    } finally {
-      setLoading(false);
-    }
-  }
+  // 刷新时 #result 但已没有可恢复的任务，去掉无效的 hash
+  useEffect(() => {
+    if (view.name === "job" && window.location.hash === RESULT_HASH) clearHash();
+    // 只在首次挂载时检查
+  }, []);
 
-  /** 切换业务入口时回到各自的初始页 */
-  function handleModeChange(next: AppMode) {
-    if (next === mode) return;
-    setMode(next);
-    setError(null);
-    setView(MODE_HOME[next]);
-  }
+  // 浏览器返回（含手机返回手势）离开 #result 时回到选岗页
+  useEffect(() => {
+    const onHashChange = () => {
+      if (window.location.hash !== RESULT_HASH) setView({ name: "job" });
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
-  function handleStartScreen(taskId: string, ingest: IngestTask, jdText: string) {
-    setView({ name: "screenResult", taskId, jdText, ingest });
+  const handleDraftChange = useCallback((draft: JobMatchDraft) => {
+    draftRef.current = draft;
+    saveDraft({ resumeTaskId: draft.resumeTaskId, selected: draft.selected });
+  }, []);
+
+  function openResult(match: StoredJobMatch) {
+    setLastMatch(match);
+    saveLastMatch(match);
+    setView({ name: "jobResult", ...match });
+    if (window.location.hash !== RESULT_HASH) window.location.hash = RESULT_HASH;
   }
 
   function handleStartJobMatch(
@@ -83,70 +74,56 @@ export default function App() {
     resumeId: string,
     resumeName: string,
     resumeStatus: ResumeStatus,
-    jobIndex: Record<string, Job>
+    jobIndex: Record<string, Job>,
+    jobIds: string[]
   ) {
-    setView({ name: "jobResult", taskId, resumeId, resumeName, resumeStatus, jobIndex });
+    const picked = Object.fromEntries(
+      jobIds.filter((id) => jobIndex[id]).map((id) => [id, jobIndex[id]])
+    ) as Record<string, Job>;
+    openResult({ taskId, resumeId, resumeName, resumeStatus, jobIds, jobIndex: picked, savedAt: Date.now() });
   }
 
-  function renderView() {
-    if (loading) return <LoadingPage />;
+  function handleReset() {
+    clearHash();
+    setView({ name: "job" });
+  }
 
-    switch (view.name) {
-      case "input":
-        return (
-          <InputPage
-            resume={resume}
-            jd={jd}
-            onResumeChange={setResume}
-            onJdChange={setJd}
-            loading={loading}
-            error={error}
-            onSubmit={runDiagnose}
-            onRetry={runDiagnose}
+  return (
+    <div className="flex min-h-screen flex-col">
+      <Header />
+
+      <div className="flex-1">
+        {view.name === "job" ? (
+          <JobMatchPage
+            onStartMatch={handleStartJobMatch}
+            draft={draftRef.current}
+            onDraftChange={handleDraftChange}
+            lastMatch={
+              lastMatch
+                ? {
+                    resumeName: lastMatch.resumeName,
+                    jobCount: lastMatch.jobIds.length,
+                    savedAt: lastMatch.savedAt,
+                  }
+                : null
+            }
+            onOpenLastMatch={() => lastMatch && openResult(lastMatch)}
           />
-        );
-      case "report":
-        return (
-          <ResultPage
-            data={view.data}
-            onReset={() => {
-              setError(null);
-              setView({ name: "input" });
-            }}
-          />
-        );
-      case "screen":
-        return <ScreenPage onStartMatch={handleStartScreen} />;
-      case "screenResult":
-        return (
-          <ScreenResultPage
-            taskId={view.taskId}
-            jdText={view.jdText}
-            ingest={view.ingest}
-            onReset={() => setView({ name: "screen" })}
-          />
-        );
-      case "job":
-        return <JobMatchPage onStartMatch={handleStartJobMatch} />;
-      case "jobResult":
-        return (
+        ) : (
           <JobResultPage
+            // 重新发起后换了任务，整页重置（详情、计时等不能沿用旧任务）
+            key={view.taskId}
             taskId={view.taskId}
             resumeId={view.resumeId}
             resumeName={view.resumeName}
             resumeStatus={view.resumeStatus}
             jobIndex={view.jobIndex}
-            onReset={() => setView({ name: "job" })}
+            jobIds={view.jobIds}
+            onReset={handleReset}
+            onRestart={(taskId) => openResult({ ...view, taskId, savedAt: Date.now() })}
           />
-        );
-    }
-  }
-
-  return (
-    <div className="flex min-h-screen flex-col">
-      <Header mode={mode} onModeChange={handleModeChange} />
-
-      <div className="flex-1">{renderView()}</div>
+        )}
+      </div>
 
       <footer className="border-t border-surface-line bg-white/60">
         <div className="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-5 text-[11px] text-ink-500 sm:flex-row sm:items-center sm:justify-between">
