@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Job, JobDegradedReason, JobMatchItem, MatchContext, ResumeStatus } from "../types";
+import type {
+  Job,
+  JobDegradedReason,
+  JobMatchItem,
+  JobMatchTask,
+  MatchContext,
+  ResumeStatus,
+} from "../types";
 import { getJobMatchTask, getMatchContext } from "../api/jobs";
 import { useTask } from "../lib/useTask";
 import { levelTone, scoreTone } from "../lib/theme";
@@ -181,11 +188,118 @@ function JobDetail({
             disabled={!interviewRequest}
             className="group mt-5 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {interviewRequest ? "针对这个岗位练三轮" : contextError ? "暂不可开始面试" : "正在确认岗位上下文"}
+            {interviewRequest ? "开始模拟面试" : contextError ? "暂不可开始面试" : "正在确认岗位上下文"}
             <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </button>
           {contextError ? <p role="alert" className="mt-2 text-[12px] text-rose-700">{contextError}</p> : null}
         </section>
+
+        {/* 岗位信息：完整 JD + 来源/投递链接，数据全部来自 /api/jobs */}
+        {job ? (
+          <section className="mt-5 rounded-xl2 border border-surface-line bg-white p-5 shadow-card sm:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold">岗位信息</h2>
+              <span
+                className={`rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ${
+                  job.application_status === "open"
+                    ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+                    : job.application_status === "closed"
+                      ? "bg-slate-100 text-ink-500 ring-slate-200"
+                      : "bg-amber-50 text-amber-700 ring-amber-200"
+                }`}
+              >
+                {job.application_status === "open"
+                  ? "已核验可投"
+                  : job.application_status === "closed"
+                    ? "已关闭"
+                    : "待核验"}
+              </span>
+            </div>
+
+            <dl className="mt-3 grid gap-x-6 gap-y-2 text-[12px] sm:grid-cols-2">
+              <div className="flex gap-2">
+                <dt className="w-16 shrink-0 text-ink-500">企业</dt>
+                <dd className="min-w-0 text-ink-700">{job.company}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="w-16 shrink-0 text-ink-500">城市</dt>
+                <dd className="min-w-0 text-ink-700">{job.cities.join(" / ")}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="w-16 shrink-0 text-ink-500">学历</dt>
+                <dd className="min-w-0 text-ink-700">{job.education_requirement}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="w-16 shrink-0 text-ink-500">专业</dt>
+                <dd className="min-w-0 text-ink-700">{job.majors.join("、")}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="w-16 shrink-0 text-ink-500">届别</dt>
+                <dd className="min-w-0 text-ink-700">{job.graduation_year} 届</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="w-16 shrink-0 text-ink-500">发布</dt>
+                <dd className="num min-w-0 text-ink-700">
+                  {job.published_at}
+                  <span className="ml-1.5 text-ink-500">
+                    {job.publication_type === "original" ? "企业原始发布" : "转载"}
+                  </span>
+                </dd>
+              </div>
+            </dl>
+
+            {job.application_status !== "open" ? (
+              <p className="mt-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[12px] leading-relaxed text-amber-700">
+                <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span>
+                  {job.application_status === "closed"
+                    ? "该岗位已关闭，不能再投递，仅供参考。"
+                    : "该岗位为待核验线索，投递入口未经核实，不能当作已确认可投。"}
+                  {job.verification_note ? `（${job.verification_note}）` : ""}
+                </span>
+              </p>
+            ) : null}
+
+            <details open className="mt-4 rounded-xl border border-surface-line">
+              <summary className="cursor-pointer select-none px-3.5 py-2.5 text-[12px] font-medium text-ink-700">
+                完整 JD
+              </summary>
+              <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap border-t border-surface-line px-3.5 py-3 text-[12px] leading-relaxed text-ink-700 [overflow-wrap:anywhere]">
+                {job.jd_text}
+              </pre>
+            </details>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <a
+                href={job.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-surface-line bg-white px-3.5 py-2 text-[12px] font-medium text-ink-700 transition-colors hover:border-brand-300 hover:text-brand-700"
+              >
+                查看招聘来源
+              </a>
+              {job.application_url ? (
+                <a
+                  href={job.application_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-3.5 py-2 text-[12px] font-semibold text-white transition-colors hover:bg-brand-700"
+                >
+                  前往投递
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  title="该岗位尚未核实投递入口"
+                  className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-xl bg-ink-300 px-3.5 py-2 text-[12px] font-semibold text-white"
+                >
+                  前往投递（暂未核实）
+                </button>
+              )}
+            </div>
+          </section>
+        ) : null}
 
         {/* 基础评分构成：所有岗位都有，与 AI 诊断的四个维度不是一回事 */}
         {item.subscores.length > 0 ? (
@@ -255,6 +369,149 @@ function JobDetail({
           onExit={() => setInterviewOpen(false)}
         />
       ) : null}
+    </div>
+  );
+}
+
+function formatElapsed(ms: number): string {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const minutes = Math.floor(total / 60);
+  const seconds = total % 60;
+  return minutes > 0 ? `${minutes} 分 ${seconds} 秒` : `${seconds} 秒`;
+}
+
+/**
+ * 深度分析进度条：按任务阶段给出不同文案，避免页面长期停在笼统的「AI 分析中」。
+ * 只展示后端给的事实（阶段、已完成数、开始时间），不推算剩余时间。
+ */
+function ProgressBanner({
+  task,
+  items,
+  pollError,
+  onRetry,
+}: {
+  task: JobMatchTask | null;
+  items: JobMatchItem[];
+  pollError: string | null;
+  onRetry: () => void;
+}) {
+  const startedAt = task?.analysis_started_at ?? null;
+  const [now, setNow] = useState(() => Date.now());
+
+  // 有开始时间才走秒表，每秒刷新一次「已等待」
+  useEffect(() => {
+    if (!startedAt) return;
+    setNow(Date.now());
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [startedAt]);
+
+  if (!task) return null;
+
+  const degradedCount = items.filter(
+    (item) => item.degraded && item.analysis_status !== "pending" && item.analysis_status !== "running"
+  ).length;
+
+  // 已完成数优先用后端字段，缺字段时按 items 里的终态回退统计
+  const completed =
+    task.analysis_completed ??
+    items.filter((item) => item.analysis_status === "succeeded" || item.analysis_status === "degraded")
+      .length;
+  const total = task.analysis_total ?? 0;
+
+  const elapsed = startedAt ? formatElapsed(now - new Date(startedAt).getTime()) : null;
+
+  /* 整批失败：已完成的结果仍然保留 */
+  if (task.status === "failed") {
+    const timeout = task.error_code === "JOB_MATCH_TIMEOUT";
+    return (
+      <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+        <div className="flex items-start gap-2">
+          <AlertIcon className="mt-0.5 h-4 w-4 shrink-0 text-rose-600" />
+          <div className="min-w-0 flex-1">
+            <p className="text-[13px] font-semibold text-rose-700">
+              {timeout ? "整批匹配超时" : "岗位匹配失败"}
+            </p>
+            <p className="mt-1 text-[12px] leading-relaxed text-rose-700">
+              {task.error ?? "任务执行失败，请重新发起。"}
+              {timeout ? "（已完成的岗位结果仍保留在下方）" : ""}
+            </p>
+            <button
+              type="button"
+              onClick={onRetry}
+              className="mt-2.5 rounded-lg bg-rose-600 px-3 py-1.5 text-[12px] font-medium text-white hover:bg-rose-700"
+            >
+              重新匹配
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* 轮询暂时失败：任务可能仍在跑，不要求用户重传简历 */
+  if (pollError) {
+    return (
+      <div className="mt-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] leading-relaxed text-amber-700">
+        <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+        <span>
+          网络波动，正在自动重试。已有结果会保留，不需要重新上传简历。
+          <span className="ml-1 text-amber-600">（{pollError}）</span>
+        </span>
+      </div>
+    );
+  }
+
+  /* 完成：只在有降级时提示一句，全成功就不再占位 */
+  if (task.status === "succeeded") {
+    if (degradedCount === 0) return null;
+    return (
+      <div className="mt-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] leading-relaxed text-amber-700">
+        <InfoIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+        <span>
+          {degradedCount} 个岗位只有基础评分（未做 AI 深度分析），其余已完成。点开岗位可看具体原因。
+        </span>
+      </div>
+    );
+  }
+
+  /* 排队 / 基础评分 / 深度分析 */
+  const analyzing = Boolean(startedAt);
+  const title =!analyzing
+    ? task.status === "queued"
+      ? "任务排队中"
+      : "正在做基础评分"
+    : "AI 深度分析中";
+
+  const detail = !analyzing
+    ? task.status === "queued"
+      ? "排队期间无需操作，轮到时自动开始。"
+      : "先按技能关键词、文本相似度与学历算出基础分，再挑选岗位做深度分析。"
+    : `已完成 ${completed}${total > 0 ? ` / ${total}` : ""} 个岗位${elapsed ? ` · 已等待 ${elapsed}` : ""}`;
+
+  return (
+    <div className="mt-4 rounded-xl border border-brand-100 bg-brand-50 px-4 py-3">
+      <div className="flex items-start gap-2.5">
+        <SpinnerIcon className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-brand-600" />
+        <div className="min-w-0 flex-1">
+          <p className="text-[13px] font-semibold text-brand-800">{title}</p>
+          <p className="num mt-1 text-[12px] leading-relaxed text-brand-700">{detail}</p>
+          {analyzing ? (
+            <p className="mt-1.5 text-[11px] leading-relaxed text-brand-700/80">
+              模型耗时会随岗位数量和响应情况变化，页面会自动更新，暂时无法给出准确的剩余时间。
+            </p>
+          ) : null}
+          {/* 深度分析阶段用后端进度，阶段不明时退回任务进度 */}
+          {analyzing && total > 0 ? (
+            <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/70">
+              <div
+                className="h-full rounded-full bg-brand-500 transition-[width] duration-500"
+                style={{ width: `${Math.min(100, Math.round((completed / total) * 100))}%` }}
+              />
+            </div>
+          ) : null}
+        </div>
+      </div>
     </div>
   );
 }
@@ -348,12 +605,7 @@ export function JobResultPage({
         </button>
       </div>
 
-      {polling ? (
-        <p className="mt-4 flex items-center gap-2 rounded-xl bg-brand-50 px-4 py-2.5 text-[12px] text-brand-700">
-          <SpinnerIcon className="h-3.5 w-3.5 animate-spin" />
-          {task?.stage ?? "正在匹配"} · 已出 {items.length} 个岗位
-        </p>
-      ) : null}
+      <ProgressBanner task={task} items={items} pollError={error} onRetry={onReset} />
 
       {/* 岗位卡片列表 */}
       <div className="mt-5 space-y-3">

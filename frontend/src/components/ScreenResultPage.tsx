@@ -107,7 +107,7 @@ function InterviewEntry({
         <p className="text-[12px] font-medium text-ink-700">模拟面试</p>
         <p className="mt-1 text-[11px] leading-relaxed text-ink-500">
           {available
-            ? `针对「${item.name}」和当前岗位练三轮，答题后立即给反馈`
+            ? `针对「${item.name}」和当前岗位练模拟面试，答题后立即给反馈`
             : "这份简历没有可用的文本，无法进入面试"}
           {available && resumeStatus === "need_review" ? "（识别质量偏低，建议先核对原文）" : ""}
         </p>
