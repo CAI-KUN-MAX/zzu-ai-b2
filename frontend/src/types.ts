@@ -186,7 +186,7 @@ export interface MatchTask {
 }
 
 /* ------------------------------------------------------------------ *
- * 单人模拟面试（最多三轮）—— 契约见 2026-10-25 任务单
+ * 单人模拟面试（当前五轮，轮数以接口 max_rounds 为准）
  * ------------------------------------------------------------------ */
 
 export type InterviewStatus = "active" | "completed";
@@ -223,7 +223,7 @@ export interface InterviewAnswerResult {
   round: number;
   max_rounds: number;
   feedback: InterviewFeedback;
-  /** 第三轮后为 null */
+  /** 最后一轮后为 null */
   next_question: InterviewQuestion | null;
 }
 
@@ -263,7 +263,8 @@ export interface Job {
   source_url: string;
   published_at: string;
   publication_type: "original" | "repost";
-  application_url: string;
+  /** 未核实投递入口时为 null，不能拿 source_url 当投递地址 */
+  application_url: string | null;
   verified_at: string;
   application_status: JobApplicationStatus;
   verification_note: string;
@@ -319,7 +320,14 @@ export interface JobMatchTask {
   status: TaskStatus;
   stage: string;
   progress: number;
+  /** 已结束深度分析的岗位数（只计 succeeded 与已结束的 degraded） */
+  analysis_completed?: number;
+  /** 实际选入逐岗深度分析的岗位数，不含 not_selected / ai_disabled */
+  analysis_total?: number;
+  /** 开始逐岗分析的 UTC ISO 时间，开始前为 null */
+  analysis_started_at?: string | null;
   error: string | null;
+  /** 整批超时为 JOB_MATCH_TIMEOUT */
   error_code: string | null;
   items: JobMatchItem[];
 }

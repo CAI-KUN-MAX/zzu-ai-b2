@@ -37,6 +37,7 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
   const [error, setError] = useState<string | null>(null);
 
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobTotal, setJobTotal] = useState(0);
   const [jobsLoading, setJobsLoading] = useState(true);
   const [jobsError, setJobsError] = useState<string | null>(null);
   const [category, setCategory] = useState<string>("全部");
@@ -62,7 +63,9 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
 
     listJobs({ page: 1, page_size: 50 })
       .then((data) => {
-        if (!cancelled) setJobs(data.items);
+        if (cancelled) return;
+        setJobs(data.items);
+        setJobTotal(data.total);
       })
       .catch((err: unknown) => {
         if (!cancelled) setJobsError(err instanceof Error ? err.message : "岗位目录加载失败");
@@ -152,7 +155,7 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
           上传一份简历，寻找适合的岗位
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-ink-500">
-          上传简历并勾选多个候选岗位，按匹配度排序并给出推荐理由与缺口。点开岗位可看诊断报告，并针对该岗位练三轮模拟面试。
+          上传简历并勾选多个候选岗位，按匹配度排序并给出推荐理由与缺口。点开岗位可看诊断报告，并针对该岗位练五轮模拟面试。
         </p>
       </div>
 
@@ -243,7 +246,7 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
               </span>
               <h2 className="text-sm font-semibold">候选岗位</h2>
               <span className="num text-[11px] text-ink-500">
-                已选 {selected.length} / {jobs.length}
+                可投 {jobTotal} 个 · 已选 {selected.length}
               </span>
             </div>
           </div>
@@ -279,6 +282,14 @@ export function JobMatchPage({ onStartMatch }: JobMatchPageProps) {
                   );
                 })}
               </div>
+
+              {visibleJobs.length === 0 ? (
+                <p className="rounded-xl border border-surface-line bg-white px-4 py-6 text-center text-[12px] leading-relaxed text-ink-500">
+                  {jobs.length === 0
+                    ? "当前没有已核验可投的岗位，暂不能用待核验线索替代。岗位核验通过后会陆续出现在这里。"
+                    : "该分类下暂无已核验可投岗位，换个分类看看。"}
+                </p>
+              ) : null}
 
               <div className="grid max-h-[420px] gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
                 {visibleJobs.map((job) => {

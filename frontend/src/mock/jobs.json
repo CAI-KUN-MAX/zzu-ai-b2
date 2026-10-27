@@ -5,11 +5,17 @@
       "job_id": "j-001",
       "title": "前端开发工程师",
       "company": "字节跳动",
-      "cities": ["北京", "上海"],
+      "cities": [
+        "北京",
+        "上海"
+      ],
       "category": "计算机",
       "education": "本科",
       "education_requirement": "本科及以上，计算机相关专业",
-      "majors": ["计算机科学与技术", "软件工程"],
+      "majors": [
+        "计算机科学与技术",
+        "软件工程"
+      ],
       "graduation_year": "2027",
       "jd_text": "岗位职责：负责业务前端页面开发与体验优化。任职要求：1. 熟练掌握 JavaScript / TypeScript，熟悉 React；2. 熟悉前后端分离，能独立对接 RESTful 接口；3. 有工程化意识，熟悉构建工具与 Git；4. 有性能优化经验者优先。",
       "source_url": "https://jobs.example.com/j-001",
@@ -24,11 +30,17 @@
       "job_id": "j-002",
       "title": "Web 前端工程师（React）",
       "company": "美团",
-      "cities": ["北京"],
+      "cities": [
+        "北京"
+      ],
       "category": "计算机",
       "education": "本科",
       "education_requirement": "本科及以上",
-      "majors": ["计算机科学与技术", "软件工程", "信息管理"],
+      "majors": [
+        "计算机科学与技术",
+        "软件工程",
+        "信息管理"
+      ],
       "graduation_year": "2027",
       "jd_text": "岗位职责：负责中后台系统前端开发。任职要求：1. 精通 React 生态，熟悉 Hooks 与状态管理；2. 掌握 TypeScript，能独立设计组件接口；3. 熟悉工程化配置，了解单元测试；4. 有组件库建设经验加分。",
       "source_url": "https://jobs.example.com/j-002",
@@ -43,11 +55,17 @@
       "job_id": "j-003",
       "title": "数据可视化前端",
       "company": "蚂蚁集团",
-      "cities": ["杭州"],
+      "cities": [
+        "杭州"
+      ],
       "category": "计算机",
       "education": "本科",
       "education_requirement": "本科及以上",
-      "majors": ["计算机科学与技术", "统计学", "数学"],
+      "majors": [
+        "计算机科学与技术",
+        "统计学",
+        "数学"
+      ],
       "graduation_year": "2027",
       "jd_text": "岗位职责：负责数据看板与可视化大屏开发。任职要求：1. 熟练掌握前端基础，熟悉 Canvas / SVG；2. 有 ECharts、D3 等可视化库实战经验；3. 对数据敏感，能把业务指标转成图表；4. 有动画与性能调优经验优先。",
       "source_url": "https://jobs.example.com/j-003",
@@ -62,11 +80,16 @@
       "job_id": "j-004",
       "title": "全栈开发工程师",
       "company": "小红书",
-      "cities": ["上海"],
+      "cities": [
+        "上海"
+      ],
       "category": "计算机",
       "education": "本科",
       "education_requirement": "本科及以上",
-      "majors": ["计算机科学与技术", "软件工程"],
+      "majors": [
+        "计算机科学与技术",
+        "软件工程"
+      ],
       "graduation_year": "2027",
       "jd_text": "岗位职责：负责业务模块前后端全链路开发。任职要求：1. 前端熟悉 React / Vue，后端熟悉 Node.js 或 Python；2. 熟悉数据库设计与接口设计；3. 有独立负责模块的经验；4. 了解云原生部署优先。",
       "source_url": "https://jobs.example.com/j-004",
@@ -81,11 +104,16 @@
       "job_id": "j-005",
       "title": "小程序开发工程师",
       "company": "京东",
-      "cities": ["北京"],
+      "cities": [
+        "北京"
+      ],
       "category": "计算机",
       "education": "不限",
       "education_requirement": "学历不限，看重项目经验",
-      "majors": ["计算机科学与技术", "软件工程"],
+      "majors": [
+        "计算机科学与技术",
+        "软件工程"
+      ],
       "graduation_year": "2027",
       "jd_text": "岗位职责：负责微信小程序与 H5 页面开发。任职要求：1. 熟悉小程序开发规范与生命周期；2. 掌握 HTML / CSS / JavaScript，了解组件化；3. 有跨端适配经验；4. 有小程序上线案例优先。",
       "source_url": "https://jobs.example.com/j-005",
@@ -100,17 +128,22 @@
       "job_id": "j-006",
       "title": "产品经理（技术背景）",
       "company": "腾讯",
-      "cities": ["深圳"],
+      "cities": [
+        "深圳"
+      ],
       "category": "经管财会",
       "education": "本科",
       "education_requirement": "本科及以上，理工科优先",
-      "majors": ["计算机科学与技术", "工商管理"],
+      "majors": [
+        "计算机科学与技术",
+        "工商管理"
+      ],
       "graduation_year": "2027",
       "jd_text": "岗位职责：负责产品需求分析与方案设计。任职要求：1. 有技术背景，能与研发高效沟通；2. 熟悉需求文档撰写与原型设计；3. 具备数据分析能力；4. 有 B 端产品经验优先。",
       "source_url": "https://jobs.example.com/j-006",
       "published_at": "2026-09-25",
       "publication_type": "repost",
-      "application_url": "https://jobs.example.com/j-006/apply",
+      "application_url": null,
       "verified_at": "2026-10-20T10:00:00Z",
       "application_status": "unverified",
       "verification_note": "岗位为转载，投递前需再次确认在招状态"
@@ -122,8 +155,15 @@
       "final": 88,
       "level": "high",
       "level_label": "强匹配",
-      "matched": ["React", "TypeScript", "Vite", "接口联调"],
-      "missing": ["性能优化"],
+      "matched": [
+        "React",
+        "TypeScript",
+        "Vite",
+        "接口联调"
+      ],
+      "missing": [
+        "性能优化"
+      ],
       "reason": "技术栈与岗位要求高度重合，工程化流程完整，唯一缺口是性能优化没有量化案例。"
     },
     "j-002": {
@@ -131,8 +171,15 @@
       "final": 84,
       "level": "high",
       "level_label": "强匹配",
-      "matched": ["React", "TypeScript", "组件化"],
-      "missing": ["单元测试", "组件库"],
+      "matched": [
+        "React",
+        "TypeScript",
+        "组件化"
+      ],
+      "missing": [
+        "单元测试",
+        "组件库"
+      ],
       "reason": "React 与 TypeScript 是核心要求，你都具备；岗位强调组件库建设与单测，这两块偏弱。"
     },
     "j-003": {
@@ -140,8 +187,15 @@
       "final": 76,
       "level": "medium",
       "level_label": "较匹配",
-      "matched": ["前端基础", "SVG"],
-      "missing": ["ECharts", "D3", "大屏适配"],
+      "matched": [
+        "前端基础",
+        "SVG"
+      ],
+      "missing": [
+        "ECharts",
+        "D3",
+        "大屏适配"
+      ],
       "reason": "前端底子够，但可视化库的实战经历缺失，需要补一个图表密集型的项目才有说服力。"
     },
     "j-004": {
@@ -149,8 +203,15 @@
       "final": 71,
       "level": "medium",
       "level_label": "较匹配",
-      "matched": ["React", "Python", "FastAPI"],
-      "missing": ["Node.js", "数据库设计"],
+      "matched": [
+        "React",
+        "Python",
+        "FastAPI"
+      ],
+      "missing": [
+        "Node.js",
+        "数据库设计"
+      ],
       "reason": "有 Python 与 FastAPI 经验，后端可以上手；但简历后端部分偏薄，数据库设计没有体现。"
     },
     "j-005": {
@@ -158,8 +219,15 @@
       "final": 63,
       "level": "medium",
       "level_label": "较匹配",
-      "matched": ["HTML", "CSS", "JavaScript"],
-      "missing": ["小程序", "跨端"],
+      "matched": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "missing": [
+        "小程序",
+        "跨端"
+      ],
       "reason": "Web 基础可以迁移，但小程序生态与跨端适配完全没有接触，需要从零学。"
     },
     "j-006": {
@@ -167,8 +235,14 @@
       "final": 48,
       "level": "low",
       "level_label": "存在缺口",
-      "matched": ["技术背景"],
-      "missing": ["需求文档", "原型设计", "数据分析"],
+      "matched": [
+        "技术背景"
+      ],
+      "missing": [
+        "需求文档",
+        "原型设计",
+        "数据分析"
+      ],
       "reason": "技术背景是加分项，但产品核心能力在简历里完全没有体现，不建议优先投。"
     }
   },
@@ -179,10 +253,30 @@
       "level": "high",
       "level_label": "强匹配",
       "dimension_scores": [
-        { "key": "skill_match", "label": "技能匹配", "score": 92, "weight": 0.4 },
-        { "key": "experience_relevance", "label": "经历相关", "score": 86, "weight": 0.3 },
-        { "key": "keyword_coverage", "label": "关键词覆盖", "score": 88, "weight": 0.2 },
-        { "key": "education_match", "label": "教育/证书", "score": 80, "weight": 0.1 }
+        {
+          "key": "skill_match",
+          "label": "技能匹配",
+          "score": 92,
+          "weight": 0.4
+        },
+        {
+          "key": "experience_relevance",
+          "label": "经历相关",
+          "score": 86,
+          "weight": 0.3
+        },
+        {
+          "key": "keyword_coverage",
+          "label": "关键词覆盖",
+          "score": 88,
+          "weight": 0.2
+        },
+        {
+          "key": "education_match",
+          "label": "教育/证书",
+          "score": 80,
+          "weight": 0.1
+        }
       ],
       "highlights": [
         {
@@ -207,7 +301,11 @@
       ],
       "summary": "技术栈与岗位高度契合，工程习惯良好，建议优先投递。",
       "disclaimer": "AI诊断结果仅供参考，请以实际岗位要求为准。",
-      "meta": { "model": "glm-4-flash", "mode": "llm", "elapsed_ms": 11800 }
+      "meta": {
+        "model": "glm-4-flash",
+        "mode": "llm",
+        "elapsed_ms": 11800
+      }
     },
     "j-002": {
       "request_id": "mock-job-j002",
@@ -215,10 +313,30 @@
       "level": "high",
       "level_label": "强匹配",
       "dimension_scores": [
-        { "key": "skill_match", "label": "技能匹配", "score": 88, "weight": 0.4 },
-        { "key": "experience_relevance", "label": "经历相关", "score": 82, "weight": 0.3 },
-        { "key": "keyword_coverage", "label": "关键词覆盖", "score": 80, "weight": 0.2 },
-        { "key": "education_match", "label": "教育/证书", "score": 80, "weight": 0.1 }
+        {
+          "key": "skill_match",
+          "label": "技能匹配",
+          "score": 88,
+          "weight": 0.4
+        },
+        {
+          "key": "experience_relevance",
+          "label": "经历相关",
+          "score": 82,
+          "weight": 0.3
+        },
+        {
+          "key": "keyword_coverage",
+          "label": "关键词覆盖",
+          "score": 80,
+          "weight": 0.2
+        },
+        {
+          "key": "education_match",
+          "label": "教育/证书",
+          "score": 80,
+          "weight": 0.1
+        }
       ],
       "highlights": [
         {
@@ -238,7 +356,11 @@
       ],
       "summary": "核心技能达标，组件化沉淀是明显加分项，补齐后竞争力更强。",
       "disclaimer": "AI诊断结果仅供参考，请以实际岗位要求为准。",
-      "meta": { "model": "glm-4-flash", "mode": "llm", "elapsed_ms": 10600 }
+      "meta": {
+        "model": "glm-4-flash",
+        "mode": "llm",
+        "elapsed_ms": 10600
+      }
     }
   }
 }
