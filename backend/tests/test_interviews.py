@@ -454,6 +454,17 @@ class InterviewGroundingTests(unittest.TestCase):
         self.assertEqual(grounded_strength("支持同时在线报名的并行处理", answer), "支持同时在线报名的并行处理。")
         self.assertEqual(grounded_strength("使用组合唯一约束并优化了慢查询", answer), "使用组合唯一约束。")
 
+    def test_dependent_clause_dropped_with_its_head(self):
+        from app.interviews import grounded_strength
+        answer = "慢查询出现在统计报名人数的接口，我用EXPLAIN看到全表扫描，给activity_id加了索引。"
+        # 主句（识别索引失效）回答里没有依据被删，只剩“通过使用EXPLAIN来识别”会变成半句话
+        self.assertIsNone(grounded_strength("能够识别索引失效问题，并通过使用EXPLAIN来识别", answer))
+        self.assertEqual(grounded_strength("识别索引失效问题，用EXPLAIN看到全表扫描，并给activity_id加了索引", answer),
+                         "用EXPLAIN看到全表扫描，给activity_id加了索引。")
+        # 主句保留时，依附小句照常保留
+        self.assertEqual(grounded_strength("用EXPLAIN看到全表扫描，通过给activity_id加了索引解决", answer),
+                         "用EXPLAIN看到全表扫描，通过给activity_id加了索引解决。")
+
     def test_strength_clauses_without_answer_basis_removed(self):
         context = self.context("answer")
         context["answer"] = "在校园报名系统里我用 FastAPI 写接口，报名表对用户 ID 和活动 ID 建了组合唯一约束，防止同一个人重复报名。"

@@ -116,7 +116,7 @@ export function useSpeechRecognition({ onFinal, lang = "zh-CN" }: UseSpeechOptio
         setErrorMessage("没有听到语音，请靠近麦克风再试一次");
       } else if (code === "network") {
         setStatus("error");
-        setErrorMessage("语音识别服务连接失败，请检查网络或直接打字");
+        setErrorMessage("连不上浏览器的语音识别服务（部分网络环境下 Chrome 无法使用），请直接打字作答");
       } else if (code === "aborted") {
         setStatus("idle");
       } else {

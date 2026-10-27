@@ -137,6 +137,8 @@ NEGATED_EXPERIENCE = re.compile(
     r"(?:没有|没|未曾|尚未|从未|还没|并未|未)有?(?:用|使用|做|接触|学|实现|写|参与|部署|掌握|涉及|配置|搭建|开发|处理|优化|设计|过)"
     r"|不(?:会用|会使用|懂|熟悉|了解|太了解|太会|擅长)")
 STRENGTH_MAX = 600
+# 依附于前一小句的开头：方式（通过/借助/利用）、目的（来/以便/从而/用于）、承接（然后/进而）
+DEPENDENT_CLAUSE = re.compile(r"(?:通过|借助|利用|来|以便|从而|进而|用于|用来|使得|然后)")
 
 
 def grounded_strength(text, answer):
@@ -149,8 +151,18 @@ def grounded_strength(text, answer):
     # 用“|”分隔，避免跨小句拼出原文里不存在的连续片段
     negated = "|".join(clause for clause in clauses if NEGATED_EXPERIENCE.search(clause))
     affirmed = "|".join(clause for clause in clauses if not NEGATED_EXPERIENCE.search(clause))
-    kept = [clause.strip() for clause in CLAUSE_SPLIT.split(text)
-            if clause.strip() and shares_quote(clause, affirmed) and not shares_quote(clause, negated)]
+    kept = []
+    head_dropped = False
+    for clause in (clause.strip() for clause in CLAUSE_SPLIT.split(text)):
+        if not clause:
+            continue
+        grounded = shares_quote(clause, affirmed) and not shares_quote(clause, negated)
+        # 前一个小句被删时，“通过…/来…/从而…”这类依附小句单独留下会变成半句话，一并删掉
+        if grounded and not (head_dropped and DEPENDENT_CLAUSE.match(clause)):
+            kept.append(clause)
+            head_dropped = False
+        else:
+            head_dropped = True
     if not kept:
         return None
     joined = "，".join(kept)
