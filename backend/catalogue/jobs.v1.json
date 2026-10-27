@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-26.v2",
+  "version": "2026-10-27.v2",
   "items": [
     {
       "job_id": "bii-2027-software",
@@ -34,7 +34,7 @@
       "source_url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55328.html",
       "published_at": "2026-08-05",
       "publication_type": "repost",
-      "application_url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55328.html",
+      "application_url": null,
       "verified_at": "2026-10-26T11:48:00+08:00",
       "application_status": "unverified",
       "verification_note": "高校页面保留投递简历入口，无明确截止日期；未验证登录后的投递资格与当前岗位状态。按正文保存海外地点，不将页面概述的北京当作工作地。"
@@ -53,7 +53,7 @@
       "source_url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55326.html",
       "published_at": "2026-08-05",
       "publication_type": "repost",
-      "application_url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55326.html",
+      "application_url": null,
       "verified_at": "2026-10-26T11:48:00+08:00",
       "application_status": "unverified",
       "verification_note": "高校页面保留投递简历入口，无明确截止日期；未验证登录后的当前投递状态。"
@@ -129,7 +129,7 @@
       "source_url": "https://career.hebut.edu.cn/home/correcruit/content/id/67117.html",
       "published_at": "2026-09-22",
       "publication_type": "repost",
-      "application_url": "https://career.hebut.edu.cn/home/correcruit/content/id/67117.html",
+      "application_url": null,
       "verified_at": "2026-10-26T11:48:00+08:00",
       "application_status": "unverified",
       "verification_note": "完整职责和学历专业要求可读；页面显示投递简历，但未验证登录后的当前投递状态。"
@@ -148,7 +148,7 @@
       "source_url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55331.html",
       "published_at": "2026-08-05",
       "publication_type": "repost",
-      "application_url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55331.html",
+      "application_url": null,
       "verified_at": "2026-10-26T11:48:00+08:00",
       "application_status": "unverified",
       "verification_note": "高校页面保留投递简历入口，无明确截止日期；未验证登录后的当前投递状态。"
@@ -167,7 +167,7 @@
       "source_url": "https://career.hebut.edu.cn/home/correcruit/content/id/67115.html",
       "published_at": "2026-09-22",
       "publication_type": "repost",
-      "application_url": "https://career.hebut.edu.cn/home/correcruit/content/id/67115.html",
+      "application_url": null,
       "verified_at": "2026-10-26T11:48:00+08:00",
       "application_status": "unverified",
       "verification_note": "完整职责和学历专业要求可读；保留来源原有专业表述。页面显示投递简历，但未验证登录后的当前投递状态。"
@@ -186,7 +186,7 @@
       "source_url": "https://henau.goworkla.cn/module/position_details/id-474182/nid-8086",
       "published_at": "2026-09-24",
       "publication_type": "repost",
-      "application_url": "https://henau.goworkla.cn/module/position_details/id-474182/nid-8086",
+      "application_url": null,
       "verified_at": "2026-10-26T11:48:00+08:00",
       "application_status": "unverified",
       "verification_note": "来源明确标记校招，未限定2027届；虽然页面有投递按钮，但未验证当前投递可用性，不能仅据按钮认定可投。保留出差、驾驶及不收实习生要求。"
@@ -243,7 +243,7 @@
       "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKuLayynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
       "published_at": "2026-09-16",
       "publication_type": "repost",
-      "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKuLayynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+      "application_url": null,
       "verified_at": "2026-10-26T16:30:00+08:00",
       "application_status": "unverified",
       "verification_note": "2026-10-26 质量复核：来源给出方向和专业，但目录未保存可核对的具体岗位职责。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业网明示发布时间、岗位方向、专业要求、简历投递邮箱和有效期至2027-06-29。学历字段按页面最低学历硕士保守记录。"
@@ -262,7 +262,7 @@
       "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-KuLaus3bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
       "published_at": "2026-09-08",
       "publication_type": "repost",
-      "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-KuLaus3bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+      "application_url": null,
       "verified_at": "2026-10-26T16:30:00+08:00",
       "application_status": "unverified",
       "verification_note": "2026-10-26 质量复核：来源要求通过企业微信公众号投递，目录 application_url 却仅指向来源页，未核验实际投递入口；暂停计入可投候选。四川大学就业网明示发布时间、完整条件与有效期至2027-05-30。"
@@ -300,7 +300,7 @@
       "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y96KuLa2yWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
       "published_at": "2026-09-01",
       "publication_type": "repost",
-      "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y96KuLa2yWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+      "application_url": null,
       "verified_at": "2026-10-26T16:30:00+08:00",
       "application_status": "unverified",
       "verification_note": "2026-10-26 质量复核：来源提供邮箱投递，但目录 application_url 仅指向来源页，未核验可用的直接投递链接；来源也未限定毕业届别，暂停计入可投候选。高校就业网明示发布时间、职责、学历专业及有效期至2027-01-29。"
@@ -319,7 +319,7 @@
       "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKzrbWynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
       "published_at": "2026-09-21",
       "publication_type": "repost",
-      "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKzrbWynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+      "application_url": null,
       "verified_at": "2026-10-26T16:30:00+08:00",
       "application_status": "unverified",
       "verification_note": "2026-10-26 质量复核：来源未列出具体岗位职责，目录仅有概括性描述。 暂停计入可投候选；需修复并重核来源后再开放。 四川大学就业网明示发布时间、任职要求、招聘流程及有效期至2027-04-29。"
@@ -357,7 +357,7 @@
       "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKlLayypzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
       "published_at": "2026-09-23",
       "publication_type": "repost",
-      "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKlLayypzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+      "application_url": null,
       "verified_at": "2026-10-26T16:30:00+08:00",
       "application_status": "unverified",
       "verification_note": "2026-10-26 质量复核：目录职责描述需与来源独立岗位内容逐项复核。 暂停计入可投候选；需修复并重核来源后再开放。 四川大学就业网明示发布时间、完整职责、专业范围和有效期至2027-06-29；学历按岗位字段保守记录。"
@@ -376,7 +376,7 @@
       "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtrh5eN6K0NS6yGHRp7ugzc-GnZ2skMx9ZMN4gtKLipCwxKF0lZC5sq-0gqJv",
       "published_at": "2026-10-12",
       "publication_type": "repost",
-      "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtrh5eN6K0NS6yGHRp7ugzc-GnZ2skMx9ZMN4gtKLipCwxKF0lZC5sq-0gqJv",
+      "application_url": null,
       "verified_at": "2026-10-26T16:30:00+08:00",
       "application_status": "unverified",
       "verification_note": "2026-10-26 质量复核：目录 application_url 仅指向来源页，尚未核验直接投递入口；暂停计入可投候选。高校就业网明示发布时间、岗位职责、2027届及语言专业要求，有效期至2027-10-11。"
@@ -420,7 +420,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKk7bWsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-09-23",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKk7bWsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-08-30，核验日仍有效。"
@@ -445,7 +445,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKz7bOsobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-10-10",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKz7bOsobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-10-07，核验日仍有效。"
@@ -470,7 +470,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y96KuLbWsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-09-02",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y96KuLbWsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-06-29，核验日仍有效。"
@@ -495,7 +495,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y96K0dS2ynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-09-05",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y96K0dS2ynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2026-12-01，核验日仍有效。"
@@ -520,7 +520,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZmKk7ayspzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-10-26",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZmKk7ayspzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-05-30，核验日仍有效。"
@@ -545,7 +545,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y96KutSuspzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-09-02",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y96KutSuspzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-01-30，核验日仍有效。"
@@ -570,7 +570,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9yKlLbSsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-08-24",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9yKlLbSsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-06-29，核验日仍有效。"
@@ -595,7 +595,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y92K0NSmyobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-09-01",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y92K0NSmyobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-07-30，核验日仍有效。"
@@ -621,7 +621,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKzra-ynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-10-09",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKzra-ynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-03-30，核验日仍有效。"
@@ -646,7 +646,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZmK0dS2smHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-10-23",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZmK0dS2smHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-06-30，核验日仍有效。"
@@ -671,7 +671,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5aKu9S6snbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-09-29",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5aKu9S6snbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-09-28，核验日仍有效。"
@@ -695,7 +695,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKzra6yWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-09-20",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKzra6yWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-08-31，核验日仍有效。"
@@ -720,7 +720,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZmKutSms4bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-10-14",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZmKutSms4bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-01-30，核验日仍有效。"
@@ -745,7 +745,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKzrayyWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-10-09",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKzrayyWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-05-30，核验日仍有效。"
@@ -770,7 +770,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKzrbOypzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-09-20",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKzrbOypzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2026-12-31，核验日仍有效。"
@@ -796,7 +796,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/jobfaircorporationinfo.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh6pt6K0NSyyGHRp7ugzc-GnZ2skMx9ZMN4gtKLipCwxKF0lZC5sq-0gqJv",
     "published_at": "2026-08-27",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/jobfaircorporationinfo.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh6pt6K0NSyyGHRp7ugzc-GnZ2skMx9ZMN4gtKLipCwxKF0lZC5sq-0gqJv",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-08-26，核验日仍有效。"
@@ -820,7 +820,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKlLa2yWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-09-23",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKlLa2yWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-06-29，核验日仍有效。"
@@ -844,7 +844,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-KuLayypzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-09-08",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-KuLayypzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-05-30，核验日仍有效。"
@@ -868,7 +868,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y92Ku9Sqsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-08-24",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y92Ku9Sqsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-06-30，核验日仍有效。"
@@ -894,7 +894,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/jobfaircorporationinfo.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh6pt6K0NSyyGHRp7ugzc-GnZ2skMx9ZMN4gtKLipCwxKF0lZC5sq-0gqJv",
     "published_at": "2026-08-27",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/jobfaircorporationinfo.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh6pt6K0NSyyGHRp7ugzc-GnZ2skMx9ZMN4gtKLipCwxKF0lZC5sq-0gqJv",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-08-26，核验日仍有效。"
@@ -919,7 +919,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKu9TSsobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-09-23",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKu9TSsobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2026-12-31，核验日仍有效。"
@@ -942,7 +942,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9yKlLbSsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-08-24",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9yKlLbSsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：来源实际职位为现场工程师，海外地区及外语专业属于公司总体招聘说明，并非独立驻外岗位。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-06-29，核验日仍有效。"
@@ -967,7 +967,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y92KutTOs3bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-08-27",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y92KutTOs3bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-07-30，核验日仍有效。"
@@ -992,7 +992,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y96KubbWs4bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-09-01",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y96KubbWs4bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-05-30，核验日仍有效。"
@@ -1020,7 +1020,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKz7bOs4bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-10-12",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKz7bOs4bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：来源实际职位为研发储备生，工业设计仅是列出的专业之一，目录拆分的独立岗位名称不成立。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-06-29，核验日仍有效。"
@@ -1045,7 +1045,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/jobfaircorporationinfo.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtrh6pt6KuLKXxoi3i7igr7-BZHxnkLZ9i8WGpNOaaKLSxKCalom6mNs",
     "published_at": "2026-09-04",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/jobfaircorporationinfo.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtrh6pt6KuLKXxoi3i7igr7-BZHxnkLZ9i8WGpNOaaKLSxKCalom6mNs",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-02-28，核验日仍有效。"
@@ -1070,7 +1070,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/jobfaircorporationinfo.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtrh6pt6KuLKXxoi3i7igr7-BZHxnkLZ9i8WGpNOaaKLSxKCalom6mNs",
     "published_at": "2026-09-04",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/jobfaircorporationinfo.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtrh6pt6KuLKXxoi3i7igr7-BZHxnkLZ9i8WGpNOaaKLSxKCalom6mNs",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-02-28，核验日仍有效。"
@@ -1096,7 +1096,7 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y92Ku9SuyWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-08-27",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y92Ku9SuyWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-06-30，核验日仍有效。"
@@ -1121,11 +1121,316 @@
     "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-Kz7a-smHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
     "published_at": "2026-09-14",
     "publication_type": "repost",
-    "application_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-Kz7a-smHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "application_url": null,
     "verified_at": "2026-10-26T18:30:00+08:00",
     "application_status": "unverified",
     "verification_note": "2026-10-26 质量复核：目录 JD 仅为摘要，未保存来源中完整的职责与任职要求。 暂停计入可投候选；需修复并重核来源后再开放。 高校就业页明示发布时间、职责要求及有效期至2027-09-13，核验日仍有效。"
+  },
+  {
+    "job_id": "ztccloud-2027-digital-consultant",
+    "title": "数智化咨询顾问",
+    "company": "深圳市中兴新云服务有限公司",
+    "cities": ["北京", "西安", "长沙", "上海", "广州", "成都", "长春"],
+    "category": "经管财会",
+    "education": "本科",
+    "education_requirement": "2027届应届毕业生，本科及以上；国内毕业时间2027年1月至6月，海外毕业时间2026年7月至2027年6月",
+    "majors": ["不限"],
+    "graduation_year": "2027",
+    "jd_text": "岗位职责：负责财务数智化咨询项目的需求调研、解决方案规划设计和落地；与客户沟通以识别需求、控制项目风险，管理并推进交付；沉淀项目知识、优化咨询方法。任职要求：本科及以上学历，专业不限；具备沟通协调、逻辑思维、自主学习和团队协作能力；能够编写文档和制作PPT，有项目制实习经验优先；能够适应出差。",
+    "source_url": "https://www.ztccloud.com.cn/careers/campus-digital-consultant.html",
+    "published_at": "2026-09-29",
+    "publication_type": "original",
+    "application_url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+    "verified_at": "2026-10-27T09:21:32+08:00",
+    "application_status": "open",
+    "verification_note": "2026-10-27 核对企业官网独立岗位页及公开网申表：岗位在意向选择列表中，表单可打开；官网写明2026-12-31截止。未提交申请。"
+  },
+  {
+    "job_id": "ztccloud-2027-fde",
+    "title": "前沿部署工程师 FDE",
+    "company": "深圳市中兴新云服务有限公司",
+    "cities": ["北京", "西安", "长沙", "上海", "广州", "成都", "长春"],
+    "category": "计算机",
+    "education": "本科",
+    "education_requirement": "2027届应届毕业生，本科及以上；国内毕业时间2027年1月至6月，海外毕业时间2026年7月至2027年6月",
+    "majors": ["计算机", "人工智能", "软件工程"],
+    "graduation_year": "2027",
+    "jd_text": "岗位职责：深入客户业务场景，识别人工智能应用机会并输出可落地的解决方案；联动产品、研发及解决方案团队，推动项目交付与持续优化。任职要求：本科及以上学历，计算机、人工智能、软件工程等相关专业优先；具备沟通协调、逻辑思维、自主学习、团队协作和创新能力；有项目制实习经验优先；能够适应出差。",
+    "source_url": "https://www.ztccloud.com.cn/careers/campus-forward-deployed-engineer.html",
+    "published_at": "2026-09-29",
+    "publication_type": "original",
+    "application_url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+    "verified_at": "2026-10-27T09:21:32+08:00",
+    "application_status": "open",
+    "verification_note": "2026-10-27 核对企业官网独立岗位页及公开网申表：FDE在意向选择列表中，表单可打开；官网写明2026-12-31截止。未提交申请。"
+  },
+  {
+    "job_id": "ztccloud-2027-implementation",
+    "title": "数智化产品实施顾问",
+    "company": "深圳市中兴新云服务有限公司",
+    "cities": ["北京", "西安", "长沙", "上海", "广州", "成都", "长春"],
+    "category": "经管财会",
+    "education": "本科",
+    "education_requirement": "2027届应届毕业生，本科及以上；国内毕业时间2027年1月至6月，海外毕业时间2026年7月至2027年6月",
+    "majors": ["不限"],
+    "graduation_year": "2027",
+    "jd_text": "岗位职责：实施公司的财务数智化项目，及时反馈客户业务需求并控制风险；管理、推进实施计划，依照实施方法按时完成任务，保障项目顺利进行。任职要求：本科及以上学历，专业不限；具备协调与沟通能力，愿意从事相关行业；能够洞察业务、检索信息、提炼要点并结构化思考，清晰表达复杂逻辑；能够适应出差。",
+    "source_url": "https://www.ztccloud.com.cn/careers/campus-implementation-consultant.html",
+    "published_at": "2026-09-29",
+    "publication_type": "original",
+    "application_url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+    "verified_at": "2026-10-27T09:21:32+08:00",
+    "application_status": "open",
+    "verification_note": "2026-10-27 核对企业官网独立岗位页及公开网申表：岗位在意向选择列表中，表单可打开；官网写明2026-12-31截止。未提交申请。"
+  },
+  {
+    "job_id": "ztccloud-2027-ai-product-manager",
+    "title": "AI产品经理",
+    "company": "深圳市中兴新云服务有限公司",
+    "cities": ["北京", "西安", "长沙", "上海", "广州", "成都", "长春"],
+    "category": "计算机",
+    "education": "本科",
+    "education_requirement": "2027届应届毕业生，本科及以上；国内毕业时间2027年1月至6月，海外毕业时间2026年7月至2027年6月",
+    "majors": ["不限"],
+    "graduation_year": "2027",
+    "jd_text": "岗位职责：运用AI开展业务需求分析、竞品调研、产品原型与交互设计，梳理功能、流程和规则；通过AI辅助编码及应用构建推动方案实现，参与验证、测试和迭代；编写使用说明，结合用户反馈与运行数据优化产品并沉淀方法。任职要求：本科及以上学历，具备业务理解、逻辑思维、学习与动手能力；熟悉常用AI工具，能组织输入、核实并优化输出；愿意学习数据、接口和应用运行知识，能借助AI完成原型、文档与测试用例；具有沟通协作能力，能够接受中短期出差；B端产品经历或财务信息系统知识优先。",
+    "source_url": "https://www.ztccloud.com.cn/careers/campus-product-manager.html",
+    "published_at": "2026-09-29",
+    "publication_type": "original",
+    "application_url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+    "verified_at": "2026-10-27T09:21:32+08:00",
+    "application_status": "open",
+    "verification_note": "2026-10-27 核对企业官网独立岗位页及公开网申表：岗位在意向选择列表中，表单可打开；官网写明2026-12-31截止。未提交申请。"
+  },
+  {
+    "job_id": "ztccloud-2027-sales-assistant",
+    "title": "销售助理",
+    "company": "深圳市中兴新云服务有限公司",
+    "cities": ["北京", "西安", "长沙", "上海", "广州", "成都", "长春"],
+    "category": "经管财会",
+    "education": "本科",
+    "education_requirement": "2027届应届毕业生，本科及以上；国内毕业时间2027年1月至6月，海外毕业时间2026年7月至2027年6月",
+    "majors": ["不限", "市场营销"],
+    "graduation_year": "2027",
+    "jd_text": "岗位职责：与业务团队合作开拓区域商机和市场，与目标客户沟通并完成销售目标；定期拜访客户，参与合同谈判与签订，制定合作方案；维护既有客户关系、解决问题并提供销售分析数据。任职要求：本科及以上学历，专业不限，市场营销类专业优先；有学生会、社团管理或大型活动组织策划经验优先；热爱销售，具备沟通能力及服务意识。",
+    "source_url": "https://www.ztccloud.com.cn/careers/campus-sales-assistant.html",
+    "published_at": "2026-09-29",
+    "publication_type": "original",
+    "application_url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+    "verified_at": "2026-10-27T09:21:32+08:00",
+    "application_status": "open",
+    "verification_note": "2026-10-27 核对企业官网独立岗位页及公开网申表：岗位在意向选择列表中，表单可打开；官网写明2026-12-31截止。未提交申请。"
+  },
+  {
+    "job_id": "ztccloud-2027-presales-assistant",
+    "title": "售前助理",
+    "company": "深圳市中兴新云服务有限公司",
+    "cities": ["北京", "西安", "长沙", "上海", "广州", "成都", "长春"],
+    "category": "经管财会",
+    "education": "本科",
+    "education_requirement": "2027届应届毕业生，本科及以上；国内毕业时间2027年1月至6月，海外毕业时间2026年7月至2027年6月",
+    "majors": ["不限"],
+    "graduation_year": "2027",
+    "jd_text": "岗位职责：与业务和销售团队合作，面向目标客户开展业务及技术交流，制作并汇报售前解决方案；参与招投标，编写技术文档，协助维护客户关系并推进签单。任职要求：本科及以上学历，专业不限；具备沟通协调、逻辑思维、自主学习、团队合作和创新能力；能够编写文档和制作PPT，有解决方案类实习经历优先；能够适应高频短期出差。",
+    "source_url": "https://www.ztccloud.com.cn/careers/campus-presales-assistant.html",
+    "published_at": "2026-09-29",
+    "publication_type": "original",
+    "application_url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+    "verified_at": "2026-10-27T09:21:32+08:00",
+    "application_status": "open",
+    "verification_note": "2026-10-27 核对企业官网独立岗位页及公开网申表：岗位在意向选择列表中，表单可打开；官网写明2026-12-31截止。未提交申请。"
+  },
+  {
+    "job_id": "crrcpz-2027-quality-engineer", "title": "质量/售后技术工程师", "company": "中车南京浦镇车辆有限公司",
+    "cities": ["江苏"], "category": "电子机械", "education": "本科", "education_requirement": "2027届本科或硕士毕业生",
+    "majors": ["车辆工程", "机械工程", "电气工程及其自动化", "自动化"], "graduation_year": "2027",
+    "jd_text": "岗位职责：负责轨道交通车辆产品的质量技术工作和售后技术支持，处理产品质量及交付后的技术问题。任职要求：2027届本科或硕士毕业生，机械、车辆、电气、自动化等相关专业；专业成绩排名不低于前50%，本科英语通过四级、硕士英语通过六级；党员或学生干部优先。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html", "published_at": "2026-09-14", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学转载页面的独立岗位、职责及资格；页面提供邮箱，但当前投递状态未核实，故不填投递 URL。"
+  },
+  {
+    "job_id": "crrcpz-2027-design-rd", "title": "设计研发工程师", "company": "中车南京浦镇车辆有限公司",
+    "cities": ["江苏"], "category": "电子机械", "education": "硕士", "education_requirement": "2027届硕士或博士毕业生",
+    "majors": ["电气工程", "电子信息", "机械工程", "材料科学与工程"], "graduation_year": "2027",
+    "jd_text": "岗位职责：参与轨道交通车辆产品的设计研发，覆盖电气、电子、机械或材料方向。任职要求：2027届硕士或博士毕业生，电气工程、电子信息、机械设计、车辆工程、材料或焊接等相关专业；专业成绩排名不低于前50%，硕士英语通过六级；党员或学生干部优先。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html", "published_at": "2026-09-14", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "同一招聘简章中有独立的设计研发工程师岗位；当前投递状态未核实。"
+  },
+  {
+    "job_id": "polyhn-2027-civil-cost", "title": "土建成本岗", "company": "保利（海南）旅游发展有限公司",
+    "cities": ["海南"], "category": "土木建筑", "education": "本科", "education_requirement": "2027届本科或硕士毕业生",
+    "majors": ["工程管理", "土木工程", "工程造价"], "graduation_year": "2027",
+    "jd_text": "岗位职责：协助测算拿地及项目各阶段土建成本，跟踪动态成本与异常预警；参与工程变更、签证、付款和预结算审核，支持招标清单、控制价和合同编审。任职要求：2027届本科或硕士毕业生，工程管理、土木工程、工程造价等相关专业；具备系统分析能力，愿意深入项目一线。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116870.html", "published_at": "2026-08-21", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；页面提供投递邮箱，未核实当前招聘状态，不把来源页作为投递入口。"
+  },
+  {
+    "job_id": "polyhn-2027-civil-engineer", "title": "土建工程师", "company": "保利（海南）旅游发展有限公司",
+    "cities": ["海南"], "category": "土木建筑", "education": "本科", "education_requirement": "2027届本科或硕士毕业生",
+    "majors": ["土木工程"], "graduation_year": "2027",
+    "jd_text": "岗位职责：协助施工项目现场准备及技术、安全、质量和进度管理；参与进度款审查、工程验收与交楼、保修维修协调，并统筹本专业与其他专业的现场工作。任职要求：2027届本科或硕士毕业生，土木工程等相关专业；具备表达、组织协调与规划能力，愿意深入项目一线。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116871.html", "published_at": "2026-08-21", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；当前投递状态未核实。"
+  },
+  {
+    "job_id": "polyhn-2027-architecture", "title": "建筑规划岗", "company": "保利（海南）旅游发展有限公司",
+    "cities": ["海南"], "category": "土木建筑", "education": "本科", "education_requirement": "2027届本科或硕士毕业生",
+    "majors": ["建筑学"], "graduation_year": "2027",
+    "jd_text": "岗位职责：参与住宅产品研究、拿地项目规划策划和设计可行性论证；协助编制设计任务书、跟进报建图纸及设计进度，并在施工和交付阶段协调图纸审查、设计变更与工程验收。任职要求：2027届本科或硕士毕业生，建筑学等相关专业；具备产品思维、沟通协调能力和计划执行能力。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116869.html", "published_at": "2026-08-21", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；当前投递状态未核实。"
+  },
+  {
+    "job_id": "dongfeng-2027-battery-rd", "title": "新型电池研发岗", "company": "东风汽车集团有限公司研发总院",
+    "cities": ["武汉"], "category": "化工材料", "education": "本科", "education_requirement": "2027届本科及以上毕业生",
+    "majors": ["材料科学与工程", "应用化学", "化学工程与技术", "高分子材料与工程"], "graduation_year": "2027",
+    "jd_text": "岗位职责：开展电池正负极、电解液、电解质膜等材料开发；参与电池设计与仿真、电芯测试验证、工艺开发和模组集成，包括热安全与热管理。任职要求：2027届本科及以上毕业生，材料、应用化学、化工、高分子、能源动力或相关工程专业；专业成绩合格，具备相应英语水平。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116880.html", "published_at": "2026-08-21", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对东风研发总院简章中的独立岗位与网申说明；短链接最终投递状态未核实。"
+  },
+  {
+    "job_id": "geneseeq-2027-technical-support", "title": "技术支持专员", "company": "南京世和基因生物技术股份有限公司",
+    "cities": ["江苏"], "category": "生物医药", "education": "硕士", "education_requirement": "2027届硕士及以上毕业生",
+    "majors": ["分子生物学", "遗传学", "医学"], "graduation_year": "2027",
+    "jd_text": "岗位职责：依照操作规程完成样本检测、DNA/RNA建库、杂交捕获和测序操作；负责试剂配制与验证、实验记录和质量控制，开展客户培训并处理实验异常。任职要求：2027届硕士及以上毕业生，分子生物学、遗传学或医学相关专业；掌握PCR等实验技能，能阅读英文操作规程，适应长期出差及两年内工作地点调配。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119462.html", "published_at": "2026-09-30", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页与2027届资格；页面提供邮箱，当前投递状态未核实。"
+  },
+  {
+    "job_id": "geneseeq-2027-research-assistant", "title": "助理研究员", "company": "南京世和基因生物技术股份有限公司",
+    "cities": ["江苏"], "category": "生物医药", "education": "硕士", "education_requirement": "2027届硕士毕业生",
+    "majors": ["分子生物学", "遗传学", "临床医学"], "graduation_year": "2027",
+    "jd_text": "岗位职责：参与肿瘤精准医疗及分子诊断研发，开展样本处理、文库构建与检测流程优化；调研文献及竞品技术，设计并验证实验方案，整理数据、记录和技术报告。任职要求：2027届硕士毕业生，分子生物学、遗传学或临床医学相关专业；具备分子实验基础、文献阅读与数据分析能力，有测序经验优先。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119452.html", "published_at": "2026-09-30", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；当前投递状态未核实。"
+  },
+  {
+    "job_id": "geneseeq-2027-research-scientist", "title": "研发科学家／高级研究员", "company": "南京世和基因生物技术股份有限公司",
+    "cities": ["江苏"], "category": "生物医药", "education": "博士", "education_requirement": "2027届博士毕业生",
+    "majors": ["分子生物学", "癌症生物学", "细胞生物学", "基因组学", "基础医学"], "graduation_year": "2027",
+    "jd_text": "岗位职责：设计并组织肿瘤分子诊断与精准医疗科研项目，指导实验团队、分析数据和技术问题；跟踪基因组学与测序技术，推进创新研究及论文、专利成果。任职要求：2027届博士毕业生，分子生物学、癌症生物学、基因组学或医学相关专业；能独立完成实验设计、实施和数据解读，具备符合岗位要求的科研成果。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119451.html", "published_at": "2026-09-30", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；当前投递状态未核实。"
+  },
+  {
+    "job_id": "crrcpz-2027-legal", "title": "法务岗", "company": "中车南京浦镇车辆有限公司",
+    "cities": ["江苏"], "category": "文法教育", "education": "本科", "education_requirement": "2027届本科及以上毕业生",
+    "majors": ["法学", "法律"], "graduation_year": "2027",
+    "jd_text": "岗位职责：负责公司及所属企业合同审查、合规管理、法律事务与日常法律咨询。任职要求：2027届本科及以上毕业生，法律或法学相关专业，具备法务相关证书优先；能运用法律知识解决实际业务问题，接受短期外派，外语流利者优先。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html", "published_at": "2026-09-14", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对2027校招简章中的独立法务岗位；当前投递状态未核实。"
+  },
+  {
+    "job_id": "startimes-2027-french-legal", "title": "法务专员（法语）", "company": "北京四达时代软件技术股份有限公司",
+    "cities": ["北京"], "category": "文法教育", "education": "本科", "education_requirement": "2027届本科及以上毕业生",
+    "majors": ["法学"], "graduation_year": "2027",
+    "jd_text": "岗位职责：协助完善集团海外法律管理制度，研究项目国法律法规并提出风险预警；为海外经营提供法律咨询、处理纠纷，起草及审查合同和法律文书。任职要求：2027届本科及以上毕业生，法学相关专业；法语可作为工作语言，具备沟通协调能力，能够接受海外出差。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118402.html", "published_at": "2026-09-09", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对2027校招简章职能类独立岗位；当前投递状态未核实。"
+  },
+  {
+    "job_id": "crrcpz-2027-translator", "title": "翻译类岗位", "company": "中车南京浦镇车辆有限公司",
+    "cities": ["江苏", "境外项目"], "category": "外语传播", "education": "本科", "education_requirement": "2027届本科及以上毕业生",
+    "majors": ["葡萄牙语", "俄语", "西班牙语"], "graduation_year": "2027",
+    "jd_text": "岗位职责：承担公司境外项目的口笔译工作，协助市场商务沟通与项目交流。任职要求：2027届本科及以上毕业生，葡萄牙语、俄语、西班牙语等小语种专业；能够接受境外工作，专业成绩排名不低于前50%，本科英语通过四级、硕士英语通过六级。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html", "published_at": "2026-09-14", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对2027校招简章中的翻译类岗位；当前投递状态未核实。"
+  },
+  {
+    "job_id": "suren-2027-product-designer", "title": "产品设计师", "company": "深圳市苏仁智能科技有限公司",
+    "cities": ["广东"], "category": "艺术设计", "education": "本科", "education_requirement": "2027届本科及以上毕业生",
+    "majors": ["工业设计", "产品设计"], "graduation_year": "2027",
+    "jd_text": "岗位职责：研究消费人群的审美与使用需求，形成产品外观设计方案；跟进手板、试产及供应链协作，研究消费电子设计趋势并沉淀设计方法。任职要求：2027届工业设计或产品设计相关专业毕业生，网申须附作品集；具备用户研究、造型设计、建模渲染能力，熟练使用Rhino、Keyshot、PS或AI等工具。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118732.html", "published_at": "2026-09-14", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对2027秋招简章中的独立产品设计师岗位；当前网申入口未核实。"
+  },
+  {
+    "job_id": "dongfeng-2027-user-insight", "title": "用户洞察及感知岗", "company": "东风汽车集团有限公司研发总院",
+    "cities": ["武汉"], "category": "艺术设计", "education": "本科", "education_requirement": "2027届本科及以上毕业生",
+    "majors": ["工业设计", "人机交互", "产品设计", "数字媒体艺术设计", "心理学"], "graduation_year": "2027",
+    "jd_text": "岗位职责：研究汽车用户与场景，识别需求和痛点，建立用户画像与场景库；开展竞品、趋势和体验评估，将洞察转为产品配置与体验目标，并参与座舱UI/UX或3D设计。任职要求：2027届本科及以上毕业生，工业设计、人机交互、产品设计、数字媒体艺术设计或心理学等相关专业；英语成绩及毕业资格符合校招基本条件。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116880.html", "published_at": "2026-08-21", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对东风研发总院简章的独立用户洞察岗位；当前网申状态未核实。"
+  },
+  {
+    "job_id": "dongfeng-2027-interior-design", "title": "造型设计-内饰设计岗", "company": "东风汽车集团有限公司研发总院",
+    "cities": ["武汉"], "category": "艺术设计", "education": "本科", "education_requirement": "2027届本科及以上毕业生",
+    "majors": ["交通工具设计", "工业设计", "产品设计", "概念设计"], "graduation_year": "2027",
+    "jd_text": "岗位职责：负责概念车和量产车的整车内饰及细节造型设计，并推进设计方案实施。任职要求：2027届本科及以上毕业生，交通工具设计、工业设计、产品设计或概念设计相关专业优先；专业对口、在校成绩合格，本科英语四级或研究生英语六级成绩合格，能够按时取得毕业证与学位证。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116880.html", "published_at": "2026-08-21", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对东风研发总院简章中的独立内饰设计岗位及统一校招条件；当前网申状态未核实。"
+  },
+  {
+    "job_id": "muyuan-2026-environment", "title": "环保工程师", "company": "牧原食品股份有限公司",
+    "cities": ["河南"], "category": "农林环境", "education": "本科", "education_requirement": "本科及以上学历，招聘届别未限定",
+    "majors": ["环境工程", "农学", "给排水科学与工程", "流体力学"], "graduation_year": "未限定",
+    "jd_text": "岗位职责：完善灭菌除臭、排污和环保运营体系，优化环保处理设施与水肥资源化利用，提升处理效率、控制成本并管理外包合作商。任职要求：本科及以上学历，环境工程、农学、给排水或相关专业；具备水处理、给排水设计或合作商管理经历者优先，能够适应长期出差。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118091.html", "published_at": "2026-09-07", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；页面没有限定毕业届别，当前投递状态未核实。"
+  },
+  {
+    "job_id": "kingagroot-2026-field-development", "title": "技术开发管培生", "company": "青岛清原作物科学集团股份有限公司",
+    "cities": ["山东"], "category": "农林环境", "education": "硕士", "education_requirement": "硕士学历，岗位页未单独限定毕业届别",
+    "majors": ["植物保护", "农学", "农药学", "作物栽培与耕作"], "graduation_year": "未限定",
+    "jd_text": "岗位职责：独立开展新产品田间探索、试验及验证示范，收集分析试验数据，形成区域应用标准；结合病虫害及市场需求优化配方，并向销售与推广团队提供田间技术支持。任职要求：植物保护、农学、农药学等相关专业硕士；具备田间试验和数据处理能力，持C2及以上驾照，可接受轮岗及一线田间出差。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119112.html", "published_at": "2026-09-20", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；同批次有2027届校招简章，但本岗位页未单独注明届别，当前投递状态未核实。"
+  },
+  {
+    "job_id": "kingagroot-2026-bioassay", "title": "生测研究员", "company": "青岛清原作物科学集团股份有限公司",
+    "cities": ["山东"], "category": "农林环境", "education": "硕士", "education_requirement": "硕士学历，岗位页未单独限定毕业届别",
+    "majors": ["昆虫学", "农药学", "植物保护", "农学"], "graduation_year": "未限定",
+    "jd_text": "岗位职责：开展除草剂、杀虫剂、杀菌剂等农药生测试验，形成试验报告并建立药效评价方法；参与田间示范、实验前处理、靶标害虫饲养和实验室仪器维护。任职要求：昆虫学、农药学、植物保护等农学相关专业硕士；有扎实理论基础和英语文献阅读能力，能够独立设计实验并适应大田环境。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119108.html", "published_at": "2026-09-20", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；毕业届别及当前投递状态未在岗位页确认。"
+  },
+  {
+    "job_id": "numberslaw-2027-precision-structure", "title": "精密机械结构工程师", "company": "深圳市大数极限科技有限公司",
+    "cities": ["广东", "四川"], "category": "电子机械", "education": "硕士", "education_requirement": "2027届硕士及以上毕业生，博士优先",
+    "majors": ["机械工程", "材料科学", "应用物理", "精密仪器"], "graduation_year": "2027",
+    "jd_text": "岗位职责：设计和验证高精度机电系统，建立结构动力学与有限元模型，评估振动、模态、冲击和热循环影响，协助开展失效分析。任职要求：2027届机械工程、材料科学、精密仪器等相关专业硕士及以上毕业生；熟悉CAD、有限元分析及精密加工工艺，具备装配公差设计能力。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119896.html", "published_at": "2026-10-19", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对2027校招简章中独立的精密机械结构岗位；二维码通道最终状态未核实。"
+  },
+  {
+    "job_id": "numberslaw-2027-thin-film", "title": "HDD薄膜材料与表界面化学工程师", "company": "深圳市大数极限科技有限公司",
+    "cities": ["广东", "四川"], "category": "化工材料", "education": "博士", "education_requirement": "2027届相关专业博士毕业生",
+    "majors": ["材料化学", "物理化学", "表面科学", "薄膜材料", "腐蚀科学"], "graduation_year": "2027",
+    "jd_text": "岗位职责：利用表面分析技术研究薄膜元素组成、界面扩散与沉积工艺，评估碳保护层和润滑剂的结构性能，建立电化学及环境可靠性评价方法。任职要求：2027届材料化学、表面科学或薄膜材料等相关专业博士；具备薄膜生长、界面反应和真空沉积研究经验，熟悉多种表征工具及数据分析。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119896.html", "published_at": "2026-10-19", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对2027校招简章中的独立博士岗位；二维码通道最终状态未核实。"
+  },
+  {
+    "job_id": "geneseeq-2027-bioinformatics", "title": "（高级）生信工程师", "company": "南京世和基因生物技术股份有限公司",
+    "cities": ["江苏"], "category": "生物医药", "education": "硕士", "education_requirement": "2027届硕士及以上毕业生",
+    "majors": ["生物信息学", "统计学", "数学", "计算机科学"], "graduation_year": "2027",
+    "jd_text": "岗位职责：开展肿瘤早筛、基因组学及分子诊断数据分析，建设和优化生信分析流程；研究新分析方法，解读生物学结果，并与实验、医学和产品团队协作交付。任职要求：2027届生物信息学、统计学、数学或计算机相关专业硕士及以上毕业生；熟悉Python、R或Perl及Linux，有NGS分析和数据可视化能力。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119453.html", "published_at": "2026-09-30", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；当前投递状态未核实。"
+  },
+  {
+    "job_id": "startimes-2027-president-secretary", "title": "总裁办秘书", "company": "北京四达时代软件技术股份有限公司",
+    "cities": ["北京"], "category": "外语传播", "education": "硕士", "education_requirement": "2027届重点院校硕士及以上毕业生",
+    "majors": ["英语", "法语"], "graduation_year": "2027",
+    "jd_text": "岗位职责：协调总裁日程及涉外会议，整理会议记录和资料，跟踪海内外项目进展；维护客户、使馆及合作伙伴沟通，承担英语口译和笔译。任职要求：2027届重点院校外语相关专业硕士及以上毕业生，英语或法语专业八级；具备口笔译、涉外礼仪、文字表达和统筹协调能力。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118402.html", "published_at": "2026-09-09", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对2027校招简章中的独立总裁办秘书岗位；当前投递状态未核实。"
+  },
+  {
+    "job_id": "huaan-2027-legal", "title": "法务专员", "company": "华安财产保险股份有限公司天津分公司",
+    "cities": ["天津"], "category": "文法教育", "education": "本科", "education_requirement": "2027届本科及以上毕业生",
+    "majors": ["法学", "审计"], "graduation_year": "2027",
+    "jd_text": "岗位职责：协助分析经营风险、执行合规内控制度，支持监管对接、合规培训和反洗钱工作；参与客户尽调、可疑交易评审、制度修订及监管材料报送。任职要求：2027届法学或审计等相关专业本科及以上毕业生；熟悉保险与反洗钱法规，具备文字表达及跨部门沟通能力，英语四级合格，法律职业资格者优先。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116840.html", "published_at": "2026-08-20", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；当前投递状态未核实。"
+  },
+  {
+    "job_id": "gcbio-2026-field-bioassay", "title": "生测专员/GLP试验员", "company": "江苏功成生物科技有限公司",
+    "cities": ["南京"], "category": "农林环境", "education": "本科", "education_requirement": "本科及以上学历，岗位页未限定毕业届别",
+    "majors": ["植物保护", "农药学", "农业昆虫与害虫防治", "生物学"], "graduation_year": "未限定",
+    "jd_text": "岗位职责：测定农药产品的生物活性，参与生测方案设计和实施，统计试验数据、撰写报告并提出优化方案；评估产品表现，协调相关试验以推进研发。任职要求：植物保护、农药学、农业昆虫与害虫防治或生物学等相关专业本科及以上学历；具备问题分析能力，工作主动、严谨细致。",
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119576.html", "published_at": "2026-10-09", "publication_type": "repost", "application_url": null,
+    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；岗位页未限定届别，当前投递状态未核实。"
   }
-
   ]
 }

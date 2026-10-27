@@ -15,6 +15,12 @@ async def list_jobs(request: Request, category: Category | None = None, educatio
     return request.app.state.job_repository.list(category, education, application_status, page, page_size)
 
 
+@router.get("/api/jobs/testing-pool", response_model=JobList)
+async def testing_pool(request: Request, category: Category | None = None, education: Education | None = None,
+                       page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100)):
+    return request.app.state.job_repository.testing_pool(category, education, page, page_size)
+
+
 @router.get("/api/jobs/{job_id}", response_model=Job)
 async def get_job(job_id: str, request: Request):
     job = request.app.state.job_repository.jobs.get(job_id)

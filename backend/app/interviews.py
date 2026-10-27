@@ -1,4 +1,4 @@
-"""Three-round, evidence-grounded interview sessions with durable replay."""
+"""Five-round, evidence-grounded interview sessions with durable replay."""
 import asyncio
 import json
 import logging
@@ -21,7 +21,7 @@ MAX_TOKENS = 2400
 REPAIR_TEMPERATURE = 0.7
 MAX_CONTEXT_CHARS = 20000
 TTL_SECONDS = 24 * 60 * 60
-MAX_ROUNDS = 3
+MAX_ROUNDS = 5
 BASE_URL = "https://open.bigmodel.cn/api/paas/v4/"
 DEFAULT_MODEL = "glm-4-flash"
 PLACEHOLDERS = {"有原文依据的优点", "建议", "建议覆盖的要点", "考察点", "一道问题", "与回答相关的追问"}
@@ -60,8 +60,8 @@ ANSWER_FORMAT = """服务器阶段要求：本次不是最后一轮，必须返�
 "strengths":[{"text":"有原文依据的优点","answer_ref":"a0"}],"improvements":["建议"]},
 "next_question":{"text":"你提到‘a0选项的quote原文’，请进一步说明具体做法？","focus":"考察点","evidence_refs":["a0","j0"]}}
 """
-FINAL_FORMAT = """服务器阶段要求：这是第三轮也是最后一轮。本次只生成反馈，绝对不要继续出题。
-next_question 必须为 JSON null。不要因为全局提问规则生成第四题。只返回如下结构：
+FINAL_FORMAT = """服务器阶段要求：这是第五轮也是最后一轮。本次只生成反馈，绝对不要继续出题。
+next_question 必须为 JSON null。不要因为全局提问规则生成第六题。只返回如下结构：
 {"feedback":{"reference_points":["建议覆盖的要点"],
 "strengths":[{"text":"有原文依据的优点","answer_ref":"a0"}],"improvements":["建议"]},"next_question":null}
 """
@@ -353,7 +353,7 @@ class InterviewService:
                                             return fallback
                                     fail(502, "INTERVIEW_GENERATION_FAILED", "面试内容生成失败，请重试；本轮尚未推进")
                                 feedback = {
-                                    "invalid_next_question": "第三轮 next_question 必须为 null，前两轮必须有下一题。",
+                                    "invalid_next_question": "第五轮 next_question 必须为 null，前四轮必须有下一题。",
                                     "invalid_question_evidence": "问题 evidence_refs 必须选择 evidence_options 中确实存在的 ID，不要自行摘录或编造 ID。",
                                     "question_missing_job_grounding": "问题至少引用一条 resume 或 jd 证据。",
                                     "followup_missing_answer_grounding": "后续问题必须通过有效的 a 选项引用本轮 answer，并保持岗位关联。",

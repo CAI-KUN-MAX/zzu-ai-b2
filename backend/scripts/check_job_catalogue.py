@@ -12,6 +12,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from app.job_schemas import Job
+from app.job_repository import test_ready
 
 CATEGORIES = ["计算机", "电子机械", "土木建筑", "化工材料", "生物医药", "经管财会",
               "文法教育", "外语传播", "艺术设计", "农林环境"]
@@ -27,6 +28,7 @@ def check(path, as_of):
         if job.published_at > as_of or job.verified_at.date() > as_of:
             raise ValueError("future catalogue date: " + job.job_id)
     active = [j for j in jobs if j.application_status == "open"]
+    testing = [j for j in jobs if test_ready(j)]
     # Open records must contain both parts of the JD. This is a minimum
     # structural gate; source accuracy still needs manual verification.
     incomplete = [j.job_id for j in active if len(j.jd_text.strip()) < 80 or
@@ -36,8 +38,16 @@ def check(path, as_of):
     counts = Counter(j.category for j in active)
     graduates = sum(j.education in {"硕士", "博士"} for j in active)
     undergraduates = sum(j.education == "本科" for j in active)
+    testing_counts = Counter(j.category for j in testing)
+    testing_graduates = sum(j.education in {"硕士", "博士"} for j in testing)
+    testing_undergraduates = sum(j.education == "本科" for j in testing)
     gaps = {category: max(0, 4 - counts[category]) for category in CATEGORIES}
+    testing_target_met = (len(testing) >= 40 and all(testing_counts[c] >= 4 for c in CATEGORIES)
+                          and testing_graduates >= 12 and testing_undergraduates >= 20)
     return dict(version=data["version"], structural_validation="passed", records=len(jobs),
+                testing_pool=len(testing), testing_by_category={c: testing_counts[c] for c in CATEGORIES},
+                testing_postgraduate=testing_graduates, testing_undergraduate=testing_undergraduates,
+                testing_target_met=testing_target_met,
                 open=len(active), unverified=sum(j.application_status == "unverified" for j in jobs),
                 open_by_category={c: counts[c] for c in CATEGORIES},
                 open_postgraduate=graduates, open_undergraduate=undergraduates,
@@ -52,10 +62,13 @@ def main():
                         default=Path(__file__).resolve().parents[1] / "catalogue" / "jobs.v1.json")
     parser.add_argument("--as-of", type=date.fromisoformat, required=True)
     parser.add_argument("--require-target", action="store_true")
+    parser.add_argument("--require-testing-pool", action="store_true")
     args = parser.parse_args()
     result = check(args.catalogue, args.as_of)
     print(json.dumps(result, ensure_ascii=False, indent=2))
     if args.require_target and not result["target_met"]:
+        sys.exit(1)
+    if args.require_testing_pool and not result["testing_target_met"]:
         sys.exit(1)
 
 

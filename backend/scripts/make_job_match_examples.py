@@ -31,9 +31,12 @@ def examples():
         summary="示例摘要：简历体现Python接口开发经历，需结合具体岗位进一步核对。",
         meta=dict(model="fictional-example-only", mode="llm", elapsed_ms=100)))
 
-    def task(status, items, stage, progress, error=None, error_code=None):
+    def task(status, items, stage, progress, error=None, error_code=None, total=0, started=None):
+        completed = sum(item["analysis_status"] in {"succeeded", "degraded"}
+                        and item.get("degraded_reason") not in {"not_selected", "ai_disabled"} for item in items)
         result = dict(status=status, stage=stage, progress=progress, error=error, error_code=error_code,
-                      items=ranked(items))
+                      analysis_completed=completed, analysis_total=total,
+                      analysis_started_at=started, items=ranked(items))
         JobMatchTask.model_validate(result)
         return result
 
@@ -65,9 +68,12 @@ def examples():
                 request=dict(resume_id="example-resume", job_ids=[job["job_id"], other["job_id"]]),
                 created=dict(http_status=202, body=dict(task_id="example-task")),
                 jobs=dict(catalogue_version="example-only", total=2, page=1, page_size=20, items=[job, other]),
-                queued=task("queued", [], "等待岗位匹配", 0), running=task("running", running, "基础评分完成", 25),
-                succeeded=task("succeeded", success, "岗位匹配完成", 100),
-                partially_degraded=task("succeeded", partial, "岗位匹配完成", 100),
+                queued=task("queued", [], "等待岗位匹配", 0), running=task("running", running, "深度分析 0/2", 25,
+                    total=2, started="2026-10-27T00:00:00+00:00"),
+                succeeded=task("succeeded", success, "岗位匹配完成", 100, total=2,
+                    started="2026-10-27T00:00:00+00:00"),
+                partially_degraded=task("succeeded", partial, "岗位匹配完成", 100, total=2,
+                    started="2026-10-27T00:00:00+00:00"),
                 fully_degraded=task("succeeded", degraded, "岗位匹配完成", 100),
                 failed=task("failed", [], "岗位匹配失败", 5, "岗位匹配暂时失败，请重试", "JOB_MATCH_FAILED"),
                 interrupted=task("failed", [], "任务已中断", 0, "服务重启，任务已中断，请重试", "TASK_INTERRUPTED"),

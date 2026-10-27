@@ -60,7 +60,7 @@ def main():
                 assert response.status_code == 200, response.text
                 result = response.json()
                 assert result["round"] == index
-                assert result["status"] == ("completed" if index == 3 else "active")
+                assert result["status"] == ("completed" if index == 5 else "active")
                 replayed = client.post(f"/api/interviews/{identifier}/answers", json=payload)
                 assert replayed.status_code == 200 and replayed.json() == result
                 item = {"round": index, "question": question, "answer": answer, "response": result,
@@ -77,7 +77,7 @@ def main():
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(transcript, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(json.dumps({"passed": True, "rounds": 3, "replay": "passed", "persistent_state": "passed"}), flush=True)
+    print(json.dumps({"passed": True, "rounds": 5, "replay": "passed", "persistent_state": "passed"}), flush=True)
 
 
 if __name__ == "__main__":
