@@ -4,8 +4,10 @@ import hashlib
 import json
 import logging
 import os
+from datetime import datetime, timezone
 
 from app import matching
+from app.job_repository import test_ready
 from app.routers.diagnose import MAX_TOTAL_CHARS, MIN_CHARS, SYSTEM_PROMPT
 from app.routers.resumes import fail
 
@@ -60,7 +62,11 @@ class JobMatchService:
             job = self.repository.jobs.get(identifier)
             if job is None:
                 fail(404, "JOB_NOT_FOUND", "岗位不存在")
-            if job.application_status != "open":
+            if job.application_status != "open" and not (
+                payload.allow_unverified_for_testing
+                and job.application_status == "unverified"
+                and test_ready(job)
+            ):
                 fail(409, "JOB_NOT_OPEN", "岗位已关闭或尚未核验投递状态")
             jobs.append(job.model_dump(mode="json"))
         # Snapshots are deliberately stored, unlike the older HR-facing match task.
@@ -85,10 +91,16 @@ class JobMatchService:
     def result(self, identifier):
         task = self.task(identifier)
         error = json.loads(task["error"]) if task["error"] else None
+        snapshot = json.loads(task["payload"])
+        items = json.loads(task["result"]) if task["result"] else []
+        selected = [item for item in items if item.get("degraded_reason") not in {"not_selected", "ai_disabled"}]
+        completed = sum(item["analysis_status"] in {"succeeded", "degraded"} for item in selected)
         return dict(status=task["status"], stage=task["stage"], progress=task["progress"],
+                    analysis_completed=completed, analysis_total=len(selected),
+                    analysis_started_at=snapshot.get("analysis_started_at"),
                     error=error.get("message") if isinstance(error, dict) else error,
                     error_code=error.get("code") if isinstance(error, dict) else None,
-                    items=json.loads(task["result"]) if task["result"] else [])
+                    items=items)
 
     def context(self, identifier, job_id):
         snapshot = json.loads(self.task(identifier)["payload"])
@@ -122,7 +134,13 @@ class JobMatchService:
                     selected = items[:top_k]
                     for item in items[top_k:]:
                         item.update(analysis_status="degraded", degraded_reason="not_selected" if top_k else "ai_disabled")
-                    self.repository.update(identifier, result=items, stage="基础评分完成", progress=25)
+                    if selected:
+                        payload = {**json.loads(self.repository.task(identifier)["payload"]),
+                                   "analysis_started_at": datetime.now(timezone.utc).isoformat()}
+                        self.repository.update(identifier, payload=payload)
+                    self.repository.update(identifier, result=items,
+                                           stage=f"深度分析 0/{len(selected)}" if selected else "基础评分完成",
+                                           progress=25)
                     completed = 0
 
                     async def refine(item):
@@ -173,13 +191,19 @@ class JobMatchService:
                 for item in items:
                     if item["analysis_status"] in {"pending", "running"}:
                         item.update(analysis_status="degraded", degraded_reason="batch_timeout")
+                self.repository.update(identifier, status="failed", stage="深度分析超时",
+                                       result=ranked(items),
+                                       error={"code": "JOB_MATCH_TIMEOUT", "message": "岗位深度分析超时，请重试"})
+                return
             except asyncio.CancelledError:
                 self.repository.update(identifier, status="failed", stage="任务已中断",
+                                       result=ranked(items),
                                        error={"code": "TASK_INTERRUPTED", "message": "服务重启，任务已中断，请重试"})
                 raise
             except Exception as exc:
                 logger.error("job match failed task_id=%s category=%s", identifier, type(exc).__name__)
                 self.repository.update(identifier, status="failed", stage="岗位匹配失败",
+                                       result=ranked(items),
                                        error={"code": "JOB_MATCH_FAILED", "message": "岗位匹配暂时失败，请重试"})
                 return
             self.repository.update(identifier, status="succeeded", stage="岗位匹配完成", progress=100,

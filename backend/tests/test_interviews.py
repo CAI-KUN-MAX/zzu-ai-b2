@@ -28,7 +28,7 @@ def model_output(context):
     return {"feedback": {"strengths": [{"text": "回答说明了数据库约束的作用。", "answer_ref": "a0"}],
                          "improvements": ["进一步说明异常处理和测试方法。"],
                          "reference_points": ["建议覆盖唯一约束、幂等处理与并发测试，不代表已有实践。"]},
-            "next_question": None if round_number == 3 else {
+            "next_question": None if round_number == 5 else {
                 "text": f"第{round_number + 1}题：你提到‘{evidence_options(context)['a0']['quote']}’，如何验证方案的可靠性？",
                 "focus": "基于回答追问", "evidence_refs": ["a0", "j0"]}}
 
@@ -86,28 +86,28 @@ class InterviewTests(unittest.TestCase):
         self.assertTrue(error["request_id"])
         self.assertTrue(error["message"])
 
-    def test_three_round_contract_and_replay_after_completion(self):
+    def test_five_round_contract_and_replay_after_completion(self):
         session = self.create()
         InterviewSession.model_validate(session)
         identifier, question = session["interview_id"], session["question"]
         responses = []
-        for round_number in range(1, 4):
+        for round_number in range(1, 6):
             response = self.submit(identifier, question["id"])
             self.assertEqual(response.status_code, 200, response.text)
             result = response.json()
             InterviewAnswerResult.model_validate(result)
             self.assertEqual(result["round"], round_number)
-            self.assertEqual(result["max_rounds"], 3)
-            self.assertEqual(result["status"], "completed" if round_number == 3 else "active")
+            self.assertEqual(result["max_rounds"], 5)
+            self.assertEqual(result["status"], "completed" if round_number == 5 else "active")
             self.assertTrue(all(isinstance(item, str) for item in result["feedback"]["strengths"]))
             responses.append((question["id"], result))
             question = result["next_question"]
         self.assertIsNone(question)
-        self.assertEqual(self.model.chat.completions.create.await_count, 4)
+        self.assertEqual(self.model.chat.completions.create.await_count, 6)
         for question_id, previous in responses:
             self.assertEqual(self.submit(identifier, question_id).json(), previous)
-        self.assertEqual(self.model.chat.completions.create.await_count, 4)
-        self.assertEqual(len(self.state(identifier)["turns"]), 3)
+        self.assertEqual(self.model.chat.completions.create.await_count, 6)
+        self.assertEqual(len(self.state(identifier)["turns"]), 5)
         self.assert_error(self.submit(identifier, "new-question"), 409, "INTERVIEW_CONFLICT")
 
     def test_review_and_no_diagnosis_report_required(self):
@@ -490,7 +490,7 @@ class InterviewGroundingTests(unittest.TestCase):
         context["history"] = [{"question": {"text": draft["next_question"]["text"]}}]
         with self.assertRaises(ValueError):
             parse_output(json.dumps(draft), context)
-        context = self.context("answer", 3)
+        context = self.context("answer", 5)
         draft = model_output(self.context("answer", 2))
         self.assertIsNone(parse_output(json.dumps(draft), context).next_question)
 

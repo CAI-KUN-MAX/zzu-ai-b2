@@ -1,16 +1,22 @@
 # 岗位来源核验与数量缺口
 
-质量复核日期：2026-10-26（Asia/Shanghai）。此前声称 40 岗已通过验收有误：数量检查没有发现被截短的 JD，也没有核对来源岗位是否被错误拆分。本次复核后目标未达成。
+质量复核日期：2026-10-27（Asia/Shanghai）。此前声称 40 岗已通过验收有误：数量检查没有发现被截短的 JD，也没有核对来源岗位是否被错误拆分。本次复核后目标未达成。
 
 ## 当前目录
 
-`jobs.v1.json` 仍有 50 条来源线索，目前 5 条 `open`、45 条 `unverified`。5 条中最低学历本科 4 条、硕士 1 条；类别和学历配额均未达标。高校页面的日期标为转载日期，不当作企业最初发布时间。
+`jobs.v1.json` 有 80 条记录，目前 11 条 `open`、69 条 `unverified`。11 条中最低学历本科 10 条、硕士 1 条；可投类别和学历配额仍未达标。高校页面的日期标为转载日期，不当作企业最初发布时间。
 
-**当前 open 5 条、unverified 45 条。** 默认 `GET /api/jobs` 只查询 open 记录；待核验记录可显式查询，但不能创建匹配任务。没有实际提交简历、发送邮件或联系招聘者，也没有验证登录后最终能否投递。独立前端示例均为虚构，不能提升真实岗位数量。
+**当前 open 11 条、unverified 69 条。** 默认 `GET /api/jobs` 只查询 open 记录；`GET /api/jobs/testing-pool` 返回 40 条多专业测试岗位，其中 29 条仍为 unverified。调用匹配接口时须显式传 `allow_unverified_for_testing=true`，且仅对测试池中的待核验岗位放宽限制。测试匹配不提升可投状态。没有实际提交简历、发送邮件或联系招聘者，也没有验证登录后最终能否投递。独立前端示例均为虚构，不能提升真实岗位数量。
+
+2026-10-27 为测试池新增 24 条来源可核对的岗位正文：涵盖[中车南京浦镇 2027 校招](https://career.nankai.edu.cn/correcruit/content/id/118737.html)、[保利海南独立岗位](https://career.nankai.edu.cn/correcruit/content/id/116870.html)、[东风研发总院简章](https://career.nankai.edu.cn/correcruit/content/id/116880.html)、[世和基因独立岗位](https://career.nankai.edu.cn/correcruit/content/id/119462.html)、[四达时代简章](https://career.nankai.edu.cn/correcruit/content/id/118402.html)、[苏仁智能简章](https://career.nankai.edu.cn/correcruit/content/id/118732.html)及其他页面。JD 为对原岗位职责与资格的忠实转述，页面发布日期按高校转载日记录；每条保留来源 URL 和核验说明。未确认当前可投和最终投递入口，因此均标 unverified，`application_url=null`。原有 41 条把来源 URL 重复填作投递 URL 的 unverified 记录也已置空该字段，避免误导前端。
+
+测试池最低结构门槛是 JD 至少 80 字，并同时含“岗位职责”“任职要求”；40 条按十类各 4 条，最低学历硕士/博士 12 条、本科 28 条。结构与来源可追溯性可以支持多专业匹配测试；它不证明岗位仍在招聘，也不替代逐条可投核验。
+
+2026-10-27 新增中兴新云官网 6 个独立岗位：[校招岗位列表](https://www.ztccloud.com.cn/careers/campus-jobs.html)注明 2027 届、岗位信息更新于 2026-09-29、网申截止 2026-12-31；每个岗位详情页列出完整职责及任职资格。单独的[公开网申表](https://www.wenjuan.com/s/UZBZJvhceK/)可打开，并明确列出这 6 个岗位供选择。目录中 `source_url` 指向企业官网各岗位详情，`application_url` 指向网申表；未提交表单或验证提交后的审核流程。6 个岗位按实际工作方向计入计算机 2 条、经管财会 4 条，不冒充其他类别。
 
 本次复核发现原 40 条 open 中 29 条 JD 不足 60 字，另有 3 条虽更长但缺少可核对的完整岗位职责或仍需逐项复核，再有 3 条把来源页误写为直接投递链接，合计 35 条退出候选集。尤其是 `saic-2027-industrial-design` 将[来源的“研发储备生”](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKz7bOs4bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)错误拆成工业设计独立岗位；`cscec4dev-2027-overseas` 将[“现场工程师”来源](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9yKlLbSsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)的地区和总体专业信息误当成独立驻外岗位。两条已更正展示字段并标为待核验，不计入配额。来源未限定毕业届别的已核实记录同步更正届别字段。其余 unverified 仍是待复核线索，不能据其摘要推断申请资格。
 
-验收脚本现要求每条 open 的 JD 至少 80 字，并明确包含岗位职责、任职要求两部分；这只是最低结构门槛，来源真实性和投递入口仍需人工核对。当前输出为 records=50、open=5、unverified=45、target_met=false。
+验收脚本现要求每条 open 的 JD 至少 80 字，并明确包含岗位职责、任职要求两部分；这只是最低结构门槛，来源真实性和投递入口仍需人工核对。当前输出为 records=80、testing_pool=40、testing_target_met=true、open=11、unverified=69、target_met=false。
 
 | 岗位 ID | 核验结果 |
 |---|---|
@@ -39,12 +45,13 @@
 
 ## 剩余验收
 
-当前静态目录距 40 条可投岗位还缺 35 条；十类及学历配额缺口见验收脚本输出。逐条补齐完整 JD、核对来源职位名称及毕业届别、复核投递入口后，才能将对应记录改回 open。岗位到达截止日期或来源状态变化后也需重新核验。
+当前静态目录距 40 条可投岗位还缺 29 条；十类及学历配额缺口见验收脚本输出。逐条核对来源职位名称及毕业届别、复核投递入口后，才能将对应记录改回 open。岗位到达截止日期或来源状态变化后也需重新核验。
 
 后续需取得可读取的官方岗位详情与有效投递状态，逐条更新 verification_note、verified_at、application_status；来源不足的类别继续补充完整记录。运行：
 
 ```powershell
-.\.venv\Scripts\python.exe backend/scripts/check_job_catalogue.py --as-of 2026-10-26 --require-target
+.\.venv\Scripts\python.exe backend/scripts/check_job_catalogue.py --as-of 2026-10-27 --require-target
+.\.venv\Scripts\python.exe backend/scripts/check_job_catalogue.py --as-of 2026-10-27 --require-testing-pool
 ```
 
-验收脚本对结构错误、重复 ID、未来日期、open JD 缺少职责或要求报错；数量检查要求 open≥40、十类各≥4、硕博≥12、本科≥20。2026-10-26 复核结果为 structural_validation=passed、open=5、target_met=false；`--require-target` 因数量及配额缺口返回非零，符合预期。
+验收脚本对结构错误、重复 ID、未来日期、open JD 缺少职责或要求报错；数量检查分别报告测试池与可投岗位。2026-10-27 复核结果为 structural_validation=passed、testing_target_met=true、open=11、target_met=false；`--require-target` 因可投数量及配额缺口返回非零，符合预期。
