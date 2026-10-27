@@ -21,6 +21,8 @@ interface InterviewPageProps {
   resumeName: string;
   resumeStatus: ResumeStatus;
   jdText: string;
+  /** 岗位名称（如“后端开发 · 某公司”），有则在确认页展示，否则退回 JD 首行 */
+  jobTitle?: string;
   /** 返回筛选结果页；原页面不卸载，展开状态与报告都还在 */
   onExit: () => void;
   /** 覆盖层层级：默认 30；嵌在岗位详情里时传 40，避免被详情盖住 */
@@ -90,6 +92,7 @@ export function InterviewPage({
   resumeName,
   resumeStatus,
   jdText,
+  jobTitle,
   onExit,
   layer = 30,
 }: InterviewPageProps) {
@@ -149,9 +152,10 @@ export function InterviewPage({
   );
 
   const jdSummary = useMemo(() => {
+    if (jobTitle) return jobTitle;
     const firstLine = jdText.split("\n").find((line) => line.trim().length > 0) ?? jdText;
     return firstLine.length > 48 ? `${firstLine.slice(0, 48)}…` : firstLine;
-  }, [jdText]);
+  }, [jdText, jobTitle]);
 
   async function handleStart() {
     if (inFlight.current) return;
@@ -442,7 +446,7 @@ export function InterviewPage({
                   </p>
                 ) : (
                   <p className="mt-1.5 text-[10px] leading-relaxed text-ink-500">
-                    语音识别由浏览器提供的服务完成，不会上传原始音频；识别文字需你确认后手动提交。
+                    语音识别由浏览器自带的识别服务完成，部分浏览器（如 Chrome）会把语音发送到其在线服务转写，网络不通时可能无法使用；本站不保存录音，识别文字需你确认后手动提交。
                   </p>
                 )}
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   Job,
   JobDegradedReason,
@@ -7,7 +7,7 @@ import type {
   MatchContext,
   ResumeStatus,
 } from "../types";
-import { getJobMatchTask, getMatchContext } from "../api/jobs";
+import { createJobMatch, getJobMatchTask, getMatchContext } from "../api/jobs";
 import { useTask } from "../lib/useTask";
 import { levelTone, scoreTone } from "../lib/theme";
 import { DimensionBars } from "./report/DimensionBars";
@@ -29,7 +29,11 @@ interface JobResultPageProps {
   resumeName: string;
   resumeStatus: ResumeStatus;
   jobIndex: Record<string, Job>;
+  /** 本次参与匹配的岗位，用于失败后原样重新发起 */
+  jobIds: string[];
   onReset: () => void;
+  /** 用同一份简历和同一批岗位重新创建任务后回调新的 taskId */
+  onRestart: (taskId: string) => void;
 }
 
 function Chip({ text, tone }: { text: string; tone: "hit" | "miss" }) {
@@ -365,6 +369,7 @@ function JobDetail({
           resumeName={resumeName}
           resumeStatus={resumeStatus}
           jdText={interviewRequest.jd_text}
+          jobTitle={job ? `${job.title} · ${job.company}` : item.title}
           layer={40}
           onExit={() => setInterviewOpen(false)}
         />
@@ -388,12 +393,18 @@ function ProgressBanner({
   task,
   items,
   pollError,
-  onRetry,
+  polling,
+  restarting,
+  onRestart,
+  onRefetch,
 }: {
   task: JobMatchTask | null;
   items: JobMatchItem[];
   pollError: string | null;
-  onRetry: () => void;
+  polling: boolean;
+  restarting: boolean;
+  onRestart: () => void;
+  onRefetch: () => void;
 }) {
   const startedAt = task?.analysis_started_at ?? null;
   const [now, setNow] = useState(() => Date.now());
@@ -438,10 +449,12 @@ function ProgressBanner({
             </p>
             <button
               type="button"
-              onClick={onRetry}
-              className="mt-2.5 rounded-lg bg-rose-600 px-3 py-1.5 text-[12px] font-medium text-white hover:bg-rose-700"
+              onClick={onRestart}
+              disabled={restarting}
+              className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1.5 text-[12px] font-medium text-white hover:bg-rose-700 disabled:opacity-60"
             >
-              重新匹配
+              {restarting ? <SpinnerIcon className="h-3.5 w-3.5 animate-spin" /> : null}
+              {restarting ? "正在重新发起…" : "用同一份简历重新匹配"}
             </button>
           </div>
         </div>
@@ -452,12 +465,23 @@ function ProgressBanner({
   /* 轮询暂时失败：任务可能仍在跑，不要求用户重传简历 */
   if (pollError) {
     return (
-      <div className="mt-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] leading-relaxed text-amber-700">
-        <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-        <span>
-          网络波动，正在自动重试。已有结果会保留，不需要重新上传简历。
-          <span className="ml-1 text-amber-600">（{pollError}）</span>
+      <div className="mt-4 flex flex-col gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] leading-relaxed text-amber-700 sm:flex-row sm:items-start">
+        <span className="flex min-w-0 flex-1 items-start gap-2">
+          <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>
+            {polling
+              ? "网络波动，正在自动重试。已有结果会保留，不需要重新上传简历。"
+              : "暂时没拿到最新进度，任务可能仍在后台进行。已有结果会保留。"}
+            <span className="ml-1 text-amber-600">（{pollError}）</span>
+          </span>
         </span>
+        <button
+          type="button"
+          onClick={onRefetch}
+          className="shrink-0 self-start rounded-lg bg-amber-600 px-3 py-1.5 text-[12px] font-medium text-white hover:bg-amber-700"
+        >
+          重新获取
+        </button>
       </div>
     );
   }
@@ -522,9 +546,36 @@ export function JobResultPage({
   resumeName,
   resumeStatus,
   jobIndex,
+  jobIds,
   onReset,
+  onRestart,
 }: JobResultPageProps) {
-  const { data: task, error, polling } = useTask(getJobMatchTask, taskId);
+  const { data: task, error, transient, polling, retry } = useTask(getJobMatchTask, taskId);
+  const [restarting, setRestarting] = useState(false);
+  const [restartError, setRestartError] = useState<string | null>(null);
+  const restartInFlight = useRef(false);
+
+  /** 整批失败或任务已不存在时，不回首页、不重传简历，直接用原参数再建一个任务 */
+  async function handleRestart() {
+    if (restartInFlight.current) return;
+    const ids = jobIds.length > 0 ? jobIds : (task?.items ?? []).map((item) => item.job_id);
+    if (ids.length === 0) {
+      onReset();
+      return;
+    }
+    restartInFlight.current = true;
+    setRestarting(true);
+    setRestartError(null);
+    try {
+      const { task_id } = await createJobMatch(resumeId, ids);
+      onRestart(task_id);
+    } catch (err) {
+      setRestartError(err instanceof Error ? err.message : "重新发起失败，请稍后再试");
+    } finally {
+      restartInFlight.current = false;
+      setRestarting(false);
+    }
+  }
   // 只记岗位 ID，详情始终读最新一次轮询结果：AI 报告在打开详情之后才到达也能自动显示
   const [detailJobId, setDetailJobId] = useState<string | null>(null);
 
@@ -548,6 +599,12 @@ export function JobResultPage({
         <div className="mt-6 h-1 w-full max-w-sm overflow-hidden rounded-full bg-slate-100">
           <div className="animate-indeterminate h-full w-1/3 rounded-full bg-brand-500" />
         </div>
+        {error ? (
+          <p className="mt-5 flex max-w-sm items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[12px] leading-relaxed text-amber-700">
+            <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <span>网络波动，暂时获取不到进度，正在自动重试；匹配任务仍在后台进行，不需要重新上传。</span>
+          </p>
+        ) : null}
       </main>
     );
   }
@@ -564,20 +621,52 @@ export function JobResultPage({
           <ArrowLeftIcon className="h-4 w-4" />
           返回
         </button>
-        <div className="mt-4 flex items-start gap-3 rounded-xl2 border border-rose-200 bg-rose-50 px-5 py-6">
-          <AlertIcon className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" />
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-rose-700">岗位匹配失败</p>
-            <p className="mt-1 text-[13px] leading-relaxed text-rose-700">{error}</p>
-            <button
-              type="button"
-              onClick={onReset}
-              className="mt-3 rounded-lg bg-rose-600 px-3 py-1.5 text-[12px] font-medium text-white hover:bg-rose-700"
-            >
-              重新发起
-            </button>
+        {transient ? (
+          /* 只是取不到进度（网络或等待太久），不能判定为匹配失败 */
+          <div className="mt-4 flex items-start gap-3 rounded-xl2 border border-amber-200 bg-amber-50 px-5 py-6">
+            <AlertIcon className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-amber-800">暂时获取不到匹配进度</p>
+              <p className="mt-1 text-[13px] leading-relaxed text-amber-700">
+                {error} 匹配任务可能仍在后台进行，网络恢复后点“重新获取”即可继续查看，不需要重新上传简历。
+              </p>
+              <button
+                type="button"
+                onClick={retry}
+                className="mt-3 rounded-lg bg-amber-600 px-3 py-1.5 text-[12px] font-medium text-white hover:bg-amber-700"
+              >
+                重新获取
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="mt-4 flex items-start gap-3 rounded-xl2 border border-rose-200 bg-rose-50 px-5 py-6">
+            <AlertIcon className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-rose-700">岗位匹配失败</p>
+              <p className="mt-1 text-[13px] leading-relaxed text-rose-700">{error}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={handleRestart}
+                  disabled={restarting}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1.5 text-[12px] font-medium text-white hover:bg-rose-700 disabled:opacity-60"
+                >
+                  {restarting ? <SpinnerIcon className="h-3.5 w-3.5 animate-spin" /> : null}
+                  {restarting ? "正在重新发起…" : "用同一份简历重新匹配"}
+                </button>
+                <button
+                  type="button"
+                  onClick={onReset}
+                  className="rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-[12px] font-medium text-rose-700 hover:bg-rose-100"
+                >
+                  返回修改岗位
+                </button>
+              </div>
+              {restartError ? <p className="mt-2 text-[12px] text-rose-700">{restartError}</p> : null}
+            </div>
+          </div>
+        )}
       </main>
     );
   }
@@ -605,7 +694,18 @@ export function JobResultPage({
         </button>
       </div>
 
-      <ProgressBanner task={task} items={items} pollError={error} onRetry={onReset} />
+      <ProgressBanner
+        task={task}
+        items={items}
+        pollError={task?.status === "failed" ? null : error}
+        polling={polling}
+        restarting={restarting}
+        onRestart={handleRestart}
+        onRefetch={retry}
+      />
+      {restartError ? (
+        <p className="mt-2 text-[12px] text-rose-700">{restartError}</p>
+      ) : null}
 
       {/* 岗位卡片列表 */}
       <div className="mt-5 space-y-3">
