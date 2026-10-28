@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-27.v2",
+  "version": "2026-10-28.v3",
   "items": [
     {
       "job_id": "bii-2027-software",
@@ -34,10 +34,10 @@
       "source_url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55328.html",
       "published_at": "2026-08-05",
       "publication_type": "repost",
-      "application_url": null,
-      "verified_at": "2026-10-26T11:48:00+08:00",
-      "application_status": "unverified",
-      "verification_note": "高校页面保留投递简历入口，无明确截止日期；未验证登录后的投递资格与当前岗位状态。按正文保存海外地点，不将页面概述的北京当作工作地。"
+      "application_url": "https://ctgu.91wllm.cn/campus/view/id/1001059",
+      "verified_at": "2026-10-28T18:00:00+08:00",
+      "application_status": "open",
+      "verification_note": "2026-10-28 核验：三峡大学招聘平台当前列出2027届海外技术岗位、显示投递简历入口并标注2026-10-31到期；高校来源保留完整职责。"
     },
     {
       "job_id": "cgc-2027-civil",
@@ -49,14 +49,14 @@
       "education_requirement": "大学本科及以上学历",
       "majors": ["土木工程", "建筑", "工民建"],
       "graduation_year": "2027",
-      "jd_text": "岗位职责：\n1、负责图纸会审及技术文件的编制工作；\n2、负责本专业或相关专业的现场施工技术管理工作，处理技术问题；\n3、负责工程变更管理、工程量审核、支付工程款审核工作；\n4、配合其它专业工程师完成项目上的其它工作。\n任职资格：\n1、土木工程、建筑、工民建等相关专业，大学本科及以上学历；\n2、能够独立工作，具有良好的沟通协调能力，富有责任心、事业心和团队协作精神，吃苦耐劳；\n3、在校成绩优异，英语四级，无挂科记录；\n4、熟练使用Office、AutoCAD、P6等应用软件；\n5、身体健康，能够接受长期驻外工作；\n6、接受实习，实习生要求：每周实习时间不低于4个工作日，工作地在北京总部，优秀实习生可优先获得录用资格。\n具体工作地点需服从公司分配，可接受驻外工作者再进行简历投递。海外机构：布基纳法索、塞内加尔、毛里塔尼亚、吉布提、贝宁、伊拉克、阿曼。",
+      "jd_text": "岗位职责：\n1、负责图纸会审及技术文件的编制工作；\n2、负责本专业或相关专业的现场施工技术管理工作，处理技术问题；\n3、负责工程变更管理、工程量审核、支付工程款审核工作；\n4、配合其它专业工程师完成项目上的其它工作。\n任职要求：\n1、土木工程、建筑、工民建等相关专业，大学本科及以上学历；\n2、能够独立工作，具有良好的沟通协调能力，富有责任心、事业心和团队协作精神，吃苦耐劳；\n3、在校成绩优异，英语四级，无挂科记录；\n4、熟练使用Office、AutoCAD、P6等应用软件；\n5、身体健康，能够接受长期驻外工作；\n6、接受实习，实习生要求：每周实习时间不低于4个工作日，工作地在北京总部，优秀实习生可优先获得录用资格。\n具体工作地点需服从公司分配，可接受驻外工作者再进行简历投递。海外机构：布基纳法索、塞内加尔、毛里塔尼亚、吉布提、贝宁、伊拉克、阿曼。",
       "source_url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55326.html",
       "published_at": "2026-08-05",
       "publication_type": "repost",
-      "application_url": null,
-      "verified_at": "2026-10-26T11:48:00+08:00",
-      "application_status": "unverified",
-      "verification_note": "高校页面保留投递简历入口，无明确截止日期；未验证登录后的当前投递状态。"
+      "application_url": "https://ctgu.91wllm.cn/campus/view/id/1001059",
+      "verified_at": "2026-10-28T18:00:00+08:00",
+      "application_status": "open",
+      "verification_note": "2026-10-28 核验：三峡大学招聘平台当前列出2027届土建技术员、显示投递简历入口并标注2026-10-31到期；高校来源保留完整职责。"
     },
     {
       "job_id": "keymed-2027-oligonucleotide",
@@ -68,14 +68,14 @@
       "education_requirement": "硕士",
       "majors": ["有机化学", "药物化学", "核酸化学", "生物化学", "制药工程"],
       "graduation_year": "2026年9月—2027年8月期间毕业",
-      "jd_text": "岗位：寡核苷酸合成研究员。工作地点：成都。学历：硕士。专业：有机化学、药物化学、核酸化学、生物化学、制药工程等相关专业。\n工作主要职责：\n1.寡核苷酸高通量筛选，活性以及毒性评估等样品的固相合成，氨解纯化超滤退火等全流程工作；\n2.寡核苷酸相关项目生产工艺开发。\n招聘对象：2026年9月—2027年8月期间毕业的国内外应届毕业生。",
+      "jd_text": "岗位职责：\n1.开展寡核苷酸高通量筛选、活性及毒性评估样品的固相合成、氨解、纯化、超滤和退火等全流程工作；\n2.参与寡核苷酸相关项目的生产工艺开发。\n任职要求：硕士学历，有机化学、药物化学、核酸化学、生物化学、制药工程等相关专业；招聘对象为2026年9月至2027年8月期间毕业的国内外应届毕业生。",
       "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118200.html",
       "published_at": "2026-09-08",
       "publication_type": "repost",
       "application_url": "https://wecruit.hotjob.cn/SU64799bd32f9d2433ba818856/mc/position/campus?postTypeCode=0%2F1227%2F37850530",
-      "verified_at": "2026-10-26T11:48:00+08:00",
-      "application_status": "unverified",
-      "verification_note": "完整保存来源表格中本岗位职责、学历、专业及共同毕业时间要求；来源无截止日期，尚未核验网申系统中的当前岗位。"
+      "verified_at": "2026-10-28T18:00:00+08:00",
+      "application_status": "open",
+      "verification_note": "2026-10-28 核验：康诺亚2027校招当前发布岗位正文与投递邮箱，官方HotJob校招入口可用。"
     },
     {
       "job_id": "keymed-2027-aidd-biology",
@@ -148,10 +148,10 @@
       "source_url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55331.html",
       "published_at": "2026-08-05",
       "publication_type": "repost",
-      "application_url": null,
-      "verified_at": "2026-10-26T11:48:00+08:00",
-      "application_status": "unverified",
-      "verification_note": "高校页面保留投递简历入口，无明确截止日期；未验证登录后的当前投递状态。"
+      "application_url": "https://ctgu.91wllm.cn/campus/view/id/1001059",
+      "verified_at": "2026-10-28T18:00:00+08:00",
+      "application_status": "open",
+      "verification_note": "2026-10-28 核验：三峡大学招聘平台当前列出2027届法语翻译、显示投递简历入口并标注2026-10-31到期，岗位要求与高校来源一致。"
     },
     {
       "job_id": "orient-2027-design",
@@ -315,14 +315,14 @@
       "education_requirement": "2027届本科及以上学历",
       "majors": ["会计", "审计", "国际会计", "计算机审计", "信息管理系统"],
       "graduation_year": "2027",
-      "jd_text": "岗位从事财务审计工作，招聘流程包括在线网申、简历筛选、综合测评、实习考察和体检。任职要求：2027届本科及以上毕业生；财务会计、国际会计、审计、计算机审计、信息管理系统等相关专业，或具备财会基础的经济、理工科背景；英语四级以上、CPA/ACCA等考试通过科目者优先；具有沟通协作能力、责任心和毅力。",
+      "jd_text": "岗位职责：从事财务审计工作，在项目经理指导下参与企业年报、IPO或并购重组等项目，编写审计底稿、整理审计资料并参与报告编制。任职要求：2027届本科及以上毕业生；财务会计、国际会计、审计、计算机审计、信息管理系统等相关专业，或具备财会基础的经济、理工科背景；英语四级以上、CPA/ACCA等考试通过科目者优先；具有沟通协作能力、责任心和毅力。",
       "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKzrbWynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
       "published_at": "2026-09-21",
       "publication_type": "repost",
-      "application_url": null,
-      "verified_at": "2026-10-26T16:30:00+08:00",
-      "application_status": "unverified",
-      "verification_note": "2026-10-26 质量复核：来源未列出具体岗位职责，目录仅有概括性描述。 暂停计入可投候选；需修复并重核来源后再开放。 四川大学就业网明示发布时间、任职要求、招聘流程及有效期至2027-04-29。"
+      "application_url": "https://zhaopin.pccpa.cn/hr/recruit/school",
+      "verified_at": "2026-10-28T19:00:00+08:00",
+      "application_status": "open",
+      "verification_note": "2026-10-28 核验：天健2027校园招聘当前开放，官方说明该地址为唯一网申通道；当前独立岗位页明确财务审计职责和2027届要求。"
     },
     {
       "job_id": "zhifei-2027-legal",
@@ -376,10 +376,10 @@
       "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtrh5eN6K0NS6yGHRp7ugzc-GnZ2skMx9ZMN4gtKLipCwxKF0lZC5sq-0gqJv",
       "published_at": "2026-10-12",
       "publication_type": "repost",
-      "application_url": null,
-      "verified_at": "2026-10-26T16:30:00+08:00",
-      "application_status": "unverified",
-      "verification_note": "2026-10-26 质量复核：目录 application_url 仅指向来源页，尚未核验直接投递入口；暂停计入可投候选。高校就业网明示发布时间、岗位职责、2027届及语言专业要求，有效期至2027-10-11。"
+      "application_url": "https://wecruit.hotjob.cn/SU612f55eebef57c0616450aa2/pb/school.html?orgCode=0%2F5",
+      "verified_at": "2026-10-28T18:00:00+08:00",
+      "application_status": "open",
+      "verification_note": "2026-10-28 核验：特变电工官方HotJob当前列出多个2027届国际市场经理助理岗位并开放投递。"
     },
     {
       "job_id": "beisen-2027-ux",
@@ -1245,192 +1245,192 @@
     "cities": ["江苏"], "category": "电子机械", "education": "本科", "education_requirement": "2027届本科或硕士毕业生",
     "majors": ["车辆工程", "机械工程", "电气工程及其自动化", "自动化"], "graduation_year": "2027",
     "jd_text": "岗位职责：负责轨道交通车辆产品的质量技术工作和售后技术支持，处理产品质量及交付后的技术问题。任职要求：2027届本科或硕士毕业生，机械、车辆、电气、自动化等相关专业；专业成绩排名不低于前50%，本科英语通过四级、硕士英语通过六级；党员或学生干部优先。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html", "published_at": "2026-09-14", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学转载页面的独立岗位、职责及资格；页面提供邮箱，但当前投递状态未核实，故不填投递 URL。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html", "published_at": "2026-09-14", "publication_type": "repost", "application_url": "https://crrc-pz.hotjob.cn/",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：中车南京浦镇2027校招专场当前公开官方HotJob网申入口，专业需求包含机械、材料等方向。"
   },
   {
     "job_id": "crrcpz-2027-design-rd", "title": "设计研发工程师", "company": "中车南京浦镇车辆有限公司",
     "cities": ["江苏"], "category": "电子机械", "education": "硕士", "education_requirement": "2027届硕士或博士毕业生",
     "majors": ["电气工程", "电子信息", "机械工程", "材料科学与工程"], "graduation_year": "2027",
     "jd_text": "岗位职责：参与轨道交通车辆产品的设计研发，覆盖电气、电子、机械或材料方向。任职要求：2027届硕士或博士毕业生，电气工程、电子信息、机械设计、车辆工程、材料或焊接等相关专业；专业成绩排名不低于前50%，硕士英语通过六级；党员或学生干部优先。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html", "published_at": "2026-09-14", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "同一招聘简章中有独立的设计研发工程师岗位；当前投递状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html", "published_at": "2026-09-14", "publication_type": "repost", "application_url": "https://crrc-pz.hotjob.cn/",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：中车南京浦镇2027校招专场当前公开官方HotJob网申入口，岗位与来源简章一致。"
   },
   {
     "job_id": "polyhn-2027-civil-cost", "title": "土建成本岗", "company": "保利（海南）旅游发展有限公司",
     "cities": ["海南"], "category": "土木建筑", "education": "本科", "education_requirement": "2027届本科或硕士毕业生",
     "majors": ["工程管理", "土木工程", "工程造价"], "graduation_year": "2027",
     "jd_text": "岗位职责：协助测算拿地及项目各阶段土建成本，跟踪动态成本与异常预警；参与工程变更、签证、付款和预结算审核，支持招标清单、控制价和合同编审。任职要求：2027届本科或硕士毕业生，工程管理、土木工程、工程造价等相关专业；具备系统分析能力，愿意深入项目一线。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116870.html", "published_at": "2026-08-21", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；页面提供投递邮箱，未核实当前招聘状态，不把来源页作为投递入口。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116870.html", "published_at": "2026-08-21", "publication_type": "repost", "application_url": "https://polynew.zhiye.com/jobs?queryId=877ba4a7-50e2-4422-8ff1-7c32dc2603e2",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：保利发展官方招聘系统当前开放2027校招查询与投递，来源岗位页另公开海南公司投递信息。"
   },
   {
     "job_id": "polyhn-2027-civil-engineer", "title": "土建工程师", "company": "保利（海南）旅游发展有限公司",
     "cities": ["海南"], "category": "土木建筑", "education": "本科", "education_requirement": "2027届本科或硕士毕业生",
     "majors": ["土木工程"], "graduation_year": "2027",
     "jd_text": "岗位职责：协助施工项目现场准备及技术、安全、质量和进度管理；参与进度款审查、工程验收与交楼、保修维修协调，并统筹本专业与其他专业的现场工作。任职要求：2027届本科或硕士毕业生，土木工程等相关专业；具备表达、组织协调与规划能力，愿意深入项目一线。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116871.html", "published_at": "2026-08-21", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；当前投递状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116871.html", "published_at": "2026-08-21", "publication_type": "repost", "application_url": "https://polynew.zhiye.com/jobs?queryId=877ba4a7-50e2-4422-8ff1-7c32dc2603e2",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：保利发展官方招聘系统当前开放2027校招查询与投递，来源岗位页另公开海南公司投递邮箱。"
   },
   {
     "job_id": "polyhn-2027-architecture", "title": "建筑规划岗", "company": "保利（海南）旅游发展有限公司",
     "cities": ["海南"], "category": "土木建筑", "education": "本科", "education_requirement": "2027届本科或硕士毕业生",
     "majors": ["建筑学"], "graduation_year": "2027",
     "jd_text": "岗位职责：参与住宅产品研究、拿地项目规划策划和设计可行性论证；协助编制设计任务书、跟进报建图纸及设计进度，并在施工和交付阶段协调图纸审查、设计变更与工程验收。任职要求：2027届本科或硕士毕业生，建筑学等相关专业；具备产品思维、沟通协调能力和计划执行能力。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116869.html", "published_at": "2026-08-21", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；当前投递状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116869.html", "published_at": "2026-08-21", "publication_type": "repost", "application_url": "https://polynew.zhiye.com/jobs?queryId=877ba4a7-50e2-4422-8ff1-7c32dc2603e2",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：保利发展官方招聘系统当前开放2027校招查询与投递，来源岗位页保留独立岗位要求。"
   },
   {
     "job_id": "dongfeng-2027-battery-rd", "title": "新型电池研发岗", "company": "东风汽车集团有限公司研发总院",
     "cities": ["武汉"], "category": "化工材料", "education": "本科", "education_requirement": "2027届本科及以上毕业生",
     "majors": ["材料科学与工程", "应用化学", "化学工程与技术", "高分子材料与工程"], "graduation_year": "2027",
     "jd_text": "岗位职责：开展电池正负极、电解液、电解质膜等材料开发；参与电池设计与仿真、电芯测试验证、工艺开发和模组集成，包括热安全与热管理。任职要求：2027届本科及以上毕业生，材料、应用化学、化工、高分子、能源动力或相关工程专业；专业成绩合格，具备相应英语水平。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116880.html", "published_at": "2026-08-21", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对东风研发总院简章中的独立岗位与网申说明；短链接最终投递状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116880.html", "published_at": "2026-08-21", "publication_type": "repost", "application_url": "https://app.mokahr.com/m/campus-recruitment/dfmc/164438#/home",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：东风集团官网链接到2027统一校招，Moka入口当前可按研发总院筛选并投递。"
   },
   {
     "job_id": "geneseeq-2027-technical-support", "title": "技术支持专员", "company": "南京世和基因生物技术股份有限公司",
     "cities": ["江苏"], "category": "生物医药", "education": "硕士", "education_requirement": "2027届硕士及以上毕业生",
     "majors": ["分子生物学", "遗传学", "医学"], "graduation_year": "2027",
     "jd_text": "岗位职责：依照操作规程完成样本检测、DNA/RNA建库、杂交捕获和测序操作；负责试剂配制与验证、实验记录和质量控制，开展客户培训并处理实验异常。任职要求：2027届硕士及以上毕业生，分子生物学、遗传学或医学相关专业；掌握PCR等实验技能，能阅读英文操作规程，适应长期出差及两年内工作地点调配。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119462.html", "published_at": "2026-09-30", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页与2027届资格；页面提供邮箱，当前投递状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119462.html", "published_at": "2026-09-30", "publication_type": "repost", "application_url": "https://zh.geneseeq.com/",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：世和基因官网当前标示2027校园招聘火热进行中，加入我们入口和校招邮箱均已公开。"
   },
   {
     "job_id": "geneseeq-2027-research-assistant", "title": "助理研究员", "company": "南京世和基因生物技术股份有限公司",
     "cities": ["江苏"], "category": "生物医药", "education": "硕士", "education_requirement": "2027届硕士毕业生",
     "majors": ["分子生物学", "遗传学", "临床医学"], "graduation_year": "2027",
     "jd_text": "岗位职责：参与肿瘤精准医疗及分子诊断研发，开展样本处理、文库构建与检测流程优化；调研文献及竞品技术，设计并验证实验方案，整理数据、记录和技术报告。任职要求：2027届硕士毕业生，分子生物学、遗传学或临床医学相关专业；具备分子实验基础、文献阅读与数据分析能力，有测序经验优先。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119452.html", "published_at": "2026-09-30", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；当前投递状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119452.html", "published_at": "2026-09-30", "publication_type": "repost", "application_url": "https://zh.geneseeq.com/",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：世和基因官网当前标示2027校园招聘火热进行中，加入我们入口和校招邮箱均已公开。"
   },
   {
     "job_id": "geneseeq-2027-research-scientist", "title": "研发科学家／高级研究员", "company": "南京世和基因生物技术股份有限公司",
     "cities": ["江苏"], "category": "生物医药", "education": "博士", "education_requirement": "2027届博士毕业生",
     "majors": ["分子生物学", "癌症生物学", "细胞生物学", "基因组学", "基础医学"], "graduation_year": "2027",
     "jd_text": "岗位职责：设计并组织肿瘤分子诊断与精准医疗科研项目，指导实验团队、分析数据和技术问题；跟踪基因组学与测序技术，推进创新研究及论文、专利成果。任职要求：2027届博士毕业生，分子生物学、癌症生物学、基因组学或医学相关专业；能独立完成实验设计、实施和数据解读，具备符合岗位要求的科研成果。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119451.html", "published_at": "2026-09-30", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；当前投递状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119451.html", "published_at": "2026-09-30", "publication_type": "repost", "application_url": "https://zh.geneseeq.com/",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：世和基因官网当前标示2027校园招聘火热进行中，加入我们入口和校招邮箱均已公开。"
   },
   {
     "job_id": "crrcpz-2027-legal", "title": "法务岗", "company": "中车南京浦镇车辆有限公司",
     "cities": ["江苏"], "category": "文法教育", "education": "本科", "education_requirement": "2027届本科及以上毕业生",
     "majors": ["法学", "法律"], "graduation_year": "2027",
     "jd_text": "岗位职责：负责公司及所属企业合同审查、合规管理、法律事务与日常法律咨询。任职要求：2027届本科及以上毕业生，法律或法学相关专业，具备法务相关证书优先；能运用法律知识解决实际业务问题，接受短期外派，外语流利者优先。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html", "published_at": "2026-09-14", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对2027校招简章中的独立法务岗位；当前投递状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html", "published_at": "2026-09-14", "publication_type": "repost", "application_url": "https://crrc-pz.hotjob.cn/",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：中车南京浦镇2027校招专场当前公开官方HotJob网申入口，专业需求明确包含法学。"
   },
   {
     "job_id": "startimes-2027-french-legal", "title": "法务专员（法语）", "company": "北京四达时代软件技术股份有限公司",
     "cities": ["北京"], "category": "文法教育", "education": "本科", "education_requirement": "2027届本科及以上毕业生",
     "majors": ["法学"], "graduation_year": "2027",
     "jd_text": "岗位职责：协助完善集团海外法律管理制度，研究项目国法律法规并提出风险预警；为海外经营提供法律咨询、处理纠纷，起草及审查合同和法律文书。任职要求：2027届本科及以上毕业生，法学相关专业；法语可作为工作语言，具备沟通协调能力，能够接受海外出差。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118402.html", "published_at": "2026-09-09", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对2027校招简章职能类独立岗位；当前投递状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118402.html", "published_at": "2026-09-09", "publication_type": "repost", "application_url": "https://career.hebut.edu.cn/home/correcruit/content/id/80333.html",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：河北工业大学招聘平台当前发布四达时代2027校招，明确法务专员岗位及公众号校园招聘投递路径。"
   },
   {
     "job_id": "crrcpz-2027-translator", "title": "翻译类岗位", "company": "中车南京浦镇车辆有限公司",
     "cities": ["江苏", "境外项目"], "category": "外语传播", "education": "本科", "education_requirement": "2027届本科及以上毕业生",
     "majors": ["葡萄牙语", "俄语", "西班牙语"], "graduation_year": "2027",
     "jd_text": "岗位职责：承担公司境外项目的口笔译工作，协助市场商务沟通与项目交流。任职要求：2027届本科及以上毕业生，葡萄牙语、俄语、西班牙语等小语种专业；能够接受境外工作，专业成绩排名不低于前50%，本科英语通过四级、硕士英语通过六级。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html", "published_at": "2026-09-14", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对2027校招简章中的翻译类岗位；当前投递状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html", "published_at": "2026-09-14", "publication_type": "repost", "application_url": "https://crrc-pz.hotjob.cn/",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：中车南京浦镇2027校招专场当前公开官方HotJob网申入口，专业需求明确包含多语种。"
   },
   {
     "job_id": "suren-2027-product-designer", "title": "产品设计师", "company": "深圳市苏仁智能科技有限公司",
     "cities": ["广东"], "category": "艺术设计", "education": "本科", "education_requirement": "2027届本科及以上毕业生",
     "majors": ["工业设计", "产品设计"], "graduation_year": "2027",
     "jd_text": "岗位职责：研究消费人群的审美与使用需求，形成产品外观设计方案；跟进手板、试产及供应链协作，研究消费电子设计趋势并沉淀设计方法。任职要求：2027届工业设计或产品设计相关专业毕业生，网申须附作品集；具备用户研究、造型设计、建模渲染能力，熟练使用Rhino、Keyshot、PS或AI等工具。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118732.html", "published_at": "2026-09-14", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对2027秋招简章中的独立产品设计师岗位；当前网申入口未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118732.html", "published_at": "2026-09-14", "publication_type": "repost", "application_url": "https://jdjyw.jlu.edu.cn/mportal/recruit/details?id=5181632be32248b4b6b088acfae365db",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：吉林大学招聘平台当前发布苏仁智能2027校招并公开产品设计岗位投递邮箱。"
   },
   {
     "job_id": "dongfeng-2027-user-insight", "title": "用户洞察及感知岗", "company": "东风汽车集团有限公司研发总院",
     "cities": ["武汉"], "category": "艺术设计", "education": "本科", "education_requirement": "2027届本科及以上毕业生",
     "majors": ["工业设计", "人机交互", "产品设计", "数字媒体艺术设计", "心理学"], "graduation_year": "2027",
     "jd_text": "岗位职责：研究汽车用户与场景，识别需求和痛点，建立用户画像与场景库；开展竞品、趋势和体验评估，将洞察转为产品配置与体验目标，并参与座舱UI/UX或3D设计。任职要求：2027届本科及以上毕业生，工业设计、人机交互、产品设计、数字媒体艺术设计或心理学等相关专业；英语成绩及毕业资格符合校招基本条件。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116880.html", "published_at": "2026-08-21", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对东风研发总院简章的独立用户洞察岗位；当前网申状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116880.html", "published_at": "2026-08-21", "publication_type": "repost", "application_url": "https://app.mokahr.com/m/campus-recruitment/dfmc/164438#/home",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：东风集团官网链接到2027统一校招，Moka入口当前可按研发总院筛选并投递。"
   },
   {
     "job_id": "dongfeng-2027-interior-design", "title": "造型设计-内饰设计岗", "company": "东风汽车集团有限公司研发总院",
     "cities": ["武汉"], "category": "艺术设计", "education": "本科", "education_requirement": "2027届本科及以上毕业生",
     "majors": ["交通工具设计", "工业设计", "产品设计", "概念设计"], "graduation_year": "2027",
     "jd_text": "岗位职责：负责概念车和量产车的整车内饰及细节造型设计，并推进设计方案实施。任职要求：2027届本科及以上毕业生，交通工具设计、工业设计、产品设计或概念设计相关专业优先；专业对口、在校成绩合格，本科英语四级或研究生英语六级成绩合格，能够按时取得毕业证与学位证。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116880.html", "published_at": "2026-08-21", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对东风研发总院简章中的独立内饰设计岗位及统一校招条件；当前网申状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116880.html", "published_at": "2026-08-21", "publication_type": "repost", "application_url": "https://app.mokahr.com/m/campus-recruitment/dfmc/164438#/home",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：东风集团官网链接到2027统一校招，Moka入口当前可按研发总院筛选并投递。"
   },
   {
     "job_id": "muyuan-2026-environment", "title": "环保工程师", "company": "牧原食品股份有限公司",
     "cities": ["河南"], "category": "农林环境", "education": "本科", "education_requirement": "本科及以上学历，招聘届别未限定",
     "majors": ["环境工程", "农学", "给排水科学与工程", "流体力学"], "graduation_year": "未限定",
     "jd_text": "岗位职责：完善灭菌除臭、排污和环保运营体系，优化环保处理设施与水肥资源化利用，提升处理效率、控制成本并管理外包合作商。任职要求：本科及以上学历，环境工程、农学、给排水或相关专业；具备水处理、给排水设计或合作商管理经历者优先，能够适应长期出差。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118091.html", "published_at": "2026-09-07", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；页面没有限定毕业届别，当前投递状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118091.html", "published_at": "2026-09-07", "publication_type": "repost", "application_url": "https://app.mokahr.com/m/campus_apply/muyuan/70116#/jobs",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：牧原2027秋招当前开放官方Moka网申，招聘方向包含环境与环保类岗位。"
   },
   {
     "job_id": "kingagroot-2026-field-development", "title": "技术开发管培生", "company": "青岛清原作物科学集团股份有限公司",
     "cities": ["山东"], "category": "农林环境", "education": "硕士", "education_requirement": "硕士学历，岗位页未单独限定毕业届别",
     "majors": ["植物保护", "农学", "农药学", "作物栽培与耕作"], "graduation_year": "未限定",
     "jd_text": "岗位职责：独立开展新产品田间探索、试验及验证示范，收集分析试验数据，形成区域应用标准；结合病虫害及市场需求优化配方，并向销售与推广团队提供田间技术支持。任职要求：植物保护、农学、农药学等相关专业硕士；具备田间试验和数据处理能力，持C2及以上驾照，可接受轮岗及一线田间出差。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119112.html", "published_at": "2026-09-20", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；同批次有2027届校招简章，但本岗位页未单独注明届别，当前投递状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119112.html", "published_at": "2026-09-20", "publication_type": "repost", "application_url": "https://career.nankai.edu.cn/correcruit/content/id/119113.html",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：南开大学招聘平台当前发布清原集团2027校招并公开投递邮箱，岗位清单包含技术开发管培生。"
   },
   {
     "job_id": "kingagroot-2026-bioassay", "title": "生测研究员", "company": "青岛清原作物科学集团股份有限公司",
     "cities": ["山东"], "category": "农林环境", "education": "硕士", "education_requirement": "硕士学历，岗位页未单独限定毕业届别",
     "majors": ["昆虫学", "农药学", "植物保护", "农学"], "graduation_year": "未限定",
     "jd_text": "岗位职责：开展除草剂、杀虫剂、杀菌剂等农药生测试验，形成试验报告并建立药效评价方法；参与田间示范、实验前处理、靶标害虫饲养和实验室仪器维护。任职要求：昆虫学、农药学、植物保护等农学相关专业硕士；有扎实理论基础和英语文献阅读能力，能够独立设计实验并适应大田环境。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119108.html", "published_at": "2026-09-20", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；毕业届别及当前投递状态未在岗位页确认。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119108.html", "published_at": "2026-09-20", "publication_type": "repost", "application_url": "https://career.nankai.edu.cn/correcruit/content/id/119113.html",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：南开大学招聘平台当前发布清原集团2027校招并公开投递邮箱，岗位清单包含生测研究员。"
   },
   {
     "job_id": "numberslaw-2027-precision-structure", "title": "精密机械结构工程师", "company": "深圳市大数极限科技有限公司",
     "cities": ["广东", "四川"], "category": "电子机械", "education": "硕士", "education_requirement": "2027届硕士及以上毕业生，博士优先",
     "majors": ["机械工程", "材料科学", "应用物理", "精密仪器"], "graduation_year": "2027",
     "jd_text": "岗位职责：设计和验证高精度机电系统，建立结构动力学与有限元模型，评估振动、模态、冲击和热循环影响，协助开展失效分析。任职要求：2027届机械工程、材料科学、精密仪器等相关专业硕士及以上毕业生；熟悉CAD、有限元分析及精密加工工艺，具备装配公差设计能力。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119896.html", "published_at": "2026-10-19", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对2027校招简章中独立的精密机械结构岗位；二维码通道最终状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119896.html", "published_at": "2026-10-19", "publication_type": "repost", "application_url": "https://career.cup.edu.cn/job/view/id/622853",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：中国石油大学招聘平台当前发布大数极限2027校招并提供二维码投递，岗位正文与来源一致。"
   },
   {
     "job_id": "numberslaw-2027-thin-film", "title": "HDD薄膜材料与表界面化学工程师", "company": "深圳市大数极限科技有限公司",
     "cities": ["广东", "四川"], "category": "化工材料", "education": "博士", "education_requirement": "2027届相关专业博士毕业生",
     "majors": ["材料化学", "物理化学", "表面科学", "薄膜材料", "腐蚀科学"], "graduation_year": "2027",
     "jd_text": "岗位职责：利用表面分析技术研究薄膜元素组成、界面扩散与沉积工艺，评估碳保护层和润滑剂的结构性能，建立电化学及环境可靠性评价方法。任职要求：2027届材料化学、表面科学或薄膜材料等相关专业博士；具备薄膜生长、界面反应和真空沉积研究经验，熟悉多种表征工具及数据分析。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119896.html", "published_at": "2026-10-19", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对2027校招简章中的独立博士岗位；二维码通道最终状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119896.html", "published_at": "2026-10-19", "publication_type": "repost", "application_url": "https://career.cup.edu.cn/job/view/id/622853",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：中国石油大学招聘平台当前发布大数极限2027校招并提供二维码投递，博士岗位正文与来源一致。"
   },
   {
     "job_id": "geneseeq-2027-bioinformatics", "title": "（高级）生信工程师", "company": "南京世和基因生物技术股份有限公司",
     "cities": ["江苏"], "category": "生物医药", "education": "硕士", "education_requirement": "2027届硕士及以上毕业生",
     "majors": ["生物信息学", "统计学", "数学", "计算机科学"], "graduation_year": "2027",
     "jd_text": "岗位职责：开展肿瘤早筛、基因组学及分子诊断数据分析，建设和优化生信分析流程；研究新分析方法，解读生物学结果，并与实验、医学和产品团队协作交付。任职要求：2027届生物信息学、统计学、数学或计算机相关专业硕士及以上毕业生；熟悉Python、R或Perl及Linux，有NGS分析和数据可视化能力。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119453.html", "published_at": "2026-09-30", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；当前投递状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119453.html", "published_at": "2026-09-30", "publication_type": "repost", "application_url": "https://zh.geneseeq.com/",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：世和基因官网当前标示2027校园招聘火热进行中，加入我们入口和校招邮箱均已公开。"
   },
   {
     "job_id": "startimes-2027-president-secretary", "title": "总裁办秘书", "company": "北京四达时代软件技术股份有限公司",
     "cities": ["北京"], "category": "外语传播", "education": "硕士", "education_requirement": "2027届重点院校硕士及以上毕业生",
     "majors": ["英语", "法语"], "graduation_year": "2027",
     "jd_text": "岗位职责：协调总裁日程及涉外会议，整理会议记录和资料，跟踪海内外项目进展；维护客户、使馆及合作伙伴沟通，承担英语口译和笔译。任职要求：2027届重点院校外语相关专业硕士及以上毕业生，英语或法语专业八级；具备口笔译、涉外礼仪、文字表达和统筹协调能力。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118402.html", "published_at": "2026-09-09", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对2027校招简章中的独立总裁办秘书岗位；当前投递状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/118402.html", "published_at": "2026-09-09", "publication_type": "repost", "application_url": "https://career.hebut.edu.cn/home/correcruit/content/id/80333.html",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：河北工业大学招聘平台当前发布四达时代2027校招，明确总裁办秘书岗位及公众号校园招聘投递路径。"
   },
   {
     "job_id": "huaan-2027-legal", "title": "法务专员", "company": "华安财产保险股份有限公司天津分公司",
     "cities": ["天津"], "category": "文法教育", "education": "本科", "education_requirement": "2027届本科及以上毕业生",
     "majors": ["法学", "审计"], "graduation_year": "2027",
     "jd_text": "岗位职责：协助分析经营风险、执行合规内控制度，支持监管对接、合规培训和反洗钱工作；参与客户尽调、可疑交易评审、制度修订及监管材料报送。任职要求：2027届法学或审计等相关专业本科及以上毕业生；熟悉保险与反洗钱法规，具备文字表达及跨部门沟通能力，英语四级合格，法律职业资格者优先。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116840.html", "published_at": "2026-08-20", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；当前投递状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/116840.html", "published_at": "2026-08-20", "publication_type": "repost", "application_url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55520.html",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：天津工业大学招聘平台当前显示该2027届法务岗位的投递简历入口。"
   },
   {
     "job_id": "gcbio-2026-field-bioassay", "title": "生测专员/GLP试验员", "company": "江苏功成生物科技有限公司",
     "cities": ["南京"], "category": "农林环境", "education": "本科", "education_requirement": "本科及以上学历，岗位页未限定毕业届别",
     "majors": ["植物保护", "农药学", "农业昆虫与害虫防治", "生物学"], "graduation_year": "未限定",
     "jd_text": "岗位职责：测定农药产品的生物活性，参与生测方案设计和实施，统计试验数据、撰写报告并提出优化方案；评估产品表现，协调相关试验以推进研发。任职要求：植物保护、农药学、农业昆虫与害虫防治或生物学等相关专业本科及以上学历；具备问题分析能力，工作主动、严谨细致。",
-    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119576.html", "published_at": "2026-10-09", "publication_type": "repost", "application_url": null,
-    "verified_at": "2026-10-27T09:42:31+08:00", "application_status": "unverified", "verification_note": "核对南开大学独立岗位页；岗位页未限定届别，当前投递状态未核实。"
+    "source_url": "https://career.nankai.edu.cn/correcruit/content/id/119576.html", "published_at": "2026-10-09", "publication_type": "repost", "application_url": "https://career.nankai.edu.cn/correcruit/content/id/119576.html",
+    "verified_at": "2026-10-28T18:00:00+08:00", "application_status": "open", "verification_note": "2026-10-28 核验：南开大学招聘平台当前显示该岗位并公开企业域名投递邮箱，正文和投递方式均可核对。"
   }
   ]
 }

@@ -102,8 +102,9 @@ async def get_text(resume_id: str, request: Request):
         fail(404, "RESUME_NOT_FOUND", "简历不存在")
     if row["status"] == "parsing":
         fail(409, "RESUME_NOT_READY", "简历正在解析，请稍后重试")
-    if row["status"] == "failed":
+    if row["status"] in {"failed", "not_resume"}:
         error = json.loads(row["error"])
-        status = {"OCR_UNAVAILABLE": 503, "UNSUPPORTED_FILE": 415, "OCR_FAILED": 422}.get(error["code"], 400)
+        status = {"OCR_UNAVAILABLE": 503, "UNSUPPORTED_FILE": 415, "OCR_FAILED": 422,
+                  "CONTENT_MISMATCH": 422}.get(error["code"], 400)
         raise HTTPException(status_code=status, detail=error)
     return dict(resume_id=row["id"], name=row["name"], chars=row["chars"], text=row["text"])

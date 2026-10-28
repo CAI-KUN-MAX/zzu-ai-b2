@@ -14,7 +14,7 @@
 
 ## 创建、轮询与重试
 
-`POST /api/job-matches`：`{"resume_id":"原简历ID","job_ids":["岗位ID1","岗位ID2"]}`。返回 202 `{"task_id":"任务ID"}`。仅接受 ready/need_review 且非空简历；岗位 ID 原始列表 1–50 项，重复合并。整批验证后创建任务，禁止额外字段。默认仅允许 open 岗位。联调测试可显式传 `"allow_unverified_for_testing":true` 匹配 JD 至少 80 字的 unverified 岗位；此选项只放宽匹配测试，不改变岗位状态，不代表可投，也不允许 closed 岗位。
+`POST /api/job-matches`：`{"resume_id":"原简历ID","job_ids":["岗位ID1","岗位ID2"]}`。返回 202 `{"task_id":"任务ID"}`。仅接受 ready/need_review 且非空简历；`not_resume` 返回 HTTP 422 / `CONTENT_MISMATCH`。岗位 ID 原始列表 1–50 项，重复合并。整批验证后创建任务，禁止额外字段。默认仅允许 open 岗位。联调测试可显式传 `"allow_unverified_for_testing":true` 匹配 JD 至少 80 字的 unverified 岗位；此选项只放宽匹配测试，不改变岗位状态，不代表可投，也不允许 closed 岗位。
 
 `GET /api/job-matches/{task_id}` 返回 `{status,stage,progress,analysis_completed,analysis_total,analysis_started_at,error,error_code,items}`。建议每 1–2 秒轮询；基础分完成后 items 全量返回。`analysis_total` 是实际选入逐岗深度分析的岗位数，`analysis_completed` 只计其中 `succeeded` 或已结束的 `degraded`；未选中的 `not_selected`/`ai_disabled` 不计入。`analysis_started_at` 是开始逐岗分析的 UTC ISO 8601 时间，开始前为 null；前端可据此计算已等待时间。items 字段及可直接使用的示例见 `examples/job_matches.json`。结果分数降序、同分 job_id 升序；AI 后重新排序。progress 不表示预计剩余时间。
 

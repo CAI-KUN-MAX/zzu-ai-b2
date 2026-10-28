@@ -54,6 +54,7 @@ class InterviewTests(unittest.TestCase):
         self.http = self.context.__enter__()
         with app.state.store.connect() as db:
             for identifier, status in (("ready", "ready"), ("review", "need_review"),
+                                       ("not-resume", "not_resume"),
                                        ("failed", "failed"), ("parsing", "parsing")):
                 db.execute("INSERT INTO resumes (id,name,sha256,file_path,source,text,chars,status,created_at) "
                            "VALUES (?,?,?,'unused','docx',?,?,?,'now')",
@@ -118,6 +119,7 @@ class InterviewTests(unittest.TestCase):
 
     def test_create_validations_do_not_call_model(self):
         for resume, jd, status, code in (("absent", JD, 404, "RESUME_NOT_FOUND"),
+                                        ("not-resume", JD, 422, "CONTENT_MISMATCH"),
                                         ("failed", JD, 409, "RESUME_NOT_READY"),
                                         ("parsing", JD, 409, "RESUME_NOT_READY"),
                                         ("ready", "短", 400, "INVALID_INPUT"),

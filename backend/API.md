@@ -90,7 +90,9 @@ curl -X POST http://127.0.0.1:8000/api/resumes/batch \
 ```
 
 - 任务状态：`queued → running → succeeded | failed`。进度 0–100，运行中 stage 如 `解析 3/8`。建议每 1–2 秒轮询。
-- 数据库内部简历状态：`parsing → ready | need_review | failed`。对外 `items` 仅包含 `ready / need_review / failed` 三种已结束解析的项目，解析中的项目暂不返回；队列和处理进度通过整体 `status/stage/progress` 展示，初期 `items` 可以为空。少于 30 字但非空时标记 `need_review`，全文仍可读取。
+- 数据库内部简历状态：`parsing → ready | need_review | not_resume | failed`。对外 `items` 仅包含这四种已结束解析的项目，解析中的项目暂不返回；队列和处理进度通过整体 `status/stage/progress` 展示，初期 `items` 可以为空。提取后独立检查身份/联系方式、教育、经历、技能等简历特征，以及通知、合同、论文、招聘 JD、聊天记录和普通文章等反向特征。边界不确定、少于 30 字或 OCR 低置信内容标记 `need_review`；明确不符标记 `not_resume`。
+
+- `need_review` 的项目错误码为 `CONTENT_REVIEW_REQUIRED`，仍兼容匹配、岗位匹配和面试流程；`not_resume` 的项目错误码为 `CONTENT_MISMATCH`，读取全文及上述三个创建入口均返回 HTTP 422，且不会创建可继续处理的任务。解析/OCR 错误继续使用 `OCR_FAILED`、`OCR_UNAVAILABLE`、`UNSUPPORTED_FILE` 或 `INGEST_FAILED`。
 - 至少一份可读取时任务为 `succeeded`，仍需逐项检查 `status/error`；全部失败时任务为 `failed`，任务 error 为首份文件错误。
 - 任务级别的 `error` 为中文字符串或 `null`，与前端 `useTask` 的直接渲染方式一致；额外字段 `error_code` 保留错误码，正常时为 `null`。单份项目的额外字段 `error` 仍保留 `{"code":"OCR_UNAVAILABLE","message":"中文提示"}` 对象，供排错使用。数据库仍保存原始错误对象，旧记录无需迁移。HTTP 级别错误沿用原有含 `request_id` 的外层错误体。
 - 进程启动和正常退出都会将未完成任务、仍在解析的简历标记失败，提示“服务重启，任务已中断，请重试”；已经完成的文件保留。
