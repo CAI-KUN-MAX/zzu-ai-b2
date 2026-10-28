@@ -86,6 +86,10 @@ class MatchingTests(unittest.TestCase):
         app.state.store.update("resumes", "c", status="parsing")
         response = self.client.post("/api/match", json={"jd_text": JD, "resume_ids": ["c"]})
         self.assertEqual(response.status_code, 409)
+        app.state.store.update("resumes", "c", status="not_resume")
+        response = self.client.post("/api/match", json={"jd_text": JD, "resume_ids": ["c"]})
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json()["error"]["code"], "CONTENT_MISMATCH")
         app.state.store.update("resumes", "c", status="ready", text="")
         self.assertEqual(self.client.post("/api/match", json={"jd_text": JD, "resume_ids": ["c"]}).status_code, 400)
         for path in ("/api/match/nope", "/api/match/nope/export"):

@@ -20,6 +20,7 @@ from docx.text.paragraph import Paragraph
 from pypdf import PdfReader
 from pypdf.errors import DependencyError, FileNotDecryptedError
 from app.ocr import OcrUnavailable, get_provider, recognize_image
+from app.resume_content import classify_resume
 
 logger = logging.getLogger(__name__)
 RESTART_ERROR = {"code": "TASK_INTERRUPTED", "message": "服务重启，任务已中断，请重试"}
@@ -144,9 +145,10 @@ def extract_text(path, kind, max_pages):
     text = clean_text(text)
     if not text:
         raise IngestError(422, "OCR_FAILED", "未识别到任何文字，请检查文件内容后重试")
+    classification = classify_resume(text, low_conf=low_conf)
     return dict(text=text, chars=len(text), pages=pages, source=source, provider=provider, low_conf=low_conf,
                 elapsed_ms=int((time.monotonic() - start) * 1000),
-                status="need_review" if len(text) < 30 or low_conf else "ready", error=None)
+                status=classification.status, error=classification.error)
 
 
 class Store:
