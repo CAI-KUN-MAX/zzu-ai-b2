@@ -66,6 +66,8 @@ class JobMatchItem(Contract):
     title: str
     score: int = Field(ge=0, le=100)
     stage1_score: int = Field(ge=0, le=100)
+    rule_score: int | None = Field(default=None, ge=0, le=100)
+    embedding_similarity: float | None = Field(default=None, ge=-1, le=1)
     level: Literal["high", "medium", "low"]
     level_label: str
     subscores: list[DimensionScore]
@@ -86,6 +88,8 @@ class JobMatchTask(Contract):
     analysis_completed: int = Field(ge=0)
     analysis_total: int = Field(ge=0)
     analysis_started_at: datetime | None
+    embedding_status: Literal["disabled", "pending", "succeeded", "degraded", "unknown"] = "unknown"
+    embedding_error: Literal["unavailable", "timeout", "input_too_large", "rate_limited"] | None = None
     error: str | None
     error_code: str | None
     items: list[JobMatchItem]

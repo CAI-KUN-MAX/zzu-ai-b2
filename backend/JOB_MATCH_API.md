@@ -1,6 +1,14 @@
 # 单简历多岗位契约（v1）
 
-本接口与 `/api/match`（一个 JD、多份简历）独立。未接入 Embedding；基础分为技能关键词 55% + 字符 2-gram 余弦相似度 30% + 学历规则 15%，不是语义向量匹配。多岗位匹配的学历分以岗位的结构化最低学历 `education` 为准，避免 JD 摘要遗漏学历导致满分；原 `/api/match` 仍从用户输入的 JD 判断。分数用于相对排序，不是录用概率或资格审查。
+本接口与 `/api/match`（一个 JD、多份简历）独立。规则基础分为技能关键词 55% + 字符 2-gram 余弦相似度 30% + 学历规则 15%。多岗位匹配可使用智谱 Embedding-3 辅助排序；字符相似度本身不是语义向量。学历分以岗位结构化 `education` 为准。分数用于相对排序，不是录用概率或资格审查。
+
+## Embedding 排序
+
+`JOB_EMBEDDING_ENABLED=true` 启用（默认关闭），复用 `LLM_API_KEY`，将简历和岗位文本发送至智谱，产生向量接口费用。文本按最多 512 字分块、无截断；超过 256 块整批回退。向量按块长加权平均后计算余弦，用同批岗位的语义名次计算百分位（单岗位为 50），`stage1_score=round(0.8*规则分+0.2*语义名次百分位)`；并列相似度使用相同平均名次。该值依赖同批岗位，不能与不同批次或规则评分直接比较，不是录用概率。技能命中、缺口与原有子分数仍解释规则分；学历等硬条件仍应人工核对。Embedding 成功后才按新基础分选择 AI 深度分析岗位。
+
+任务增加 `embedding_status`：`disabled`、`pending`、`succeeded`、`degraded`、`unknown`（旧任务）；`embedding_error` 为 `null` 或 `unavailable`、`timeout`、`input_too_large`、`rate_limited`（服务端返回 429）。每项增加 `rule_score`（规则基础分）及 `embedding_similarity`（原始余弦，-1 至 1；不可用为 null）。服务不可用、限流、超时、输入过长或返回无效向量时整批回退规则分，不混用不同口径；失败任务再次 POST 可重新尝试。只在进程内处理向量，不写入数据库或日志。预算 30 秒，使用共享模型并发门限。旧 `/api/match` 不变。
+
+向量字段的独立虚构示例见 `examples/job_embedding.json`。
 
 ## 岗位目录
 
@@ -18,11 +26,11 @@
 
 `GET /api/job-matches/{task_id}` 返回 `{status,stage,progress,analysis_completed,analysis_total,analysis_started_at,error,error_code,items}`。建议每 1–2 秒轮询；基础分完成后 items 全量返回。`analysis_total` 是实际选入逐岗深度分析的岗位数，`analysis_completed` 只计其中 `succeeded` 或已结束的 `degraded`；未选中的 `not_selected`/`ai_disabled` 不计入。`analysis_started_at` 是开始逐岗分析的 UTC ISO 8601 时间，开始前为 null；前端可据此计算已等待时间。items 字段及可直接使用的示例见 `examples/job_matches.json`。结果分数降序、同分 job_id 升序；AI 后重新排序。progress 不表示预计剩余时间。
 
-前 8 岗（MATCH_LLM_TOP_K 可降低，0 关闭）共享现有 AI 并发门限；单项预算 90 秒含并发等待，整批自开始处理起 165 秒含基础评分，不含任务排队。这些预算不是 ETA。整批超时使任务为 `failed/JOB_MATCH_TIMEOUT`，未结束岗位标为 `batch_timeout`，保留已有逐岗结果；单项超时只使该岗位降级。真实 AI 成功后 score=round(0.35*stage1_score+0.65*report.overall_score)，否则保持基础分。命中/缺口与 subscores 解释基础评分；report 解释 AI 诊断。
+前 8 岗（MATCH_LLM_TOP_K 可降低，0 关闭）共享现有 AI 并发门限；单项预算 90 秒含并发等待，整批自开始处理起 165 秒含基础评分及向量处理，不含任务排队。这些预算不是 ETA。整批超时使任务为 `failed/JOB_MATCH_TIMEOUT`，未结束岗位标为 `batch_timeout`，保留已有逐岗结果；单项超时只使该岗位降级。真实 AI 成功后 score=round(0.35*stage1_score+0.65*report.overall_score)，否则保持基础分。命中/缺口与 subscores 解释规则分；report 解释 AI 诊断。
 
 analysis_status：pending/running 表示尚未结束（degraded=true、degraded_reason=null）；succeeded 表示真实 AI 报告完成；degraded 表示已结束降级。degraded_reason：ai_disabled、not_selected、input_too_short、input_too_long、model_failed、item_timeout、batch_timeout、mock_report。降级没有 report，reason=null；不编造 AI 理由。任务级 succeeded 允许部分或全部降级。
 
-同一 resume_id、简历内容、岗位集合与快照及评分/提示词版本的重复请求，复用 queued/running/succeeded 任务；失败任务允许重建。原简历 ID 纳入指纹，保证后续面试使用的仍是原 ID。成功后重复请求是结果重放，不保证再次调用模型；未完成模型调用按输入合并、成功 LLM 报告持久缓存。重启中断任务为 failed/TASK_INTERRUPTED，可重新 POST。仅支持单 worker。
+同一 resume_id、简历内容、岗位集合与快照及评分/提示词版本、Embedding 配置的重复请求，复用 queued/running/succeeded 任务；任务失败或 Embedding 降级的任务允许重建。原简历 ID 纳入指纹，保证后续面试使用的仍是原 ID。成功后重复请求是结果重放，不保证再次调用模型；未完成模型调用按输入合并、成功 LLM 报告持久缓存。重启中断任务为 failed/TASK_INTERRUPTED，可重新 POST。仅支持单 worker。
 
 ## 诊断与面试
 

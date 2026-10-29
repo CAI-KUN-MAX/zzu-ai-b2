@@ -41,6 +41,7 @@ class JobMatchingTests(unittest.TestCase):
         self.directory = tempfile.TemporaryDirectory()
         self.environment = patch.dict(os.environ, {"DATA_DIR": self.directory.name,
                                                    "MATCH_LLM_TOP_K": "0", "MOCK_MODE": "false",
+                                                   "JOB_EMBEDDING_ENABLED": "false",
                                                    "OCR_PROVIDER": "stub"})
         self.environment.start()
         self.client_context = TestClient(app)
@@ -90,6 +91,26 @@ class JobMatchingTests(unittest.TestCase):
         for query in ("page=0", "page_size=101", "category=其他", "education=高中", "application_status=bad"):
             self.assertEqual(self.client.get("/api/jobs?" + query).status_code, 422)
         self.assertEqual(self.client.get("/api/jobs/nope").status_code, 404)
+
+    def test_embedding_changes_ranking_and_reports_failure_for_retry(self):
+        from app.job_embedding import EmbeddingError
+        with patch.dict(os.environ, {"JOB_EMBEDDING_ENABLED": "true"}), \
+             patch("app.job_embedding.similarities", new=AsyncMock(return_value=[0.2, 0.9, 0.5])):
+            first = self.create()
+            result = self.wait(first)
+            self.assertEqual(result["embedding_status"], "succeeded")
+            items = {item["job_id"]: item for item in result["items"]}
+            self.assertEqual(items["b"]["embedding_similarity"], 0.9)
+            self.assertGreater(items["b"]["stage1_score"], items["a"]["stage1_score"])
+            self.assertEqual(items["a"]["rule_score"], items["b"]["rule_score"])
+        with patch.dict(os.environ, {"JOB_EMBEDDING_ENABLED": "true"}), \
+             patch("app.job_embedding.similarities", new=AsyncMock(side_effect=EmbeddingError("timeout"))):
+            failed = self.create(["a"])
+            result = self.wait(failed)
+            self.assertEqual((result["embedding_status"], result["embedding_error"]), ("degraded", "timeout"))
+            self.assertEqual(result["items"][0]["stage1_score"], result["items"][0]["rule_score"])
+            self.assertIsNone(result["items"][0]["embedding_similarity"])
+            self.assertNotEqual(failed, self.create(["a"]))
 
     def test_testing_pool_requires_explicit_match_opt_in(self):
         jd = "岗位职责：参与分子检测实验、整理数据并优化试验流程，与研发团队核对分析结果，记录样本处理和检测质量问题。任职要求：生物学硕士，掌握分子实验和数据分析方法，能够阅读英文文献并编写报告，具备跨团队沟通能力。"

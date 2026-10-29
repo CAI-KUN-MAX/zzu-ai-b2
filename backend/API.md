@@ -1,6 +1,6 @@
 # 后端接口：简历解析与匹配排序
 
-单份简历对多个岗位的新接口见 [JOB_MATCH_API.md](JOB_MATCH_API.md)，与原 `/api/match` 契约独立。岗位来源与数量验收见 [catalogue/VALIDATION.md](catalogue/VALIDATION.md)。当前没有接入 Embedding，字符 2-gram 相似度不能称为语义向量匹配。
+单份简历对多个岗位的新接口见 [JOB_MATCH_API.md](JOB_MATCH_API.md)，与原 `/api/match` 契约独立。岗位来源与数量验收见 [catalogue/VALIDATION.md](catalogue/VALIDATION.md)。单简历多岗位支持可选云端 Embedding；原 `/api/match` 不使用 Embedding，字符 2-gram 相似度不能称为语义向量匹配。
 
 新接口的测试结果和环境限制见 [JOB_MATCH_VALIDATION.md](JOB_MATCH_VALIDATION.md)。
 
