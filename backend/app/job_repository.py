@@ -59,7 +59,8 @@ class JobRepository:
             db.execute("BEGIN IMMEDIATE")
             for row in db.execute("SELECT id,payload FROM tasks WHERE kind='job_match' "
                                   "AND status IN ('queued','running','succeeded')"):
-                if json.loads(row["payload"]).get("fingerprint") == fingerprint:
+                existing = json.loads(row["payload"])
+                if existing.get("fingerprint") == fingerprint and existing.get("embedding_status") != "degraded":
                     return row["id"], False
             identifier = uuid.uuid4().hex
             db.execute("INSERT INTO tasks (id,kind,status,stage,payload,created_at,updated_at) "
