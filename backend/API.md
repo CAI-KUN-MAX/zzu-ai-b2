@@ -240,7 +240,7 @@ cd backend; ..\.venv\Scripts\python.exe -m unittest discover -s tests -v; cd ..
 {
   "interview_id":"服务器生成的会话ID",
   "status":"active","round":1,"max_rounds":5,
-  "question":{"id":"服务器生成的问题ID","text":"一道岗位与项目相关的问题","focus":"考察点"}
+  "question":{"id":"服务器生成的问题ID","text":"一道岗位与项目相关的问题","focus":"考察点","source":"llm"}
 }
 ```
 
@@ -264,11 +264,13 @@ cd backend; ..\.venv\Scripts\python.exe -m unittest discover -s tests -v; cd ..
     "improvements":["可执行的改进建议"],
     "reference_points":["建议覆盖的知识点，不代表候选人已经做过"]
   },
-  "next_question":{"id":"下一问题ID","text":"结合本轮回答的追问","focus":"考察点"}
+  "next_question":{"id":"下一问题ID","text":"结合本轮回答的追问","focus":"考察点","source":"llm"}
 }
 ```
 
 第五轮响应为 `status="completed"`、`round=5`、`next_question=null`。创建响应的 round 是当前题号，回答响应的 round 是刚完成的轮次。回答去除首尾空白后为 20–3000 字。客户端不能传入轮次、问题正文或会话状态；未约定字段会返回 422。
+
+题目的 `source` 为 `llm`（模型生成并通过校验）、`fallback`（服务端模板兜底）或 `unknown`（旧记录没有来源信息）。回答响应的反馈仍来自模型并经过校验；`next_question.source` 只描述下一题，不代表反馈来源。旧会话重放时缺失来源按 `unknown` 返回，不推断为真实模型题。
 
 ### 状态、失败与重试
 

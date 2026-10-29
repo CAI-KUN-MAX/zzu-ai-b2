@@ -26,6 +26,7 @@ class Question(StrictModel):
     id: str
     text: ShortText
     focus: FocusText
+    source: Literal["llm", "fallback", "unknown"] = "unknown"
 
 
 class Feedback(StrictModel):

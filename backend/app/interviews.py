@@ -337,7 +337,7 @@ class InterviewService:
                                 result = parse_output(response.choices[0].message.content, context)
                                 logger.info("interview request_id=%s category=success elapsed_ms=%s", request_id,
                                             int((time.monotonic() - started) * 1000))
-                                return result
+                                return result, "llm"
                             except (ValueError, TypeError) as validation_error:
                                 known_checks = {"invalid_next_question", "invalid_question_evidence",
                                                 "question_missing_job_grounding", "followup_missing_answer_grounding",
@@ -355,14 +355,14 @@ class InterviewService:
                                         if fallback is not None:
                                             logger.info("interview request_id=%s category=fallback_first_question check=%s",
                                                         request_id, check)
-                                            return fallback
+                                            return fallback, "fallback"
                                     # 只有追问不合格：保留已校验的反馈，用本轮回答原文拼追问，轮次照常推进
                                     if isinstance(validation_error, QuestionRejected):
                                         fallback = fallback_question(context, validation_error.draft)
                                         if fallback is not None:
                                             logger.info("interview request_id=%s category=fallback_question check=%s",
                                                         request_id, check)
-                                            return fallback
+                                            return fallback, "fallback"
                                     fail(502, "INTERVIEW_GENERATION_FAILED", "面试内容生成失败，请重试；本轮尚未推进")
                                 feedback = {
                                     "invalid_next_question": "第五轮 next_question 必须为 null，前四轮必须有下一题。",
@@ -410,9 +410,9 @@ class InterviewService:
         if not row["text"].strip():
             fail(400, "INVALID_INPUT", "简历文本为空，请核对后重新上传")
         context = dict(action="create", round=1, resume=row["text"], jd=jd, history=[])
-        draft = await self.generate(context, request_id)
+        draft, source = await self.generate(context, request_id)
         interview_id = uuid.uuid4().hex
-        question = dict(id=uuid.uuid4().hex, text=draft.question.text, focus=draft.question.focus)
+        question = dict(id=uuid.uuid4().hex, text=draft.question.text, focus=draft.question.focus, source=source)
         result = InterviewSession(interview_id=interview_id, question=question).model_dump()
         state = dict(round=1, status="active", question=question, turns=[])
         created_at = time.time()
@@ -454,11 +454,11 @@ class InterviewService:
             history.append(dict(question=state["question"], answer=answer))
             context = dict(action="answer", round=state["round"], resume=row["resume_text"],
                            jd=row["jd_text"], history=history, answer=answer)
-            draft = await self.generate(context, request_id)
+            draft, source = await self.generate(context, request_id)
             if row["expires_at"] <= time.time():
                 fail(410, "INTERVIEW_EXPIRED", "面试会话已过期，请重新开始")
             next_question = None if draft.next_question is None else dict(
-                id=uuid.uuid4().hex, text=draft.next_question.text, focus=draft.next_question.focus)
+                id=uuid.uuid4().hex, text=draft.next_question.text, focus=draft.next_question.focus, source=source)
             feedback = dict(strengths=[item.text for item in draft.feedback.strengths],
                             improvements=draft.feedback.improvements, reference_points=draft.feedback.reference_points)
             result = InterviewAnswerResult(interview_id=identifier,
