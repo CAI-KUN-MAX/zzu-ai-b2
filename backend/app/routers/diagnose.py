@@ -13,6 +13,7 @@ from openai import AsyncOpenAI, APITimeoutError
 
 from app.schemas import DiagnoseRequest, DiagnoseResponse, ErrorResponse, MetaInfo
 from app.mock_data import MOCK_RESPONSES
+from app.resume_content import classify_resume
 
 # 固定路径，避免启动目录影响环境变量加载。
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
@@ -299,6 +300,9 @@ def validate_length(payload):
              responses={status: {"model": ErrorResponse} for status in (400, 413, 422, 500, 504)})
 async def diagnose(payload: DiagnoseRequest):
     validate_length(payload)
+    if classify_resume(payload.resume_text).status == "not_resume":
+        raise HTTPException(status_code=422, detail={
+            "code": "CONTENT_MISMATCH", "message": "提交内容不是可用于诊断的简历，请重新上传"})
 
     request_id = uuid.uuid4().hex
     # 只有显式开启才返回 mock，避免生产环境漏配变量时悄悄返回假报告。

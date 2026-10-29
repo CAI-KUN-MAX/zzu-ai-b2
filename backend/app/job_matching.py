@@ -38,6 +38,8 @@ def readable_resume(repository, identifier):
     row = repository.resume(identifier)
     if not row:
         fail(404, "RESUME_NOT_FOUND", "简历不存在，请重新上传")
+    if row["status"] == "not_resume":
+        fail(422, "CONTENT_MISMATCH", "文件内容不是可用于岗位匹配的简历，请重新上传")
     if row["status"] not in {"ready", "need_review"}:
         fail(409, "RESUME_NOT_READY", "简历尚未解析完成或解析失败，请重新上传")
     if not row["text"].strip():

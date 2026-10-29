@@ -108,6 +108,14 @@ class JobMatchingTests(unittest.TestCase):
         request["job_ids"] = ["closed"]
         self.assertEqual(self.client.post("/api/job-matches", json=request).status_code, 409)
 
+    def test_not_resume_is_rejected_before_task_creation(self):
+        app.state.store.update("resumes", "r", status="not_resume")
+        response = self.client.post("/api/job-matches", json={"resume_id": "r", "job_ids": ["a"]})
+        self.assertEqual(response.status_code, 422, response.text)
+        self.assertEqual(response.json()["error"]["code"], "CONTENT_MISMATCH")
+        with app.state.store.connect() as db:
+            self.assertEqual(db.execute("SELECT count(*) FROM tasks WHERE kind='job_match'").fetchone()[0], 0)
+
     def test_structured_education_is_scored_when_jd_omits_it(self):
         jd = "负责药理实验、细胞活性检测和实验数据整理，熟悉实验室规范及动物伦理要求。"
         resume = {"id": "r", "name": "", "text": "药学本科毕业，具有细胞实验和数据整理经验。"}
@@ -407,12 +415,16 @@ class JobMatchingTests(unittest.TestCase):
         MatchContext.model_validate(examples["context"])
         catalogue = JobRepository(app.state.store)
         self.assertGreater(len(catalogue.jobs), 0)
-        # Coverage is an explicit acceptance report, never silently treated as met by unit tests.
+        # Coverage remains explicit: quantity, category, education and concrete
+        # major distribution are all checked by the catalogue report.
         self.assertEqual(len(catalogue.jobs), len(set(catalogue.jobs)))
-        report = check_catalogue(root / "catalogue" / "jobs.v1.json", date(2026, 10, 27))
+        report = check_catalogue(root / "catalogue" / "jobs.v1.json", date(2026, 10, 28))
         self.assertTrue(report["testing_target_met"])
-        self.assertEqual(report["testing_pool"], 40)
-        self.assertFalse(report["target_met"])
+        self.assertGreaterEqual(report["testing_pool"], 40)
+        self.assertGreaterEqual(report["open"], 40)
+        self.assertTrue(report["major_coverage_met"])
+        self.assertTrue(all(report["open_majors_by_category"].values()))
+        self.assertTrue(report["target_met"])
 
 
 if __name__ == "__main__":

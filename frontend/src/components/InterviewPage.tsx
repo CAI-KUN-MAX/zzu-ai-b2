@@ -102,6 +102,14 @@ export function InterviewPage({
   const [currentRound, setCurrentRound] = useState(1);
   const [maxRounds, setMaxRounds] = useState(DEFAULT_MAX_ROUNDS);
 
+  const answerRef = useRef<HTMLTextAreaElement>(null);
+
+  /** 「改用文字输入」：清掉语音错误态并把焦点交给输入框 */
+  function handleUseTextInput() {
+    speech.reset();
+    answerRef.current?.focus();
+  }
+
   // 语音识别只负责把最终文本追加进输入框，提交仍需用户手动点击
   const speech = useSpeechRecognition({
     onFinal: (text) =>
@@ -412,6 +420,7 @@ export function InterviewPage({
 
                 <textarea
                   id="interview-answer"
+                  ref={answerRef}
                   value={answer}
                   onChange={(event) => setAnswer(event.target.value)}
                   readOnly={busy}
@@ -424,29 +433,57 @@ export function InterviewPage({
                   } ${busy ? "bg-surface-soft/60" : "bg-white"}`}
                 />
 
-                {/* 语音状态：识别中显示实时片段，失败/不支持时仍可手动打字 */}
+                {/* 语音状态：每种状态都给明确说明，失败时提供重试与改用文字输入 */}
                 {!speech.supported ? (
+                  <p className="mt-1.5 flex items-start gap-1.5 text-[11px] leading-relaxed text-ink-500">
+                    <InfoIcon className="mt-0.5 h-3 w-3 shrink-0" />
+                    <span>
+                      当前浏览器不支持浏览器语音识别，请直接打字作答（不影响提交）。
+                    </span>
+                  </p>
+                ) : speech.failed ? (
+                  <div
+                    role="alert"
+                    className="mt-1.5 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-2"
+                  >
+                    <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-rose-700">
+                      <AlertIcon className="mt-0.5 h-3 w-3 shrink-0" />
+                      <span>{speech.lastError}</span>
+                    </p>
+                    <div className="mt-1.5 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={speech.start}
+                        disabled={busy}
+                        className="rounded-md bg-rose-600 px-2.5 py-1 text-[11px] font-medium text-white transition-colors hover:bg-rose-700 disabled:opacity-50"
+                      >
+                        重试语音识别
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleUseTextInput}
+                        className="rounded-md bg-white px-2.5 py-1 text-[11px] font-medium text-ink-700 ring-1 ring-inset ring-surface-line transition-colors hover:bg-slate-50"
+                      >
+                        改用文字输入
+                      </button>
+                    </div>
+                  </div>
+                ) : speech.status === "starting" ? (
                   <p className="mt-1.5 text-[11px] leading-relaxed text-ink-500">
-                    当前浏览器不支持语音识别，请直接打字输入。
+                    正在请求麦克风权限，请在浏览器弹窗中选择「允许」；如果一直没反应，可以改用文字输入。
                   </p>
-                ) : speech.status === "denied" ? (
-                  <p role="alert" className="mt-1.5 flex items-start gap-1.5 text-[11px] leading-relaxed text-rose-600">
-                    <AlertIcon className="mt-0.5 h-3 w-3 shrink-0" />
-                    <span>{speech.errorMessage}；仍可正常打字并提交。</span>
-                  </p>
-                ) : speech.status === "error" ? (
-                  <p role="alert" className="mt-1.5 flex items-start gap-1.5 text-[11px] leading-relaxed text-amber-700">
-                    <AlertIcon className="mt-0.5 h-3 w-3 shrink-0" />
-                    <span>{speech.errorMessage}</span>
-                  </p>
-                ) : speech.listening ? (
+                ) : speech.status === "listening" ? (
                   <p className="mt-1.5 text-[11px] leading-relaxed text-brand-700">
                     正在识别{speech.interim ? `：「${speech.interim}」` : "…"}
                     <span className="text-ink-500">识别结果会追加到上方输入框，请检查后手动提交。</span>
                   </p>
+                ) : speech.status === "stopped" ? (
+                  <p className="mt-1.5 text-[11px] leading-relaxed text-ink-500">
+                    已停止识别。可以继续编辑文字，或再次点击「语音输入」。
+                  </p>
                 ) : (
                   <p className="mt-1.5 text-[10px] leading-relaxed text-ink-500">
-                    语音识别由浏览器自带的识别服务完成，部分浏览器（如 Chrome）会把语音发送到其在线服务转写，网络不通时可能无法使用；本站不保存录音，识别文字需你确认后手动提交。
+                    语音识别由浏览器自带的识别服务完成（Chrome 会把语音发送到其在线服务转写），网络不通或浏览器不支持时无法使用；本站不保存录音，识别文字需你确认后手动提交。
                   </p>
                 )}
 

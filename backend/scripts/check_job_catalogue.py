@@ -36,6 +36,12 @@ def check(path, as_of):
     if incomplete:
         raise ValueError("incomplete open JD: " + ", ".join(incomplete))
     counts = Counter(j.category for j in active)
+    majors_by_category = {
+        category: sorted({major for job in active if job.category == category
+                          for major in job.majors if major != "不限"})
+        for category in CATEGORIES
+    }
+    major_coverage_met = all(len(majors) >= 2 for majors in majors_by_category.values())
     graduates = sum(j.education in {"硕士", "博士"} for j in active)
     undergraduates = sum(j.education == "本科" for j in active)
     testing_counts = Counter(j.category for j in testing)
@@ -50,10 +56,12 @@ def check(path, as_of):
                 testing_target_met=testing_target_met,
                 open=len(active), unverified=sum(j.application_status == "unverified" for j in jobs),
                 open_by_category={c: counts[c] for c in CATEGORIES},
+                open_majors_by_category=majors_by_category, major_coverage_met=major_coverage_met,
                 open_postgraduate=graduates, open_undergraduate=undergraduates,
                 missing_total=max(0, 40 - len(active)), missing_by_category=gaps,
                 missing_postgraduate=max(0, 12 - graduates), missing_undergraduate=max(0, 20 - undergraduates),
-                target_met=len(active) >= 40 and not any(gaps.values()) and graduates >= 12 and undergraduates >= 20)
+                target_met=(len(active) >= 40 and not any(gaps.values()) and major_coverage_met
+                            and graduates >= 12 and undergraduates >= 20))
 
 
 def main():

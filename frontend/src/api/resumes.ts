@@ -11,7 +11,37 @@ export const MAX_BATCH_BYTES = 50 * 1024 * 1024;
 /** 拆批时每批份数 */
 export const BATCH_SIZE = 5;
 
-export const ACCEPTED_TYPES = [".pdf", ".docx", ".png", ".jpg", ".jpeg"];
+/** 文档类：只走文档入口，不与图片混用 */
+export const DOCUMENT_EXTENSIONS = [".pdf", ".docx"];
+/** 图片类：只走图片入口 */
+export const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg"];
+
+export const ACCEPTED_TYPES = [...DOCUMENT_EXTENSIONS, ...IMAGE_EXTENSIONS];
+
+/**
+ * 文档入口的 accept：扩展名 + 准确的 MIME。
+ * 不能出现 image/*，否则部分移动端浏览器会直接跳到相册。
+ */
+export const DOCUMENT_ACCEPT =
+  ".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+/** 图片入口的 accept：只接受位图，不给文档 */
+export const IMAGE_ACCEPT = ".png,.jpg,.jpeg,image/png,image/jpeg";
+
+export type FileKind = "document" | "image";
+
+export function fileKindOf(name: string): FileKind | null {
+  const lower = name.toLowerCase();
+  if (DOCUMENT_EXTENSIONS.some((ext) => lower.endsWith(ext))) return "document";
+  if (IMAGE_EXTENSIONS.some((ext) => lower.endsWith(ext))) return "image";
+  return null;
+}
+
+/** 上传前展示给用户的类型标签 */
+export function fileTypeLabel(name: string): string {
+  const dot = name.lastIndexOf(".");
+  return dot >= 0 ? name.slice(dot + 1).toUpperCase() : "未知";
+}
 
 const MOCK_TASK: IngestTask = ingestMock as IngestTask;
 

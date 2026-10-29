@@ -14,6 +14,7 @@ from pypdf import PdfWriter
 from pypdf.generic import DecodedStreamObject, DictionaryObject, NameObject
 
 from app.ingestion import Store, clean_text, extract_text
+from app.resume_content import classify_resume
 from app.main import app
 
 
@@ -156,7 +157,8 @@ class IngestApiTests(unittest.TestCase):
                 result = self.wait(identifier)
                 self.assertEqual(result["status"], "succeeded")
                 self.assertTrue(result["items"])
-                self.assertTrue(all(item["status"] in {"ready", "need_review", "failed"} for item in result["items"]))
+                self.assertTrue(all(item["status"] in {"ready", "need_review", "not_resume", "failed"}
+                                    for item in result["items"]))
 
     def test_restart_error_is_frontend_renderable_string(self):
         with app.state.store.connect() as db:
@@ -185,6 +187,28 @@ class IngestApiTests(unittest.TestCase):
         result = self.wait(self.upload(docx_bytes("", table=False)))
         self.assertEqual(result["status"], "failed")
         self.assertEqual(result["items"][0]["error"]["code"], "OCR_FAILED")
+
+    def test_resume_content_positive_negative_and_boundary(self):
+        valid = "姓名：张三 手机：13800138000 教育经历：某大学计算机本科 项目经历：负责后端接口开发 专业技能：Python、SQL"
+        result = self.wait(self.upload(docx_bytes(valid, table=False)))
+        self.assertEqual(result["items"][0]["status"], "ready")
+
+        samples = [
+            "课程通知：请各位同学周三到教学楼上课，课程安排和考试时间另行通知。" * 3,
+            "甲方与乙方经协商订立本合同。合同编号 2026-01，违约责任及争议解决如下。" * 3,
+            "摘要：本文研究人工智能应用。关键词：机器学习。实验结果见正文，参考文献如下。" * 3,
+            "招聘岗位：后端工程师。岗位职责：开发接口。任职要求：本科，熟悉 Python。投递方式见官网。" * 3,
+            "微信聊天记录\n小王 10:20 在吗\n小李 10:21 好的，收到\n撤回了一条消息" * 3,
+        ]
+        for index, sample in enumerate(samples):
+            item = self.wait(self.upload(docx_bytes(sample, table=False), f"negative-{index}.docx"))["items"][0]
+            self.assertEqual(item["status"], "not_resume")
+            self.assertEqual(item["error"]["code"], "CONTENT_MISMATCH")
+            self.assert_error(self.client.get(f'/api/resumes/{item["resume_id"]}/text'), 422, "CONTENT_MISMATCH")
+
+        boundary = classify_resume("姓名张三，可能是扫描简历，但其余文字无法清晰识别", low_conf=4)
+        self.assertEqual(boundary.status, "need_review")
+        self.assertEqual(boundary.error["code"], "CONTENT_REVIEW_REQUIRED")
 
     def test_invalid_input_atomic_validation(self):
         for content, status, code in [(b"", 400, "INVALID_INPUT"), (b"old doc", 415, "UNSUPPORTED_FILE"),

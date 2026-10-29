@@ -299,6 +299,12 @@ class RouteTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(short.status_code, 400)
             self.assertEqual(short.json()["error"]["code"], "TEXT_TOO_SHORT")
             self.assertEqual(self.create.await_count, 0)
+            mismatch = await client.post("/api/diagnose", json={
+                "resume_text": "招聘岗位：工程师。岗位职责：负责系统开发。任职要求：本科并熟悉 Python。投递方式：官网申请。" * 2,
+                "jd_text": PAYLOAD.jd_text})
+            self.assertEqual(mismatch.status_code, 422)
+            self.assertEqual(mismatch.json()["error"]["code"], "CONTENT_MISMATCH")
+            self.assertEqual(self.create.await_count, 0)
             too_long = await client.post("/api/diagnose", json={"resume_text": "熟" * 15000, "jd_text": "要" * 5001})
             self.assertEqual(too_long.status_code, 413)
             self.assertEqual(too_long.json()["error"]["code"], "TEXT_TOO_LONG")
