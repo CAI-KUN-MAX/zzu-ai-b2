@@ -90,6 +90,7 @@ class InterviewTests(unittest.TestCase):
     def test_five_round_contract_and_replay_after_completion(self):
         session = self.create()
         InterviewSession.model_validate(session)
+        self.assertEqual(session["question"]["source"], "llm")
         identifier, question = session["interview_id"], session["question"]
         responses = []
         for round_number in range(1, 6):
@@ -103,6 +104,8 @@ class InterviewTests(unittest.TestCase):
             self.assertTrue(all(isinstance(item, str) for item in result["feedback"]["strengths"]))
             responses.append((question["id"], result))
             question = result["next_question"]
+            if question:
+                self.assertEqual(question["source"], "llm")
         self.assertIsNone(question)
         self.assertEqual(self.model.chat.completions.create.await_count, 6)
         for question_id, previous in responses:
@@ -110,6 +113,18 @@ class InterviewTests(unittest.TestCase):
         self.assertEqual(self.model.chat.completions.create.await_count, 6)
         self.assertEqual(len(self.state(identifier)["turns"]), 5)
         self.assert_error(self.submit(identifier, "new-question"), 409, "INTERVIEW_CONFLICT")
+
+    def test_old_question_without_source_is_unknown(self):
+        session = self.create()
+        identifier = session["interview_id"]
+        result = self.submit(identifier, session["question"]["id"]).json()
+        state = self.state(identifier)
+        del state["turns"][0]["response"]["next_question"]["source"]
+        with app.state.store.connect() as db:
+            db.execute("UPDATE interviews SET state=? WHERE id=?", (json.dumps(state), identifier))
+        replay = self.submit(identifier, session["question"]["id"]).json()
+        self.assertEqual(replay["next_question"]["source"], "unknown")
+        self.assertEqual(replay["next_question"]["id"], result["next_question"]["id"])
 
     def test_review_and_no_diagnosis_report_required(self):
         with patch("app.routers.diagnose.diagnose") as old_diagnose:
@@ -178,6 +193,7 @@ class InterviewTests(unittest.TestCase):
         self.model.chat.completions.create.return_value = completion({"answer": {"probability": 1.0}})
         session = self.create()
         self.assertEqual(self.model.chat.completions.create.await_count, 4)
+        self.assertEqual(session["question"]["source"], "fallback")
         self.assertIn("简历中提到“", session["question"]["text"])
         self.assertIn("FastAPI", session["question"]["text"])
         self.assertNotIn("probability", json.dumps(session, ensure_ascii=False))
@@ -211,6 +227,7 @@ class InterviewTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.text)
         result = response.json()
         self.assertEqual(self.model.chat.completions.create.await_count, calls + 2)
+        self.assertEqual(result["next_question"]["source"], "fallback")
         quote = evidence_options(dict(answer=ANSWER.strip()))["a0"]["quote"]
         self.assertIn(f"你提到“{quote}”", result["next_question"]["text"])
         # ANSWER 是“我会……”的设想，追问用计划语气，不暗示已经做过

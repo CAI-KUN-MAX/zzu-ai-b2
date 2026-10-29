@@ -6,7 +6,7 @@ import logging
 import os
 from datetime import datetime, timezone
 
-from app import matching
+from app import matching, job_embedding
 from app.job_repository import test_ready
 from app.routers.diagnose import MAX_TOTAL_CHARS, MIN_CHARS, SYSTEM_PROMPT
 from app.routers.resumes import fail
@@ -29,6 +29,7 @@ def base_scores(resume, jobs):
                                      required_education=job["education"])
         item.pop("resume_id")
         item.pop("name")
+        item.update(rule_score=item["stage1_score"], embedding_similarity=None)
         item.update(job_id=job["job_id"], title=job["title"], analysis_status="pending", degraded_reason=None)
         items.append(item)
     return ranked(items)
@@ -76,6 +77,8 @@ class JobMatchService:
                         scoring_version=SCORING_VERSION, prompt_version=matching.PROMPT_VERSION,
                         system_prompt_hash=hashlib.sha256(SYSTEM_PROMPT.encode()).hexdigest(),
                         top_k=max(0, min(8, int(os.getenv("MATCH_LLM_TOP_K", "8")))),
+                        embedding_enabled=os.getenv("JOB_EMBEDDING_ENABLED", "false").lower() == "true",
+                        embedding_model=job_embedding.MODEL,
                         mock_mode=os.getenv("MOCK_MODE", "false").lower() == "true")
         identifier, created = self.repository.create_or_reuse(snapshot)
         if created:
@@ -100,6 +103,8 @@ class JobMatchService:
         return dict(status=task["status"], stage=task["stage"], progress=task["progress"],
                     analysis_completed=completed, analysis_total=len(selected),
                     analysis_started_at=snapshot.get("analysis_started_at"),
+                    embedding_status=snapshot.get("embedding_status", "pending" if snapshot.get("embedding_enabled") else ("disabled" if "embedding_enabled" in snapshot else "unknown")),
+                    embedding_error=snapshot.get("embedding_error"),
                     error=error.get("message") if isinstance(error, dict) else error,
                     error_code=error.get("code") if isinstance(error, dict) else None,
                     items=items)
@@ -131,6 +136,22 @@ class JobMatchService:
                 async with asyncio.timeout(TOTAL_TIMEOUT):
                     row = dict(id=snapshot["resume_id"], name="", text=snapshot["resume_text"])
                     items = await asyncio.to_thread(base_scores, row, snapshot["jobs"])
+                    embedding_status = "disabled"
+                    embedding_error = None
+                    if snapshot.get("embedding_enabled"):
+                        self.repository.update(identifier, stage="语义匹配", progress=10)
+                        try:
+                            values = await job_embedding.similarities(row["text"], snapshot["jobs"], self.match_jobs.llm_gate)
+                            job_embedding.apply(items, snapshot["jobs"], values)
+                            for item in items:
+                                item.update(matching.level_fields(item["score"]))
+                            items = ranked(items)
+                            embedding_status = "succeeded"
+                        except job_embedding.EmbeddingError as exc:
+                            embedding_status, embedding_error = "degraded", str(exc)
+                    payload = {**json.loads(self.repository.task(identifier)["payload"]),
+                               "embedding_status": embedding_status, "embedding_error": embedding_error}
+                    self.repository.update(identifier, payload=payload)
                     by_id = {job["job_id"]: job for job in snapshot["jobs"]}
                     top_k = snapshot["top_k"]
                     selected = items[:top_k]

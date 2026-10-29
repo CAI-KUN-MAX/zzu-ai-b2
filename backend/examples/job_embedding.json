@@ -1,0 +1,11 @@
+{
+  "embedding_status": "succeeded",
+  "embedding_error": null,
+  "item_example": {
+    "job_id": "example-job",
+    "rule_score": 70,
+    "embedding_similarity": 0.82,
+    "stage1_score": 76
+  },
+  "note": "虚构片段：语义名次百分位为 100 时，round(0.8*70+0.2*100)=76；完整响应见 job_matches.json。"
+}
