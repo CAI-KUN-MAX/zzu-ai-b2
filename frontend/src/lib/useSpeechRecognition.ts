@@ -105,6 +105,8 @@ export function useSpeechRecognition({ onFinal, lang = "zh-CN" }: UseSpeechOptio
   const stop = useCallback(() => {
     userStoppedRef.current = true;
     const recognition = recognitionRef.current;
+    // 先隔离旧会话，再停止收音：stop/abort 都可能异步派发最后一段结果。
+    recognitionRef.current = null;
     if (!recognition) {
       busyRef.current = false;
       setInterim("");
@@ -112,7 +114,7 @@ export function useSpeechRecognition({ onFinal, lang = "zh-CN" }: UseSpeechOptio
       return;
     }
     try {
-      recognition.stop();
+      recognition.abort();
     } catch {
       /* 已经停止时忽略 */
     }
@@ -140,17 +142,21 @@ export function useSpeechRecognition({ onFinal, lang = "zh-CN" }: UseSpeechOptio
     setStatus("starting");
 
     const recognition = new Ctor();
+    let sessionError = false;
+    const isCurrent = () => recognitionRef.current === recognition;
     recognition.lang = lang;
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
+      if (!isCurrent()) return;
       gotStartRef.current = true;
       setStatus("listening");
     };
 
     recognition.onresult = (event) => {
+      if (!isCurrent() || sessionError) return;
       let finalText = "";
       let interimText = "";
 
@@ -167,9 +173,10 @@ export function useSpeechRecognition({ onFinal, lang = "zh-CN" }: UseSpeechOptio
     };
 
     recognition.onerror = (event) => {
+      if (!isCurrent()) return;
+      sessionError = true;
       const code = event.error;
-      busyRef.current = false;
-      recognitionRef.current = null;
+      // 等待 onend 释放会话，防止错误后立即重试与尚未结束的收音重叠。
 
       if (code === "not-allowed" || code === "service-not-allowed") {
         fail("denied", SPEECH_HINT.denied);
@@ -188,9 +195,12 @@ export function useSpeechRecognition({ onFinal, lang = "zh-CN" }: UseSpeechOptio
     };
 
     recognition.onend = () => {
+      if (!isCurrent()) return;
       setInterim("");
       recognitionRef.current = null;
       busyRef.current = false;
+      // 保留 not-allowed/network/no-speech 等具体失败原因。
+      if (sessionError) return;
 
       // 关键：点了却没真正启动（没收到 onstart 就结束），不能静默回到空闲
       if (!gotStartRef.current && !userStoppedRef.current) {
@@ -231,16 +241,19 @@ export function useSpeechRecognition({ onFinal, lang = "zh-CN" }: UseSpeechOptio
 
   /** 清掉错误提示，回到可再次启动的初始态（页面上的「改用文字输入」用） */
   const reset = useCallback(() => {
+    stop();
     setLastError(null);
     setInterim("");
     setStatus((prev) => (prev === "unsupported" ? prev : "idle"));
-  }, []);
+  }, [stop]);
 
   // 卸载时确保关掉麦克风
   useEffect(() => {
     return () => {
+      const recognition = recognitionRef.current;
+      recognitionRef.current = null;
       try {
-        recognitionRef.current?.abort();
+        recognition?.abort();
       } catch {
         /* 忽略 */
       }
