@@ -1,3 +1,4 @@
+import { IS_MOCK_MODE } from "../api/http";
 import { LogoIcon } from "./icons";
 
 /**
@@ -20,9 +21,17 @@ export function Header() {
           </div>
         </div>
 
-        <span className="shrink-0 rounded-full bg-brand-50 px-3 py-1 text-[12px] font-medium text-brand-700 ring-1 ring-inset ring-brand-100">
-          岗位匹配
-        </span>
+        <div className="flex shrink-0 items-center gap-2">
+          {/* mock 模式必须在页面上显式标出来，演示时不能把样例数据当成真实结果 */}
+          {IS_MOCK_MODE ? (
+            <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700 ring-1 ring-inset ring-amber-200">
+              演示数据
+            </span>
+          ) : null}
+          <span className="rounded-full bg-brand-50 px-3 py-1 text-[12px] font-medium text-brand-700 ring-1 ring-inset ring-brand-100">
+            岗位匹配
+          </span>
+        </div>
       </div>
     </header>
   );
