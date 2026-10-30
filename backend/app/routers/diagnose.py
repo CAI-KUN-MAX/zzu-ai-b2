@@ -54,6 +54,10 @@ SYSTEM_PROMPT = """
 引用时逐字复制，保留大小写与标点，不得把“熟悉Python和MySQL”改成“熟悉Python、MySQL”，不得拼接不连续片段。
 resume_evidence 不得填写“未提及”“无相关经验”等说明文字；找不到可逐字引用的证据就填 null。
 未体现某项经历不代表不具备。建议必须具体可执行，不得建议编造经历。
+每个缺口还要给 rewrite_suggestion，作为可放进简历的改写建议：
+- resume_evidence 有值时，只能改写这段已有证据，不得新增原文没有的项目、职责、技术或数字；
+- resume_evidence 为 null 时，只能给带【项目名称】【真实成果】等占位符的条件模板，并明确“仅在确有相关经历时补充”，不得写成候选人已经做过；
+- 不要用“精通”“主导”等更强表述替换原文较弱的掌握程度。
 没有亮点或缺口时允许对应数组为空，不要为凑数量编造。
 四个维度必须完整唯一，分数是 0–100 整数，权重固定如下。每个维度按以下档位独立评分：
 - 85–100：JD 要求基本全部满足，且有具体成果或量化数据
@@ -79,7 +83,7 @@ resume_evidence 不得填写“未提及”“无相关经验”等说明文字�
 }
 title、suggestion、summary 使用用户消息中 output_language 指定的语言，与简历原文语言无关；evidence 等原文引用保持原样。
 非空亮点格式：{"title":"标题","evidence":"原文片段","source":"resume"}。
-非空缺口格式：{"title":"标题","jd_requirement":"JD原文","resume_evidence":null,"suggestion":"具体建议","severity":"high"}。
+非空缺口格式：{"title":"标题","jd_requirement":"JD原文","resume_evidence":null,"suggestion":"具体建议","rewrite_suggestion":"仅在确有相关经历时补充：使用【技术】完成【真实任务】，取得【真实成果】","severity":"high"}。
 severity 只能是 high、medium 或 low。
 """
 
@@ -96,6 +100,7 @@ EDUCATION_REQUIREMENT = re.compile(
     r"CET[- ]?[46]|英语\s*[四六46]级|托福|雅思|TOEFL|IELTS",
     re.IGNORECASE,
 )
+REWRITE_PLACEHOLDER = re.compile(r"【[^】\n]{1,30}】")
 # 要求里的修饰词，去掉后剩下的才是要在简历里找的关键词
 REQUIREMENT_WORDS = re.compile(
     r"熟练掌握|熟练|熟悉|掌握|精通|了解|具备|具有|拥有|相关|经验|经历|能力|背景|优先|加分|以上|"
@@ -187,6 +192,7 @@ def apply_response_options(report, payload):
     if not suggestions_enabled(payload):
         for gap in report.gaps:
             gap.suggestion = ""
+            gap.rewrite_suggestion = ""
     return report
 
 
@@ -251,6 +257,12 @@ def parse_report(content, payload, request_id, elapsed_ms, lenient=False):
             raise ValueError("证据必须逐字复制对应原文的连续片段，不得改写、拼接或使用未提及等说明；没有简历证据时 resume_evidence 必须填 null")
     for gap in report.gaps:
         texts.extend([gap.title, gap.jd_requirement, gap.suggestion])
+        if suggestions_enabled(payload):
+            if not gap.rewrite_suggestion.strip():
+                raise ValueError("rewrite_suggestion_missing")
+            if gap.resume_evidence is None and not REWRITE_PLACEHOLDER.search(gap.rewrite_suggestion):
+                raise ValueError("rewrite_suggestion_placeholder_missing")
+            texts.append(gap.rewrite_suggestion)
         if not quoted_from(payload.jd_text, gap.jd_requirement):
             raise ValueError("证据必须逐字复制对应原文的连续片段，不得改写、拼接或使用未提及等说明；没有简历证据时 resume_evidence 必须填 null")
         if gap.resume_evidence is not None:

@@ -13,6 +13,7 @@ import { levelTone, scoreTone } from "../lib/theme";
 import { DimensionBars } from "./report/DimensionBars";
 import { Highlights } from "./report/Highlights";
 import { Gaps } from "./report/Gaps";
+import { RewriteSuggestions } from "./report/RewriteSuggestions";
 import { InterviewPage } from "./InterviewPage";
 import {
   AlertIcon,
@@ -341,6 +342,7 @@ function JobDetail({
             />
             <Highlights highlights={item.report.highlights} className="" />
             <Gaps gaps={item.report.gaps} className="" />
+            <RewriteSuggestions gaps={item.report.gaps} className="" />
           </div>
         ) : isAnalyzing(item) ? (
           <p className="mt-5 flex items-start gap-2 rounded-xl border border-brand-100 bg-brand-50 px-4 py-3 text-[12px] leading-relaxed text-brand-700">

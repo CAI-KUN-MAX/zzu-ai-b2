@@ -54,6 +54,8 @@ export interface Gap {
   resume_evidence: string | null;
   /** 改进建议 */
   suggestion: string;
+  /** 可放入简历的改写句或带占位符的诚实模板 */
+  rewrite_suggestion?: string;
   severity: GapSeverity;
 }
 
