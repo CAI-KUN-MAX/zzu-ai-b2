@@ -6,6 +6,7 @@ import { levelTone, scoreTone } from "../lib/theme";
 import { DimensionBars } from "./report/DimensionBars";
 import { Highlights } from "./report/Highlights";
 import { Gaps } from "./report/Gaps";
+import { RewriteSuggestions } from "./report/RewriteSuggestions";
 import { InterviewPage } from "./InterviewPage";
 import {
   AlertIcon,
@@ -84,6 +85,7 @@ function ExpandedReport({ item }: { item: MatchItem }) {
       <BaseScore item={item} />
       <Highlights highlights={report.highlights} className="" />
       <Gaps gaps={report.gaps} className="" />
+      <RewriteSuggestions gaps={report.gaps} className="" />
     </div>
   );
 }
