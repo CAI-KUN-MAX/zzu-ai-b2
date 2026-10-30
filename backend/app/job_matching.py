@@ -180,8 +180,12 @@ class JobMatchService:
                             elif len(text.strip()) + len(jd.strip()) > MAX_TOTAL_CHARS:
                                 reason = "input_too_long"
                             else:
-                                async with asyncio.timeout(ITEM_TIMEOUT):
-                                    report = await self.match_jobs.shared_report_for(text, jd)
+                                trace_token = matching.report_trace.set((identifier, item["job_id"]))
+                                try:
+                                    async with asyncio.timeout(ITEM_TIMEOUT):
+                                        report = await self.match_jobs.shared_report_for(text, jd)
+                                finally:
+                                    matching.report_trace.reset(trace_token)
                                 if report.meta.mode != "llm":
                                     reason = "mock_report"
                                 else:
@@ -199,6 +203,9 @@ class JobMatchService:
                             reason = "model_failed"
                         if reason:
                             item.update(analysis_status="degraded", degraded_reason=reason)
+                            if reason == "item_timeout":
+                                logger.warning("job analysis timeout task_id=%s job_id=%s reason=%s",
+                                               identifier, item["job_id"], reason)
                         completed += 1
                         self.repository.update(identifier, result=ranked(items),
                                                stage=f"深度分析 {completed}/{len(selected)}",

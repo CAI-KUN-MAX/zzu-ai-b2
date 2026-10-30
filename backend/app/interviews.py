@@ -97,9 +97,13 @@ def evidence_options(context):
     return options
 
 
+def contains_plan(context):
+    return bool(re.search(r"我会|我将|计划|打算|准备|建议", context.get("answer", "")))
+
+
 def hypothetical_answer(context):
     answer = context.get("answer", "")
-    return bool(re.search(r"我会|我将|计划|打算|准备|建议", answer) and
+    return bool(contains_plan(context) and
                 not re.search(r"我曾|我已经|我完成了|我实现了|我做过", answer))
 
 
@@ -210,10 +214,10 @@ def parse_output(raw, context):
         draft.feedback.reference_points = [text for text in draft.feedback.reference_points if text not in PLACEHOLDERS]
         if not draft.feedback.reference_points:
             raise ValueError("empty_reference_points")
+        if contains_plan(context):
+            # Present-tense praise can also turn a plan into an asserted action.
+            draft.feedback.strengths = []
         if hypothetical_answer(context):
-            # An answer describing plans does not establish completed work.
-            draft.feedback.strengths = [strength for strength in draft.feedback.strengths
-                                        if not re.search(r"已经|成功|实现了|设计了|完成了|进行了|验证了|取得了|确保了|提高了|证明了|获得了", strength.text)]
             if question is not None:
                 question.text = question.text.replace("你是如何", "你会如何").replace("你使用的", "你计划使用的")
         # 字段赋值不会再触发校验：处理完后按对外结构再验一次，不合格交给修复重试，避免组装响应时才报 500

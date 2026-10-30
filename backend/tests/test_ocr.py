@@ -71,6 +71,21 @@ CHINESE_FONT = next((path for path in CHINESE_FONTS if Path(path).exists()), Non
 
 @unittest.skipUnless(os.getenv("TEST_REAL_OCR") == "1", "set TEST_REAL_OCR=1 after installing requirements-ocr.txt")
 class RealOfflineOcrTests(unittest.TestCase):
+    @unittest.skipUnless(CHINESE_FONT, "Chinese test requires a CJK font")
+    def test_chinese_job_posting_is_not_resume(self):
+        with patch.dict(os.environ, {"OCR_PROVIDER": "rapidocr"}), tempfile.TemporaryDirectory() as directory:
+            image = Image.new("RGB", (1400, 600), "white")
+            draw = ImageDraw.Draw(image)
+            font = ImageFont.truetype(CHINESE_FONT, 36)
+            for index, line in enumerate(("招聘岗位：后端开发工程师", "岗位职责：开发和维护平台接口",
+                                          "任职要求：熟悉Python数据库和团队协作", "投递方式：请访问招聘网站")):
+                draw.text((40, 40 + index * 110), line, font=font, fill="black")
+            path = Path(directory) / "job.png"
+            image.save(path, format="PNG")
+            result = extract_text(path, "png", 10)
+            self.assertEqual(result["status"], "not_resume")
+            self.assertEqual(result["error"]["code"], "CONTENT_MISMATCH")
+
     @unittest.skipUnless(CHINESE_FONT, "Chinese test requires a CJK font (YaHei / STHeiti / Noto CJK / WenQuanYi)")
     def test_chinese_resume_offline(self):
         with patch.dict(os.environ, {"OCR_PROVIDER": "rapidocr"}), tempfile.TemporaryDirectory() as directory:

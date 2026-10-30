@@ -547,6 +547,31 @@ class InterviewGroundingTests(unittest.TestCase):
         self.assertNotIn("你是如何", result.next_question.text)
         self.assertIn("你会如何", result.next_question.text)
 
+    def test_planned_actions_are_not_asserted_as_completed(self):
+        context = self.context("answer")
+        context["answer"] = "我会区分业务冲突和系统故障，并用请求编号定位日志，通过自动化测试验证事务回滚。"
+        draft = model_output(context)
+        draft["feedback"]["strengths"] = [
+            {"text": "使用请求编号定位日志。", "answer_ref": "a0"},
+            {"text": "通过自动化测试验证事务回滚。", "answer_ref": "a0"},
+        ]
+        context["round"] = 5
+        result = parse_output(json.dumps(draft, ensure_ascii=False), context)
+        self.assertEqual(result.feedback.strengths, [])
+        self.assertTrue(result.feedback.reference_points)
+
+    def test_mixed_experience_and_plans_do_not_assert_plans_as_facts(self):
+        context = self.context("answer", 5)
+        context["answer"] = "我已经实现了报名接口，接下来我会使用请求编号定位日志，并通过自动化测试验证事务回滚。"
+        draft = model_output(context)
+        draft["feedback"]["strengths"] = [
+            {"text": "使用请求编号定位日志。", "answer_ref": "a1"},
+            {"text": "我已经实现了报名接口。", "answer_ref": "a0"},
+        ]
+        result = parse_output(json.dumps(draft, ensure_ascii=False), context)
+        self.assertEqual(result.feedback.strengths, [])
+        self.assertTrue(result.feedback.reference_points)
+
     def test_prompt_placeholders_are_not_published_as_feedback(self):
         context = self.context("answer")
         draft = model_output(context)
