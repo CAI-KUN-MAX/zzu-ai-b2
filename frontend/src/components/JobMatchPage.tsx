@@ -400,7 +400,7 @@ export function JobMatchPage({
             </p>
           ) : (
             <>
-              <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex flex-wrap gap-1.5 pb-1">
                 {categories.map((item) => {
                   const active = item === category;
                   const count = item === "全部" ? jobs.length : (categoryCount.get(item) ?? 0);

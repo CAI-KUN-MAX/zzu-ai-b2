@@ -335,8 +335,8 @@ function JobDetail({
             ) : (
               <p className="mt-2 text-[11px] text-ink-500">
                 {embeddingStatus === "disabled"
-                  ? "本次未启用语义匹配，基础分即规则分"
-                  : "本次没有可用的向量相似度，基础分按规则计算"}
+                  ? "本次未启用语义匹配，基础分根据技能、文本和学历计算"
+                  : "本次暂未获得语义匹配结果，基础分根据技能、文本和学历计算"}
               </p>
             )}
             {/* 只有真实 AI 成功（analysis_status=succeeded）时总分才按加权公式计算；模拟报告不参与加权 */}
