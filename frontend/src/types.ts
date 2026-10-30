@@ -54,6 +54,8 @@ export interface Gap {
   resume_evidence: string | null;
   /** 改进建议 */
   suggestion: string;
+  /** 可放入简历的改写句或带占位符的诚实模板 */
+  rewrite_suggestion?: string;
   severity: GapSeverity;
 }
 
@@ -108,7 +110,7 @@ export interface ApiErrorBody {
 export type TaskStatus = "queued" | "running" | "succeeded" | "failed";
 
 /** 单份简历的解析状态 */
-export type ResumeStatus = "ready" | "need_review" | "failed";
+export type ResumeStatus = "ready" | "need_review" | "not_resume" | "failed";
 
 /** 解析批次的单条结果 */
 export interface IngestItem {
@@ -284,6 +286,18 @@ export interface JobMatchRequest {
   job_ids: string[];
 }
 
+/** 语义匹配状态：关闭 / 计算中 / 成功 / 降级 / 旧任务未知 */
+export type EmbeddingStatus = "disabled" | "pending" | "succeeded" | "degraded" | "unknown";
+
+export type EmbeddingError =
+  | "unavailable"
+  | "timeout"
+  | "input_too_large"
+  | "rate_limited"
+  | "authentication_failed"
+  | "insufficient_balance"
+  | "invalid_vector";
+
 export type JobAnalysisStatus = "pending" | "running" | "succeeded" | "degraded";
 
 export type JobDegradedReason =
@@ -302,7 +316,12 @@ export interface JobMatchItem {
   title: string;
   /** 最终分：有 AI 报告时为加权分，降级时等于 stage1_score */
   score: number;
+  /** 基础分：语义启用时 = 0.8×规则分 + 0.2×语义名次百分位；未启用时等于规则分 */
   stage1_score: number;
+  /** 纯规则分（技能关键词 55% + 文本相似度 30% + 学历 15%） */
+  rule_score?: number | null;
+  /** 简历与 JD 的向量余弦相似度，-1~1；语义未启用或降级时为 null */
+  embedding_similarity?: number | null;
   level: MatchLevel;
   level_label: string;
   /** 基础评分的分项，与 report.dimension_scores 不是一回事 */
@@ -326,6 +345,10 @@ export interface JobMatchTask {
   analysis_total?: number;
   /** 开始逐岗分析的 UTC ISO 时间，开始前为 null */
   analysis_started_at?: string | null;
+  /** 语义（向量）匹配状态；旧任务可能没有该字段，按 unknown 处理 */
+  embedding_status?: EmbeddingStatus;
+  /** 语义匹配失败原因，仅 degraded 时有值 */
+  embedding_error?: EmbeddingError | null;
   error: string | null;
   /** 整批超时为 JOB_MATCH_TIMEOUT */
   error_code: string | null;

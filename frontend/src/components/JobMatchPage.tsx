@@ -54,6 +54,7 @@ function formatSavedAt(savedAt: number): string {
 const RESUME_STATUS_STYLE: Record<ResumeStatus, string> = {
   ready: "bg-emerald-50 text-emerald-700 ring-emerald-200",
   need_review: "bg-amber-50 text-amber-700 ring-amber-200",
+  not_resume: "bg-rose-50 text-rose-700 ring-rose-200",
   failed: "bg-rose-50 text-rose-700 ring-rose-200",
 };
 
@@ -95,7 +96,8 @@ export function JobMatchPage({
   }, [resumeTaskId, selected, files]);
   const resume = ingest?.items[0] ?? null;
   // 只有一份简历：拿到解析结果（非 failed）就可以发起匹配
-  const parsed = !!resume && resume.status !== "failed";
+  // 失败和「不是简历」都不能继续，前者可能是格式问题，后者内容不对
+  const parsed = !!resume && resume.status !== "failed" && resume.status !== "not_resume";
   // 只有后端明确返回失败才算解析失败；轮询网络错误或等待超时不能证明解析失败
   const resumeFailed = resume?.status === "failed" || ingest?.status === "failed";
   const pollUnavailable = !!resumeTaskId && !!pollError && pollTransient && !resumeFailed;
@@ -273,7 +275,27 @@ export function JobMatchPage({
 
                   {resume.status === "need_review" ? (
                     <p className="mt-3 text-[11px] leading-relaxed text-amber-700">
-                      识别质量偏低，匹配结果可能有偏差，建议核对原文后再用。
+                      识别质量偏低
+                      {typeof resume.low_conf === "number" && resume.low_conf > 0
+                        ? `（${resume.low_conf} 行置信度较低）`
+                        : ""}
+                      ，匹配结果可能有偏差，建议核对原文后再用。
+                    </p>
+                  ) : null}
+
+                  {resume.status === "not_resume" ? (
+                    <p className="mt-3 rounded-lg bg-rose-50 px-2.5 py-2 text-[11px] leading-relaxed text-rose-700">
+                      这份文件看起来不是简历，无法继续匹配。请换一份简历文件后重试。
+                    </p>
+                  ) : null}
+
+                  {resume.status === "failed" ? (
+                    <p className="mt-3 rounded-lg bg-rose-50 px-2.5 py-2 text-[11px] leading-relaxed text-rose-700">
+                      {resume.error?.code === "OCR_FAILED"
+                        ? "图片里没有识别到文字，请换一张更清晰的扫描件或直接上传 PDF/DOCX。"
+                        : resume.error?.code === "OCR_UNAVAILABLE"
+                          ? "当前环境无法使用图片识别，请改用 PDF 或 DOCX 上传。"
+                          : resume.error?.message || "解析失败，请换一份文件重试。"}
                     </p>
                   ) : null}
 
