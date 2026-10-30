@@ -1,5 +1,6 @@
 """Reproducible shortlist scoring and bounded reuse of the diagnosis pipeline."""
 import asyncio
+import contextvars
 import hashlib
 import importlib
 import json
@@ -7,6 +8,7 @@ import logging
 import math
 import os
 import re
+import time
 import uuid
 from collections import Counter
 
@@ -20,6 +22,7 @@ from app.routers.diagnose import (
 from app.schemas import DiagnoseRequest, DiagnoseResponse
 
 logger = logging.getLogger(__name__)
+report_trace = contextvars.ContextVar("report_trace", default=None)
 PROMPT_VERSION = "screening-v1"
 LLM_ITEM_TIMEOUT = 90
 MATCH_TOTAL_TIMEOUT = 165
@@ -213,16 +216,32 @@ class MatchJobs:
         cached = self.cache_get(key)
         if cached:
             return cached
-        async with self.llm_gate:
-            cached = self.cache_get(key)
-            if cached:
-                return cached
-            report = DiagnoseResponse.model_validate(await run_diagnose(resume, jd))
-            if report.meta.mode == "llm":
-                with self.store.connect() as db:
-                    db.execute("INSERT OR REPLACE INTO llm_cache (key,result,created_at) VALUES (?,?,?)",
-                               (key, report.model_dump_json(), now()))
-            return report
+        started = time.monotonic()
+        phase = "gate_wait"
+        try:
+            async with self.llm_gate:
+                cached = self.cache_get(key)
+                if cached:
+                    return cached
+                phase = "diagnose"
+                report = DiagnoseResponse.model_validate(await run_diagnose(resume, jd))
+                if report.meta.mode == "llm":
+                    with self.store.connect() as db:
+                        db.execute("INSERT OR REPLACE INTO llm_cache (key,result,created_at) VALUES (?,?,?)",
+                                   (key, report.model_dump_json(), now()))
+                return report
+        except asyncio.CancelledError:
+            trace = report_trace.get()
+            if trace:
+                logger.warning("job report interrupted task_id=%s job_id=%s phase=%s elapsed_ms=%s",
+                               trace[0], trace[1], phase, int((time.monotonic() - started) * 1000))
+            raise
+        except LlmError as exc:
+            trace = report_trace.get()
+            if trace and str(exc) in {"diagnose_timeout", "diagnose_http_504"}:
+                logger.warning("job report timeout task_id=%s job_id=%s phase=%s elapsed_ms=%s",
+                               trace[0], trace[1], phase, int((time.monotonic() - started) * 1000))
+            raise
 
     async def run(self, identifier, jd, rows):
         async with self.task_gate:
