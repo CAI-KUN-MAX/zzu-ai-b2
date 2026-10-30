@@ -1,5 +1,6 @@
+import { useState } from "react";
 import type { Gap } from "../../types";
-import { SparkIcon } from "../icons";
+import { CheckIcon, SparkIcon } from "../icons";
 
 interface RewriteSuggestionsProps {
   gaps: Gap[];
@@ -9,7 +10,31 @@ interface RewriteSuggestionsProps {
 /** 把模型给出的可用句子单独呈现，避免用户在缺口卡片里寻找改写结果。 */
 export function RewriteSuggestions({ gaps, className = "mt-10" }: RewriteSuggestionsProps) {
   const items = gaps.filter((gap) => Boolean(gap.rewrite_suggestion?.trim()));
+  const [copyState, setCopyState] = useState<string | null>(null);
   if (items.length === 0) return null;
+
+  async function copySuggestion(text: string, key: string) {
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(text);
+      copied = true;
+    } catch {
+      const holder = document.createElement("textarea");
+      holder.value = text;
+      holder.style.position = "fixed";
+      holder.style.opacity = "0";
+      document.body.appendChild(holder);
+      holder.select();
+      try {
+        copied = document.execCommand("copy");
+      } catch {
+        copied = false;
+      }
+      document.body.removeChild(holder);
+    }
+    setCopyState(copied ? key : `error:${key}`);
+    window.setTimeout(() => setCopyState(null), 2000);
+  }
 
   return (
     <section className={className}>
@@ -41,10 +66,33 @@ export function RewriteSuggestions({ gaps, className = "mt-10" }: RewriteSuggest
                 </p>
               </div>
               <div className="rounded-xl border border-brand-100 bg-white p-3">
-                <p className="text-[11px] font-medium text-brand-700">建议改写</p>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[11px] font-medium text-brand-700">建议改写</p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      copySuggestion(
+                        gap.rewrite_suggestion ?? "",
+                        `${gap.title}-rewrite-${index}`
+                      )
+                    }
+                    className="inline-flex shrink-0 items-center gap-1 rounded-md bg-brand-50 px-2 py-1 text-[10px] font-medium text-brand-700 transition-colors hover:bg-brand-100"
+                    aria-label={`复制“${gap.title}”的改写建议`}
+                  >
+                    {copyState === `${gap.title}-rewrite-${index}` ? (
+                      <CheckIcon className="h-3 w-3" />
+                    ) : null}
+                    {copyState === `${gap.title}-rewrite-${index}` ? "已复制" : "一键复制"}
+                  </button>
+                </div>
                 <p className="mt-1 text-[13px] leading-relaxed text-ink-800">
                   {gap.rewrite_suggestion}
                 </p>
+                {copyState === `error:${gap.title}-rewrite-${index}` ? (
+                  <p role="alert" className="mt-1.5 text-[10px] text-rose-600">
+                    自动复制失败，请长按或选中文字复制。
+                  </p>
+                ) : null}
               </div>
             </div>
           </article>
