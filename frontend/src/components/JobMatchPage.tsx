@@ -4,6 +4,7 @@ import { STATUS_LABEL, getIngestTask, uploadResumes } from "../api/resumes";
 import { createJobMatch, listJobs } from "../api/jobs";
 import { useTask } from "../lib/useTask";
 import { DropZone } from "./DropZone";
+import { StepBar } from "./StepBar";
 import { JobJdDialog } from "./JobJdDialog";
 import {
   AlertIcon,
@@ -54,7 +55,22 @@ function formatSavedAt(savedAt: number): string {
 const RESUME_STATUS_STYLE: Record<ResumeStatus, string> = {
   ready: "bg-emerald-50 text-emerald-700 ring-emerald-200",
   need_review: "bg-amber-50 text-amber-700 ring-amber-200",
+  not_resume: "bg-rose-50 text-rose-700 ring-rose-200",
   failed: "bg-rose-50 text-rose-700 ring-rose-200",
+};
+
+/** 行业色标：让一屏几十个岗位有可扫读的视觉锚点 */
+const CATEGORY_DOT: Record<string, string> = {
+  计算机: "bg-blue-500",
+  电子机械: "bg-amber-500",
+  土木建筑: "bg-stone-500",
+  化工材料: "bg-violet-500",
+  生物医药: "bg-emerald-500",
+  经管财会: "bg-rose-500",
+  文法教育: "bg-cyan-500",
+  外语传播: "bg-teal-500",
+  艺术设计: "bg-pink-500",
+  农林环境: "bg-lime-600",
 };
 
 /** 主入口：上传一份简历，从岗位目录里勾选多个岗位发起匹配 */
@@ -95,7 +111,8 @@ export function JobMatchPage({
   }, [resumeTaskId, selected, files]);
   const resume = ingest?.items[0] ?? null;
   // 只有一份简历：拿到解析结果（非 failed）就可以发起匹配
-  const parsed = !!resume && resume.status !== "failed";
+  // 失败和「不是简历」都不能继续，前者可能是格式问题，后者内容不对
+  const parsed = !!resume && resume.status !== "failed" && resume.status !== "not_resume";
   // 只有后端明确返回失败才算解析失败；轮询网络错误或等待超时不能证明解析失败
   const resumeFailed = resume?.status === "failed" || ingest?.status === "failed";
   const pollUnavailable = !!resumeTaskId && !!pollError && pollTransient && !resumeFailed;
@@ -133,6 +150,12 @@ export function JobMatchPage({
   const categories = useMemo(() => {
     const set = new Set(jobs.map((job) => job.category));
     return ["全部", ...Array.from(set)];
+  }, [jobs]);
+
+  const categoryCount = useMemo(() => {
+    const map = new Map<string, number>();
+    jobs.forEach((job) => map.set(job.category, (map.get(job.category) ?? 0) + 1));
+    return map;
   }, [jobs]);
 
   const visibleJobs = useMemo(
@@ -205,6 +228,10 @@ export function JobMatchPage({
         <p className="mt-3 text-sm leading-relaxed text-ink-500">
           上传简历并勾选多个候选岗位，按匹配度排序并给出推荐理由与缺口。点开岗位可看诊断报告，并针对该岗位练五轮模拟面试。
         </p>
+
+        <div className="mt-5">
+          <StepBar current={1} />
+        </div>
       </div>
 
       {lastMatch ? (
@@ -273,7 +300,27 @@ export function JobMatchPage({
 
                   {resume.status === "need_review" ? (
                     <p className="mt-3 text-[11px] leading-relaxed text-amber-700">
-                      识别质量偏低，匹配结果可能有偏差，建议核对原文后再用。
+                      识别质量偏低
+                      {typeof resume.low_conf === "number" && resume.low_conf > 0
+                        ? `（${resume.low_conf} 行置信度较低）`
+                        : ""}
+                      ，匹配结果可能有偏差，建议核对原文后再用。
+                    </p>
+                  ) : null}
+
+                  {resume.status === "not_resume" ? (
+                    <p className="mt-3 rounded-lg bg-rose-50 px-2.5 py-2 text-[11px] leading-relaxed text-rose-700">
+                      这份文件看起来不是简历，无法继续匹配。请换一份简历文件后重试。
+                    </p>
+                  ) : null}
+
+                  {resume.status === "failed" ? (
+                    <p className="mt-3 rounded-lg bg-rose-50 px-2.5 py-2 text-[11px] leading-relaxed text-rose-700">
+                      {resume.error?.code === "OCR_FAILED"
+                        ? "图片里没有识别到文字，请换一张更清晰的扫描件或直接上传 PDF/DOCX。"
+                        : resume.error?.code === "OCR_UNAVAILABLE"
+                          ? "当前环境无法使用图片识别，请改用 PDF 或 DOCX 上传。"
+                          : resume.error?.message || "解析失败，请换一份文件重试。"}
                     </p>
                   ) : null}
 
@@ -323,10 +370,29 @@ export function JobMatchPage({
           </div>
 
           {jobsLoading ? (
-            <p className="flex items-center gap-2 rounded-xl border border-surface-line bg-white px-4 py-6 text-[13px] text-ink-500">
-              <SpinnerIcon className="h-4 w-4 animate-spin" />
-              正在加载岗位目录…
-            </p>
+            <div className="flex flex-col gap-2" aria-busy="true" aria-label="正在加载岗位目录">
+              <div className="flex gap-1.5">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="h-6 w-16 animate-pulse rounded-full bg-slate-100"
+                    style={{ animationDelay: `${i * 60}ms` }}
+                  />
+                ))}
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="rounded-xl border border-surface-line bg-white p-3"
+                    style={{ animationDelay: `${i * 60}ms` }}
+                  >
+                    <div className="h-3 w-2/3 animate-pulse rounded bg-slate-100" />
+                    <div className="mt-2 h-2.5 w-1/2 animate-pulse rounded bg-slate-100" />
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : jobsError ? (
             <p className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-[12px] text-rose-700">
               <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
@@ -334,21 +400,25 @@ export function JobMatchPage({
             </p>
           ) : (
             <>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {categories.map((item) => {
                   const active = item === category;
+                  const count = item === "全部" ? jobs.length : (categoryCount.get(item) ?? 0);
                   return (
                     <button
                       key={item}
                       type="button"
                       onClick={() => setCategory(item)}
-                      className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                      className={`shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
                         active
                           ? "bg-ink-900 text-white"
                           : "bg-white text-ink-500 ring-1 ring-inset ring-surface-line hover:text-ink-900"
                       }`}
                     >
                       {item}
+                      <span className={`num ml-1 ${active ? "text-white/60" : "text-ink-300"}`}>
+                        {count}
+                      </span>
                     </button>
                   );
                 })}
@@ -363,12 +433,14 @@ export function JobMatchPage({
               ) : null}
 
               <div className="grid max-h-[420px] gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
-                {visibleJobs.map((job) => {
+                {visibleJobs.map((job, index) => {
                   const active = selected.includes(job.job_id);
+                  const dot = CATEGORY_DOT[job.category] ?? "bg-slate-400";
                   return (
                     <div
                       key={job.job_id}
-                      className={`flex items-start gap-1 rounded-xl border transition-all ${
+                      style={{ animationDelay: `${Math.min(index, 12) * 25}ms` }}
+                      className={`rise-in flex items-start gap-1 rounded-xl border transition-all ${
                         active
                           ? "border-brand-400 bg-brand-50/50 shadow-sm"
                           : "border-surface-line bg-white hover:border-brand-200 hover:bg-brand-50/20"
@@ -388,11 +460,16 @@ export function JobMatchPage({
                         {active ? <CheckIcon className="h-3 w-3" /> : null}
                       </span>
                       <span className="min-w-0">
-                        <span className="block truncate text-[13px] font-medium text-ink-900">
-                          {job.title}
+                        <span className="flex items-center gap-1.5">
+                          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} aria-hidden="true" />
+                          <span className="truncate text-[13px] font-medium text-ink-900">
+                            {job.title}
+                          </span>
                         </span>
                         <span className="mt-0.5 block truncate text-[11px] text-ink-500">
-                          {job.company} · {job.cities.join(" / ")} · {job.education}
+                          {job.company} · {job.cities[0]}
+                          {job.cities.length > 1 ? ` +${job.cities.length - 1}` : ""} ·{" "}
+                          {job.education}
                         </span>
                       </span>
                     </button>

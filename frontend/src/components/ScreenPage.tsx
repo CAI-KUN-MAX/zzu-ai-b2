@@ -19,6 +19,7 @@ const MIN_JD_CHARS = 30;
 const STATUS_STYLE: Record<ResumeStatus, { dot: string; chip: string }> = {
   ready: { dot: "bg-emerald-500", chip: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
   need_review: { dot: "bg-amber-500", chip: "bg-amber-50 text-amber-700 ring-amber-200" },
+  not_resume: { dot: "bg-rose-500", chip: "bg-rose-50 text-rose-700 ring-rose-200" },
   failed: { dot: "bg-rose-500", chip: "bg-rose-50 text-rose-700 ring-rose-200" },
 };
 

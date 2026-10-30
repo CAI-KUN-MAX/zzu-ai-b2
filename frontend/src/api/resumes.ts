@@ -267,5 +267,6 @@ export function splitIntoBatches(files: File[]): File[][] {
 export const STATUS_LABEL: Record<ResumeStatus, string> = {
   ready: "解析完成",
   need_review: "建议核对",
+  not_resume: "不是简历",
   failed: "解析失败",
 };
