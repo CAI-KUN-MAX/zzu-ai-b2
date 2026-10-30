@@ -17,6 +17,8 @@ import { Highlights } from "./report/Highlights";
 import { Gaps } from "./report/Gaps";
 import { RewriteSuggestions } from "./report/RewriteSuggestions";
 import { InterviewPage } from "./InterviewPage";
+import { StepBar } from "./StepBar";
+import { CountUp } from "./CountUp";
 import {
   AlertIcon,
   ArrowLeftIcon,
@@ -768,6 +770,9 @@ export function JobResultPage({
           <p className="num mt-1 text-[11px] text-ink-500">
             共 {items.length} 个岗位参与匹配，按匹配度排序
           </p>
+          <div className="mt-3">
+            <StepBar current={3} />
+          </div>
         </div>
         <button
           type="button"
@@ -806,7 +811,8 @@ export function JobResultPage({
               key={item.job_id}
               type="button"
               onClick={() => setDetailJobId(item.job_id)}
-              className="group block w-full rounded-xl2 border border-surface-line bg-white p-4 text-left shadow-card transition-all hover:border-brand-300 hover:shadow-md sm:p-5"
+              style={{ animationDelay: `${Math.min(index, 10) * 45}ms` }}
+              className="rise-in group block w-full rounded-xl2 border border-surface-line bg-white p-4 text-left shadow-card transition-all hover:border-brand-300 hover:shadow-md sm:p-5"
             >
               <div className="flex items-start gap-3">
                 <span className="num mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-surface-soft text-[12px] font-semibold text-ink-500">
@@ -847,17 +853,10 @@ export function JobResultPage({
                 </div>
 
                 <div className="flex shrink-0 flex-col items-end gap-1">
-                  <span
+                  <CountUp
+                    value={item.score}
                     className={`num text-[22px] font-semibold leading-none ${scoreStyle.text}`}
-                  >
-                    {item.score}
-                  </span>
-                  <span className="h-1 w-16 overflow-hidden rounded-full bg-slate-200/70">
-                    <span
-                      className={`bar-grow block h-full rounded-full ${scoreStyle.bar}`}
-                      style={{ width: `${Math.max(0, Math.min(100, item.score))}%` }}
-                    />
-                  </span>
+                  />
                   <span
                     className={`mt-0.5 inline-flex items-center gap-1 text-[10px] ${isAnalyzing(item) ? "text-brand-600" : "text-ink-500"}`}
                   >
