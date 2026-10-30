@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type {
+  EmbeddingError,
+  EmbeddingStatus,
   Job,
   JobDegradedReason,
   JobMatchItem,
@@ -13,11 +15,15 @@ import { levelTone, scoreTone } from "../lib/theme";
 import { DimensionBars } from "./report/DimensionBars";
 import { Highlights } from "./report/Highlights";
 import { Gaps } from "./report/Gaps";
+import { RewriteSuggestions } from "./report/RewriteSuggestions";
 import { InterviewPage } from "./InterviewPage";
+import { StepBar } from "./StepBar";
+import { CountUp } from "./CountUp";
 import {
   AlertIcon,
   ArrowLeftIcon,
   ArrowRightIcon,
+  CheckIcon,
   ChevronDownIcon,
   InfoIcon,
   SpinnerIcon,
@@ -81,6 +87,7 @@ function JobDetail({
   resumeId,
   resumeName,
   resumeStatus,
+  embeddingStatus,
   onClose,
 }: {
   item: JobMatchItem;
@@ -89,6 +96,7 @@ function JobDetail({
   resumeId: string;
   resumeName: string;
   resumeStatus: ResumeStatus;
+  embeddingStatus?: EmbeddingStatus;
   onClose: () => void;
 }) {
   const [interviewOpen, setInterviewOpen] = useState(false);
@@ -310,14 +318,31 @@ function JobDetail({
           <div className="mt-5">
             <DimensionBars
               dimensions={item.subscores}
-              title={`基础评分 ${item.stage1_score} 分`}
-              hint="技能关键词 55% + 文本相似度 30% + 学历 15%"
+              title={`基础分 ${item.stage1_score} 分`}
+              hint={
+                item.rule_score != null && item.rule_score !== item.stage1_score
+                  ? `规则分 ${item.rule_score} × 80% + 语义名次 × 20%`
+                  : "技能关键词 55% + 文本相似度 30% + 学历 15%"
+              }
               className=""
             />
+            {/* 只有真的算过向量才展示相似度，避免把规则结果说成向量结果 */}
+            {item.embedding_similarity != null ? (
+              <p className="num mt-2 text-[11px] text-ink-500">
+                向量相似度 {(item.embedding_similarity * 100).toFixed(1)}%
+                {item.rule_score != null ? ` · 规则分 ${item.rule_score}` : ""}
+              </p>
+            ) : (
+              <p className="mt-2 text-[11px] text-ink-500">
+                {embeddingStatus === "disabled"
+                  ? "本次未启用语义匹配，基础分即规则分"
+                  : "本次没有可用的向量相似度，基础分按规则计算"}
+              </p>
+            )}
             {/* 只有真实 AI 成功（analysis_status=succeeded）时总分才按加权公式计算；模拟报告不参与加权 */}
             {item.report && item.analysis_status === "succeeded" ? (
               <p className="num mt-2 text-[11px] text-ink-500">
-                总分 {item.score} = 基础评分 {item.stage1_score} × 35% + AI 诊断 {item.report.overall_score} × 65%（四舍五入）
+                总分 {item.score} = 基础分 {item.stage1_score} × 35% + AI 诊断 {item.report.overall_score} × 65%（四舍五入）
               </p>
             ) : null}
           </div>
@@ -341,6 +366,7 @@ function JobDetail({
             />
             <Highlights highlights={item.report.highlights} className="" />
             <Gaps gaps={item.report.gaps} className="" />
+            <RewriteSuggestions gaps={item.report.gaps} className="" />
           </div>
         ) : isAnalyzing(item) ? (
           <p className="mt-5 flex items-start gap-2 rounded-xl border border-brand-100 bg-brand-50 px-4 py-3 text-[12px] leading-relaxed text-brand-700">
@@ -376,6 +402,67 @@ function JobDetail({
       ) : null}
     </div>
   );
+}
+
+/** 语义匹配失败原因，面向用户简化，不暴露内部错误码 */
+const EMBEDDING_ERROR_TEXT: Record<EmbeddingError, string> = {
+  rate_limited: "语义服务限流",
+  timeout: "语义计算超时",
+  unavailable: "语义服务不可用",
+  input_too_large: "文本超出长度限制",
+  authentication_failed: "语义服务鉴权失败",
+  insufficient_balance: "语义服务额度不足",
+  invalid_vector: "语义结果异常",
+};
+
+/**
+ * 语义（向量）匹配状态。
+ * 关闭 / 降级时基础分只用规则分，必须说清楚，不能让人误以为用了向量。
+ */
+function EmbeddingNotice({ status, error }: { status?: EmbeddingStatus; error?: EmbeddingError | null }) {
+  const current = status ?? "unknown";
+
+  if (current === "succeeded") {
+    return (
+      <p className="mt-3 flex items-center gap-1.5 text-[11px] leading-relaxed text-emerald-700">
+        <CheckIcon className="h-3.5 w-3.5 shrink-0" />
+        语义匹配已启用：基础分 = 规则分 × 80% + 语义名次 × 20%
+      </p>
+    );
+  }
+
+  if (current === "pending") {
+    return (
+      <p className="mt-3 flex items-center gap-1.5 text-[11px] leading-relaxed text-brand-700">
+        <SpinnerIcon className="h-3.5 w-3.5 shrink-0 animate-spin" />
+        正在计算语义匹配，完成后排序会自动更新
+      </p>
+    );
+  }
+
+  if (current === "degraded") {
+    const reason = error ? EMBEDDING_ERROR_TEXT[error] : "语义服务异常";
+    return (
+      <p className="mt-3 flex items-start gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-800">
+        <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+        <span>
+          语义匹配降级（{reason}），已回退到关键词与文本相似度排序；本次基础分不含语义分量。
+        </span>
+      </p>
+    );
+  }
+
+  if (current === "disabled") {
+    return (
+      <p className="mt-3 flex items-start gap-1.5 rounded-lg bg-slate-50 px-3 py-2 text-[11px] leading-relaxed text-ink-500">
+        <InfoIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+        <span>语义匹配未启用，当前基础分只由关键词、文本相似度与学历三项规则算出。</span>
+      </p>
+    );
+  }
+
+  // unknown：旧任务没记录该字段，不额外打扰
+  return null;
 }
 
 function formatElapsed(ms: number): string {
@@ -683,6 +770,9 @@ export function JobResultPage({
           <p className="num mt-1 text-[11px] text-ink-500">
             共 {items.length} 个岗位参与匹配，按匹配度排序
           </p>
+          <div className="mt-3">
+            <StepBar current={3} />
+          </div>
         </div>
         <button
           type="button"
@@ -693,6 +783,8 @@ export function JobResultPage({
           换个岗位再匹配
         </button>
       </div>
+
+      <EmbeddingNotice status={task?.embedding_status} error={task?.embedding_error} />
 
       <ProgressBanner
         task={task}
@@ -719,7 +811,8 @@ export function JobResultPage({
               key={item.job_id}
               type="button"
               onClick={() => setDetailJobId(item.job_id)}
-              className="group block w-full rounded-xl2 border border-surface-line bg-white p-4 text-left shadow-card transition-all hover:border-brand-300 hover:shadow-md sm:p-5"
+              style={{ animationDelay: `${Math.min(index, 10) * 45}ms` }}
+              className="rise-in group block w-full rounded-xl2 border border-surface-line bg-white p-4 text-left shadow-card transition-all hover:border-brand-300 hover:shadow-md sm:p-5"
             >
               <div className="flex items-start gap-3">
                 <span className="num mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-surface-soft text-[12px] font-semibold text-ink-500">
@@ -760,17 +853,10 @@ export function JobResultPage({
                 </div>
 
                 <div className="flex shrink-0 flex-col items-end gap-1">
-                  <span
+                  <CountUp
+                    value={item.score}
                     className={`num text-[22px] font-semibold leading-none ${scoreStyle.text}`}
-                  >
-                    {item.score}
-                  </span>
-                  <span className="h-1 w-16 overflow-hidden rounded-full bg-slate-200/70">
-                    <span
-                      className={`bar-grow block h-full rounded-full ${scoreStyle.bar}`}
-                      style={{ width: `${Math.max(0, Math.min(100, item.score))}%` }}
-                    />
-                  </span>
+                  />
                   <span
                     className={`mt-0.5 inline-flex items-center gap-1 text-[10px] ${isAnalyzing(item) ? "text-brand-600" : "text-ink-500"}`}
                   >
@@ -788,9 +874,10 @@ export function JobResultPage({
       <p className="mt-6 flex items-start gap-2 text-[11px] leading-relaxed text-ink-500">
         <InfoIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         <span>
-          所有岗位先做基础评分（技能关键词 55%、文本相似度 30%、学历 15%）；排名靠前的岗位（默认前 8 个）再做 AI
-          深度分析，成功后总分 = 基础分 × 35% + AI 诊断分 × 65%。标「基础评分」的岗位未获得有效 AI 报告（未入选、分析失败或超时等），总分即基础分。
-          AI 判断仅供参考，请结合人工判断。
+          所有岗位先算<b>规则分</b>（技能关键词 55% + 文本相似度 30% + 学历 15%）。
+          语义匹配开启时<b>基础分</b> = 规则分 × 80% + 语义名次 × 20%；语义关闭或降级时基础分即规则分。
+          排名靠前的岗位（默认前 8 个）再做 AI 深度分析，成功后总分 = 基础分 × 35% + AI 诊断分 × 65%。
+          标「基础评分」的岗位未获得有效 AI 报告（未入选、分析失败或超时等），总分即基础分。AI 判断仅供参考，请结合人工判断。
         </span>
       </p>
 
@@ -802,6 +889,7 @@ export function JobResultPage({
           resumeId={resumeId}
           resumeName={resumeName}
           resumeStatus={resumeStatus}
+          embeddingStatus={task?.embedding_status}
           onClose={() => setDetailJobId(null)}
         />
       ) : null}

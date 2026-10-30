@@ -10,7 +10,8 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from app.interview_schemas import InterviewAnswer, InterviewAnswerResult, InterviewSession
-from app.interviews import InterviewService, SYSTEM_PROMPT, build_messages, evidence_options, parse_output
+from app.interviews import (FEEDBACK_MAX_TOKENS, InterviewService, SYSTEM_PROMPT, build_messages,
+                            evidence_options, parse_output)
 from app.main import app
 from app.mock_data import MOCK_RESPONSES
 from fastapi.testclient import TestClient
@@ -105,7 +106,7 @@ class InterviewTests(unittest.TestCase):
             responses.append((question["id"], result))
             question = result["next_question"]
             if question:
-                self.assertEqual(question["source"], "llm")
+                self.assertEqual(question["source"], "fallback")
         self.assertIsNone(question)
         self.assertEqual(self.model.chat.completions.create.await_count, 6)
         for question_id, previous in responses:
@@ -212,21 +213,18 @@ class InterviewTests(unittest.TestCase):
         self.assertEqual(second.kwargs["extra_body"], {"do_sample": True})
         self.assertGreater(second.kwargs["temperature"], first.kwargs["temperature"])
 
-    def test_ungrounded_followup_twice_falls_back_to_answer_quote(self):
+    def test_server_followup_uses_answer_quote_without_second_model_call(self):
         session = self.create()
         identifier, question_id = session["interview_id"], session["question"]["id"]
 
-        async def drifting(**kwargs):
-            # 反馈合格，但追问两次都转去问与本轮回答无关的话题
-            data = model_output(json.loads(kwargs["messages"][1]["content"]))
-            data["next_question"]["text"] = "你是如何使用Git进行版本控制的？"
-            return completion(data)
-        self.model.chat.completions.create.side_effect = drifting
         calls = self.model.chat.completions.create.await_count
         response = self.submit(identifier, question_id)
         self.assertEqual(response.status_code, 200, response.text)
         result = response.json()
-        self.assertEqual(self.model.chat.completions.create.await_count, calls + 2)
+        self.assertEqual(self.model.chat.completions.create.await_count, calls + 1)
+        request = self.model.chat.completions.create.call_args.kwargs
+        self.assertEqual(request["max_tokens"], FEEDBACK_MAX_TOKENS)
+        self.assertIn('"next_question":null', request["messages"][0]["content"])
         self.assertEqual(result["next_question"]["source"], "fallback")
         quote = evidence_options(dict(answer=ANSWER.strip()))["a0"]["quote"]
         self.assertIn(f"你提到“{quote}”", result["next_question"]["text"])
@@ -236,7 +234,7 @@ class InterviewTests(unittest.TestCase):
         self.assertEqual(self.state(identifier)["round"], 2)
         # 重放返回同一份兜底结果，不再调用模型
         self.assertEqual(self.submit(identifier, question_id).json(), result)
-        self.assertEqual(self.model.chat.completions.create.await_count, calls + 2)
+        self.assertEqual(self.model.chat.completions.create.await_count, calls + 1)
         # 兜底追问照常可以回答
         self.model.chat.completions.create.side_effect = self.good_completion
         self.assertEqual(self.submit(identifier, result["next_question"]["id"]).status_code, 200)
@@ -535,6 +533,20 @@ class InterviewGroundingTests(unittest.TestCase):
         self.assertEqual(json.loads(messages[1]["content"])["resume"], context["resume"])
         self.assertNotIn(injected, messages[0]["content"])
 
+    def test_answer_prompt_uses_bounded_current_turn_context(self):
+        context = self.context("answer", 3)
+        context["history"] = [
+            {"question": {"text": "旧问题"}, "answer": "旧回答" * 1000},
+            {"question": {"text": "当前问题"}, "answer": context["answer"]},
+        ]
+        payload = json.loads(build_messages(context)[1]["content"])
+        self.assertEqual(payload["question"]["text"], "当前问题")
+        self.assertEqual(payload["answer"], context["answer"])
+        self.assertNotIn("resume", payload)
+        self.assertNotIn("jd", payload)
+        self.assertNotIn("history", payload)
+        self.assertLess(len(json.dumps(payload, ensure_ascii=False)), 3000)
+
     def test_plans_are_not_published_as_completed_work(self):
         context = self.context("answer")
         draft = model_output(context)
@@ -546,6 +558,31 @@ class InterviewGroundingTests(unittest.TestCase):
         self.assertEqual(result.feedback.strengths, [])
         self.assertNotIn("你是如何", result.next_question.text)
         self.assertIn("你会如何", result.next_question.text)
+
+    def test_planned_actions_are_not_asserted_as_completed(self):
+        context = self.context("answer")
+        context["answer"] = "我会区分业务冲突和系统故障，并用请求编号定位日志，通过自动化测试验证事务回滚。"
+        draft = model_output(context)
+        draft["feedback"]["strengths"] = [
+            {"text": "使用请求编号定位日志。", "answer_ref": "a0"},
+            {"text": "通过自动化测试验证事务回滚。", "answer_ref": "a0"},
+        ]
+        context["round"] = 5
+        result = parse_output(json.dumps(draft, ensure_ascii=False), context)
+        self.assertEqual(result.feedback.strengths, [])
+        self.assertTrue(result.feedback.reference_points)
+
+    def test_mixed_experience_and_plans_do_not_assert_plans_as_facts(self):
+        context = self.context("answer", 5)
+        context["answer"] = "我已经实现了报名接口，接下来我会使用请求编号定位日志，并通过自动化测试验证事务回滚。"
+        draft = model_output(context)
+        draft["feedback"]["strengths"] = [
+            {"text": "使用请求编号定位日志。", "answer_ref": "a1"},
+            {"text": "我已经实现了报名接口。", "answer_ref": "a0"},
+        ]
+        result = parse_output(json.dumps(draft, ensure_ascii=False), context)
+        self.assertEqual(result.feedback.strengths, [])
+        self.assertTrue(result.feedback.reference_points)
 
     def test_prompt_placeholders_are_not_published_as_feedback(self):
         context = self.context("answer")

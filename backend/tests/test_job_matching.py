@@ -265,6 +265,33 @@ class JobMatchingTests(unittest.TestCase):
         self.assertTrue(all(i["degraded_reason"] == "item_timeout" for i in result["items"]))
         self.assertFalse(app.state.match_jobs.inflight)
 
+    def test_timeout_logs_safe_stage_for_model_and_queue(self):
+        async def slow(resume, jd):
+            await asyncio.sleep(10)
+
+        class BlockingGate:
+            async def __aenter__(self):
+                await asyncio.sleep(10)
+
+            async def __aexit__(self, *args):
+                return False
+
+        with patch.dict(os.environ, {"MATCH_LLM_TOP_K": "8"}), \
+                patch("app.job_matching.ITEM_TIMEOUT", .1), \
+                patch("app.matching.run_diagnose", side_effect=slow):
+            for gate, phase, job in [(BlockingGate(), "gate_wait", "a"),
+                                     (asyncio.Semaphore(1), "diagnose", "c")]:
+                app.state.match_jobs.llm_gate = gate
+                with self.assertLogs("app.matching", level="WARNING") as logs:
+                    identifier = self.create([job])
+                    result = self.wait(identifier)
+                self.assertEqual(result["items"][0]["degraded_reason"], "item_timeout")
+                output = "\n".join(logs.output)
+                self.assertIn("phase=" + phase, output)
+                self.assertIn("task_id=" + identifier, output)
+                self.assertNotIn(TEXT, output)
+                self.assertNotIn(JD, output)
+
     def test_total_timeout_preserves_completed_results(self):
         async def fake(resume, jd):
             if "新闻" in jd:

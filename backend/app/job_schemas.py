@@ -89,7 +89,7 @@ class JobMatchTask(Contract):
     analysis_total: int = Field(ge=0)
     analysis_started_at: datetime | None
     embedding_status: Literal["disabled", "pending", "succeeded", "degraded", "unknown"] = "unknown"
-    embedding_error: Literal["unavailable", "timeout", "input_too_large", "rate_limited"] | None = None
+    embedding_error: Literal["unavailable", "timeout", "input_too_large", "rate_limited", "authentication_failed", "insufficient_balance", "invalid_vector"] | None = None
     error: str | None
     error_code: str | None
     items: list[JobMatchItem]

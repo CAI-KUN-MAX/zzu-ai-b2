@@ -22,6 +22,8 @@ class Gap(BaseModel):
     jd_requirement: str
     resume_evidence: Optional[str] = None
     suggestion: str
+    # 可直接放进简历的改写句；默认值用于兼容历史缓存与旧报告。
+    rewrite_suggestion: str = ""
     severity: Literal["high", "medium", "low"] # 只能是这三个
 
 class MetaInfo(BaseModel):

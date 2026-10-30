@@ -4,9 +4,9 @@
 
 ## Embedding 排序
 
-`JOB_EMBEDDING_ENABLED=true` 启用（默认关闭），复用 `LLM_API_KEY`，将简历和岗位文本发送至智谱，产生向量接口费用。文本按最多 512 字分块、无截断；超过 256 块整批回退。向量按块长加权平均后计算余弦，用同批岗位的语义名次计算百分位（单岗位为 50），`stage1_score=round(0.8*规则分+0.2*语义名次百分位)`；并列相似度使用相同平均名次。该值依赖同批岗位，不能与不同批次或规则评分直接比较，不是录用概率。技能命中、缺口与原有子分数仍解释规则分；学历等硬条件仍应人工核对。Embedding 成功后才按新基础分选择 AI 深度分析岗位。
+`JOB_EMBEDDING_ENABLED=true` 启用（默认关闭），从 `ZHIPUAI_API_KEY` 读取智谱密钥，使用 `embedding-3`、1024 维，将简历和岗位文本发送至智谱，产生向量接口费用。配置迁移时需单独设置该变量；原 `LLM_API_KEY` 仍供诊断和面试使用。文本按最多 512 字分块、无截断；超过 256 块整批回退。向量按块长加权平均后计算余弦，用同批岗位的语义名次计算百分位（单岗位为 50），`stage1_score=round(0.8*规则分+0.2*语义名次百分位)`；并列相似度使用相同平均名次。该值依赖同批岗位，不能与不同批次或规则评分直接比较，不是录用概率。技能命中、缺口与原有子分数仍解释规则分；学历等硬条件仍应人工核对。Embedding 成功后才按新基础分选择 AI 深度分析岗位。
 
-任务增加 `embedding_status`：`disabled`、`pending`、`succeeded`、`degraded`、`unknown`（旧任务）；`embedding_error` 为 `null` 或 `unavailable`、`timeout`、`input_too_large`、`rate_limited`（服务端返回 429）。每项增加 `rule_score`（规则基础分）及 `embedding_similarity`（原始余弦，-1 至 1；不可用为 null）。服务不可用、限流、超时、输入过长或返回无效向量时整批回退规则分，不混用不同口径；失败任务再次 POST 可重新尝试。只在进程内处理向量，不写入数据库或日志。预算 30 秒，使用共享模型并发门限。旧 `/api/match` 不变。
+任务增加 `embedding_status`：`disabled`、`pending`、`succeeded`、`degraded`、`unknown`（旧任务）；`embedding_error` 为 `null` 或 `unavailable`、`timeout`、`input_too_large`、`rate_limited`、`authentication_failed`、`insufficient_balance`、`invalid_vector`。智谱业务错误码 1113 表示欠费，不能把所有 HTTP 429 都当作普通限流；其他无法明确判断的 429 保留 `rate_limited`。每项增加 `rule_score`（规则基础分）及 `embedding_similarity`（原始余弦，-1 至 1；不可用为 null）。服务不可用、限流、超时、输入过长或返回无效向量时整批回退规则分，不混用不同口径；失败任务再次 POST 可重新尝试。只在进程内处理向量，不写入数据库或日志。预算 30 秒，使用共享模型并发门限。旧 `/api/match` 不变。
 
 向量字段的独立虚构示例见 `examples/job_embedding.json`。
 
