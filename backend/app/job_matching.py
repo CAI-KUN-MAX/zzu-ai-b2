@@ -79,6 +79,7 @@ class JobMatchService:
                         top_k=max(0, min(8, int(os.getenv("MATCH_LLM_TOP_K", "8")))),
                         embedding_enabled=os.getenv("JOB_EMBEDDING_ENABLED", "false").lower() == "true",
                         embedding_model=job_embedding.MODEL,
+                        embedding_dimensions=job_embedding.DIMENSIONS,
                         mock_mode=os.getenv("MOCK_MODE", "false").lower() == "true")
         identifier, created = self.repository.create_or_reuse(snapshot)
         if created:
