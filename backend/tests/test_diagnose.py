@@ -63,9 +63,11 @@ class ParseTests(unittest.TestCase):
         data = valid_data()
         data["highlights"].append({"title": "改写的亮点", "evidence": "精通Python与MySQL", "source": "resume"})
         data["gaps"].append({"title": "改写的要求", "jd_requirement": "精通Kubernetes", "resume_evidence": None,
-                             "suggestion": "补充项目", "severity": "low"})
+                             "suggestion": "补充项目", "rewrite_suggestion": "仅在确有相关经历时补充：【真实项目】",
+                             "severity": "low"})
         data["gaps"].append({"title": "证据对不上", "jd_requirement": "熟悉Kubernetes容器编排",
-                             "resume_evidence": "做过K8s", "suggestion": "补充项目", "severity": "low"})
+                             "resume_evidence": "做过K8s", "suggestion": "补充项目",
+                             "rewrite_suggestion": "在【真实项目】中使用 Kubernetes。", "severity": "low"})
         with self.assertRaises(ValueError):
             module.parse_report(json.dumps(data), PAYLOAD, "id", 0)
         report = module.parse_report(json.dumps(data), PAYLOAD, "id", 0, lenient=True)
@@ -83,6 +85,7 @@ class ParseTests(unittest.TestCase):
             lambda d: d["gaps"][0].update(severity="urgent"),
             lambda d: d["gaps"][0].update(jd_requirement="虚构要求"),
             lambda d: d["gaps"][0].update(resume_evidence="虚构经历"),
+            lambda d: d["gaps"][0].update(rewrite_suggestion=" "),
             lambda d: d.update(summary=" "),
         ]
         for mutate in mutations:
@@ -137,7 +140,8 @@ class ParseTests(unittest.TestCase):
         data = valid_data()
         data["summary"] = "候选人缺乏MySQL经验"
         data["gaps"].append({"title": "缺乏MySQL", "jd_requirement": "要求Python和MySQL", "resume_evidence": None,
-                             "suggestion": "补充数据库项目", "severity": "high"})
+                             "suggestion": "补充数据库项目",
+                             "rewrite_suggestion": "仅在确有相关经历时补充：【真实数据库项目】", "severity": "high"})
         report = module.parse_report(json.dumps(data), PAYLOAD, "id", 0)
         self.assertEqual([g.jd_requirement for g in report.gaps], ["熟悉Kubernetes容器编排"])
         self.assertNotIn("缺乏MySQL", report.summary)
@@ -152,9 +156,11 @@ class ParseTests(unittest.TestCase):
         data["highlights"] = [{"title": "具备 React 项目经验", "evidence": "使用 Vite + React + TypeScript 搭建输入页与结果页", "source": "resume"}]
         data["gaps"] = [
             {"title": "缺乏 React 或 Vue 框架经验", "jd_requirement": "熟练掌握 JavaScript / TypeScript，熟悉 React 或 Vue 任一框架；",
-             "resume_evidence": None, "suggestion": "学习 React 或 Vue", "severity": "high"},
+             "resume_evidence": None, "suggestion": "学习 React 或 Vue",
+             "rewrite_suggestion": "仅在确有相关经历时补充：【真实前端项目】", "severity": "high"},
             {"title": "缺乏 Kubernetes 经验", "jd_requirement": "熟悉 Kubernetes 容器编排",
-             "resume_evidence": None, "suggestion": "补充相关项目", "severity": "medium"},
+             "resume_evidence": None, "suggestion": "补充相关项目",
+             "rewrite_suggestion": "仅在确有相关经历时补充：【真实部署项目】", "severity": "medium"},
         ]
         report = module.parse_report(json.dumps(data), payload, "id", 0)
         self.assertEqual([gap.title for gap in report.gaps], ["缺乏 Kubernetes 经验"])
@@ -173,6 +179,22 @@ class ParseTests(unittest.TestCase):
         report = module.parse_report(json.dumps(data), payload, "id", 0)
         self.assertEqual([gap.severity for gap in report.gaps], ["high", "medium", "low"])
         self.assertTrue(all(gap.suggestion == "" for gap in report.gaps))
+        self.assertTrue(all(gap.rewrite_suggestion == "" for gap in report.gaps))
+
+    def test_rewrite_suggestion_is_required_when_enabled(self):
+        data = valid_data()
+        data["gaps"][0].pop("rewrite_suggestion")
+        with self.assertRaisesRegex(ValueError, "rewrite_suggestion_missing"):
+            module.parse_report(json.dumps(data), PAYLOAD, "id", 0)
+
+        data = valid_data()
+        data["gaps"][0]["rewrite_suggestion"] = "主导大型项目并实现显著增长"
+        with self.assertRaisesRegex(ValueError, "rewrite_suggestion_placeholder_missing"):
+            module.parse_report(json.dumps(data), PAYLOAD, "id", 0)
+
+        payload = PAYLOAD.model_copy(update={"options": {"include_suggestions": False}})
+        report = module.parse_report(json.dumps(data), payload, "id", 0)
+        self.assertEqual(report.gaps[0].rewrite_suggestion, "")
 
     def test_user_message_isolates_input(self):
         message = module.build_user_message(PAYLOAD, "简体中文")

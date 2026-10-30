@@ -32,6 +32,7 @@
       "jd_requirement": "熟悉Kubernetes容器编排",
       "resume_evidence": "了解Docker部署",
       "suggestion": "建议补充K8s相关项目经验",
+      "rewrite_suggestion": "了解 Docker 部署，并在【真实项目】中完成 Kubernetes 基础编排与发布验证。",
       "severity": "low"
     },
     {
@@ -39,6 +40,7 @@
       "jd_requirement": "有高并发、大流量系统的性能优化经验",
       "resume_evidence": "简历中项目均为单机部署，未提及并发量级",
       "suggestion": "补充一个压测或性能优化案例，写明 QPS 与优化前后的耗时对比",
+      "rewrite_suggestion": "仅在确有相关经历时补充：针对【真实系统】完成【压测/性能优化】，将【真实指标】从【优化前】提升至【优化后】。",
       "severity": "medium"
     },
     {
@@ -46,6 +48,7 @@
       "jd_requirement": "熟悉敏捷开发流程，有跨团队协作经验",
       "resume_evidence": "项目描述集中在个人产出，未体现需求评审、代码评审等协作环节",
       "suggestion": "在项目条目中补充你的角色与协作方式，如主导评审、对接前后端联调",
+      "rewrite_suggestion": "仅在确有相关经历时补充：在【真实项目】中负责【真实协作事项】，与【真实协作对象】完成【真实结果】。",
       "severity": "low"
     }
   ],

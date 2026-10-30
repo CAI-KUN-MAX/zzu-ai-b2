@@ -4,6 +4,7 @@ import { ScoreRing } from "./ScoreRing";
 import { DimensionBars } from "./report/DimensionBars";
 import { Highlights } from "./report/Highlights";
 import { Gaps } from "./report/Gaps";
+import { RewriteSuggestions } from "./report/RewriteSuggestions";
 import { ArrowLeftIcon, ArrowRightIcon, InfoIcon } from "./icons";
 
 interface ResultPageProps {
@@ -65,6 +66,7 @@ export function ResultPage({ data, onReset }: ResultPageProps) {
       <DimensionBars dimensions={data.dimension_scores} />
       <Highlights highlights={data.highlights} />
       <Gaps gaps={data.gaps} />
+      <RewriteSuggestions gaps={data.gaps} />
 
       {/* 底部：免责声明 + 再诊断 */}
       <div className="mt-10 flex flex-col gap-5 border-t border-surface-line pt-6 sm:flex-row sm:items-center sm:justify-between">

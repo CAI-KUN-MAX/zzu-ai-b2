@@ -27,7 +27,12 @@ function normalize(data: DiagnoseResponse): DiagnoseResponse {
     highlights: Array.isArray(data.highlights) ? data.highlights : [],
     // 后端已按优先级返回，这里再兜一层，防止 LLM 返回乱序
     gaps: Array.isArray(data.gaps)
-      ? [...data.gaps].sort(
+      ? data.gaps
+          .map((gap) => ({
+            ...gap,
+            rewrite_suggestion: gap.rewrite_suggestion ?? "",
+          }))
+          .sort(
           (a, b) => (SEVERITY_RANK[a.severity] ?? 3) - (SEVERITY_RANK[b.severity] ?? 3)
         )
       : [],
