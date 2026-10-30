@@ -16,7 +16,10 @@ from app.interview_schemas import (AnswerDraft, Feedback, FirstQuestionDraft, In
 logger = logging.getLogger(__name__)
 TOTAL_TIMEOUT = 75
 CALL_TIMEOUT = 50
-MAX_TOKENS = 2400
+# 第一题只需一个短问题；回答轮只让模型生成短反馈，下一题由服务器即时生成。
+# 相比原来每轮最多生成 2400 token 的「反馈 + 追问」，显著缩短模型输出时间。
+CREATE_MAX_TOKENS = 600
+FEEDBACK_MAX_TOKENS = 900
 # 第一次关闭采样，结果稳定；修复重试开启采样，否则同一输入每次得到同一份不合格输出，用户怎么重试都会失败
 REPAIR_TEMPERATURE = 0.7
 MAX_CONTEXT_CHARS = 20000
@@ -55,10 +58,11 @@ improvements 是具体可执行的改进建议；reference_points 是建议回�
 CREATE_FORMAT = """服务器阶段要求：本次生成第一题，只返回如下结构：
 {"question":{"text":"一道问题","focus":"考察点","evidence_refs":["j0"]}}
 """
-ANSWER_FORMAT = """服务器阶段要求：本次不是最后一轮，必须返回反馈和一个关联追问：
+ANSWER_FORMAT = """服务器阶段要求：本次只生成本轮反馈，下一题由服务器依据回答原文生成。
+next_question 固定返回 JSON null，不要生成追问。只返回：
 {"feedback":{"reference_points":["建议覆盖的要点"],
 "strengths":[{"text":"有原文依据的优点","answer_ref":"a0"}],"improvements":["建议"]},
-"next_question":{"text":"你提到‘a0选项的quote原文’，请进一步说明具体做法？","focus":"考察点","evidence_refs":["a0","j0"]}}
+"next_question":null}
 """
 FINAL_FORMAT = """服务器阶段要求：这是第五轮也是最后一轮。本次只生成反馈，绝对不要继续出题。
 next_question 必须为 JSON null。不要因为全局提问规则生成第六题。只返回如下结构：
@@ -110,8 +114,18 @@ def build_messages(context):
         FINAL_FORMAT if context["round"] == MAX_ROUNDS else ANSWER_FORMAT)
     if hypothetical_answer(context):
         phase += "\n本轮回答主要描述设想。只评价所描述的思路，不将其写成已经实施的成果，追问使用‘你会如何’或‘你计划’措辞。"
+    options = evidence_options(context)
+    # 回答阶段只需评价当前回答。整份简历、完整 JD 和历史轮次会显著放大输入，
+    # 且下一题已经改由服务器生成；只发送当前问题、回答和有限证据片段即可。
+    payload = ({**context, "evidence_options": options} if context["action"] == "create" else {
+        "action": "answer",
+        "round": context["round"],
+        "question": context["history"][-1]["question"],
+        "answer": context["answer"],
+        "evidence_options": options,
+    })
     return [{"role": "system", "content": SYSTEM_PROMPT + "\n" + phase},
-            {"role": "user", "content": json.dumps({**context, "evidence_options": evidence_options(context)}, ensure_ascii=False)}]
+            {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}]
 
 
 def check_context(messages):
@@ -288,13 +302,26 @@ def fallback_question(context, draft):
     planned = hypothetical_answer(context)
     previous = re.sub(r"\s+", "", "".join(turn["answer"] for turn in context["history"][:-1])).casefold()
     answers = [(reference, option) for reference, option in evidence_options(context).items() if option["source"] == "answer"]
+    templates = ([
+        "你提到“{quote}”，你会如何具体落实？需要注意哪些风险，又打算怎样验证效果？",
+        "围绕“{quote}”，你会如何处理边界情况或失败场景？",
+        "对于“{quote}”，你会用哪些指标判断方案有效，又会如何权衡取舍？",
+        "你提到“{quote}”，如果需要与团队协作落地，你会怎样拆分步骤并验证结果？",
+    ] if planned else [
+        "你提到“{quote}”，请具体说明当时是怎么做的、为什么这样设计，以及如何验证效果？",
+        "围绕“{quote}”，当时遇到了哪些边界情况或失败场景，你是怎么处理的？",
+        "对于“{quote}”，你用了哪些指标判断方案有效，又做过哪些取舍？",
+        "你提到“{quote}”，请说明当时如何与团队协作推进，并验证最终结果？",
+    ])
+    offset = max(context.get("round", 1) - 1, 0) % len(templates)
+    ordered_templates = templates[offset:] + templates[:offset]
     # 优先选前几轮没讲过的片段，避免模板追问也绕回旧话题；sorted 稳定，同分保持原文顺序
     for reference, option in sorted(answers, key=lambda item: -answer_novelty(item[1]["quote"], previous)):
-        text = (f"你提到“{option['quote']}”，你会如何具体落实？需要注意哪些风险，又打算怎样验证效果？" if planned else
-                f"你提到“{option['quote']}”，请具体说明当时是怎么做的、为什么这样设计，以及如何验证效果？")
-        if text not in asked:
-            draft.next_question = QuestionDraft(text=text, focus="围绕本轮回答追问", evidence_refs=[reference])
-            return draft
+        for template in ordered_templates:
+            text = template.format(quote=option["quote"])
+            if text not in asked:
+                draft.next_question = QuestionDraft(text=text, focus="围绕本轮回答追问", evidence_refs=[reference])
+                return draft
     return None
 
 
@@ -329,15 +356,27 @@ class InterviewService:
                             check_context(messages)
                             response = await client.chat.completions.create(
                                 model=model, messages=messages, response_format={"type": "json_object"},
-                                temperature=REPAIR_TEMPERATURE if attempt else .2, max_tokens=MAX_TOKENS,
+                                temperature=REPAIR_TEMPERATURE if attempt else .2,
+                                max_tokens=(CREATE_MAX_TOKENS if context["action"] == "create"
+                                            else FEEDBACK_MAX_TOKENS),
                                 extra_body={"do_sample": bool(attempt)})
                             try:
                                 if not response.choices or response.choices[0].finish_reason != "stop":
                                     raise ValueError("incomplete_output")
-                                result = parse_output(response.choices[0].message.content, context)
+                                # 回答轮的模型只负责反馈。按最终轮规则解析会强制 next_question=null，
+                                # 随后由服务器基于本轮回答原文生成追问，避免追问校验失败再调用一次模型。
+                                parse_context = ({**context, "round": MAX_ROUNDS}
+                                                 if context["action"] == "answer" else context)
+                                result = parse_output(response.choices[0].message.content, parse_context)
+                                source = "llm"
+                                if context["action"] == "answer" and context["round"] < MAX_ROUNDS:
+                                    result = fallback_question(context, result)
+                                    if result is None:
+                                        raise ValueError("invalid_next_question")
+                                    source = "fallback"
                                 logger.info("interview request_id=%s category=success elapsed_ms=%s", request_id,
                                             int((time.monotonic() - started) * 1000))
-                                return result, "llm"
+                                return result, source
                             except (ValueError, TypeError) as validation_error:
                                 known_checks = {"invalid_next_question", "invalid_question_evidence",
                                                 "question_missing_job_grounding", "followup_missing_answer_grounding",
