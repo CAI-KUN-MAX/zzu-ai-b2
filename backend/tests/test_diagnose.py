@@ -43,6 +43,13 @@ class ParseTests(unittest.TestCase):
         report = module.parse_report("```json\n" + json.dumps(valid_data()) + "\n```", PAYLOAD, "id", 0)
         self.assertEqual(report.overall_score, 65)
 
+    def test_placeholder_summary_rejected_including_repair(self):
+        data = valid_data()
+        data["summary"] = "基于证据的一句话总体评价"
+        for lenient in (False, True):
+            with self.subTest(lenient=lenient), self.assertRaisesRegex(ValueError, "占位文字"):
+                module.parse_report(json.dumps(data), PAYLOAD, "id", 0, lenient=lenient)
+
     def test_invalid_json(self):
         for content in (None, "", "[]", "null", "{bad", "prefix {}"):
             with self.subTest(content=content), self.assertRaises((ValueError, KeyError, TypeError)):
