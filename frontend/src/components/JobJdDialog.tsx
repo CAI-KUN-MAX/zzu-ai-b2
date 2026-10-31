@@ -72,7 +72,7 @@ export function JobJdDialog({ job, selected, onToggle, onClose }: JobJdDialogPro
             ))}
           </dl>
 
-          <p className="mt-4 text-[11px] font-medium text-ink-500">岗位 JD</p>
+          <p className="mt-4 text-[11px] font-medium text-ink-500">岗位要求</p>
           <p className="mt-1.5 whitespace-pre-wrap rounded-xl bg-surface-soft/70 px-3.5 py-3 text-[13px] leading-relaxed text-ink-900">
             {job.jd_text}
           </p>

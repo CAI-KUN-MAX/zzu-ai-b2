@@ -56,14 +56,14 @@ function Chip({ text, tone }: { text: string; tone: "hit" | "miss" }) {
 
 /** 降级原因：卡片上的短标签和详情里的完整说明 */
 const DEGRADED_REASON: Record<JobDegradedReason, { short: string; detail: string }> = {
-  ai_disabled: { short: "未开启 AI", detail: "当前未开启 AI 深度分析" },
-  not_selected: { short: "未入选 AI", detail: "只对基础分排名靠前的岗位（默认前 8 个）做 AI 深度分析，这个岗位未入选" },
-  input_too_short: { short: "简历过短", detail: "简历内容过短，无法做 AI 深度分析" },
-  input_too_long: { short: "内容超长", detail: "简历与 JD 合计超过 2 万字，无法做 AI 深度分析" },
-  model_failed: { short: "AI 失败", detail: "AI 深度分析失败" },
-  item_timeout: { short: "AI 超时", detail: "这个岗位的 AI 深度分析超时" },
-  batch_timeout: { short: "AI 超时", detail: "整批 AI 深度分析超时，这个岗位未完成" },
-  mock_report: { short: "模拟报告", detail: "当前为模拟报告" },
+  ai_disabled: { short: "未做深度分析", detail: "当前没有开启 AI 深入分析" },
+  not_selected: { short: "未做深度分析", detail: "只会给排在前面的岗位（默认前 8 个）做 AI 深入分析，这个岗位没排进去" },
+  input_too_short: { short: "简历太短", detail: "简历内容太少，不足以做 AI 分析" },
+  input_too_long: { short: "内容太长", detail: "简历和岗位要求加起来超过 2 万字，超出了分析长度，可以精简后再试" },
+  model_failed: { short: "AI 没成功", detail: "AI 分析这次没成功，可以重新匹配再试一次" },
+  item_timeout: { short: "AI 等太久", detail: "这个岗位的 AI 分析等太久了，先按关键词给分" },
+  batch_timeout: { short: "AI 等太久", detail: "整批分析等太久，这个岗位没跑完" },
+  mock_report: { short: "示例数据", detail: "这是演示用的示例报告，不是真实结果" },
 };
 
 /** 是否还在等 AI：pending / running 时报告可能随后到达，不能当成“没做 AI” */
@@ -318,31 +318,29 @@ function JobDetail({
           <div className="mt-5">
             <DimensionBars
               dimensions={item.subscores}
-              title={`基础分 ${item.stage1_score} 分`}
-              hint={
-                item.rule_score != null && item.rule_score !== item.stage1_score
-                  ? `规则分 ${item.rule_score} × 80% + 语义名次 × 20%`
-                  : "技能关键词 55% + 文本相似度 30% + 学历 15%"
-              }
+              title={`匹配分 ${item.stage1_score}`}
+              hint="技能关键词 + 文本相近 + 学历，三项算出来"
               className=""
             />
-            {/* 只有真的算过向量才展示相似度，避免把规则结果说成向量结果 */}
+            {/* 只有真的比较过内容才展示相近程度，避免把关键词结果说成内容理解 */}
             {item.embedding_similarity != null ? (
-              <p className="num mt-2 text-[11px] text-ink-500">
-                语义关联度 {(item.embedding_similarity * 100).toFixed(1)}%
-                {item.rule_score != null ? ` · 规则分 ${item.rule_score}` : ""}
+              <p className="mt-2 text-[11px] text-ink-500">
+                简历和岗位要求的内容相近程度：
+                <span className="font-medium text-ink-700">
+                  {similarityLabel(item.embedding_similarity)}
+                </span>
               </p>
             ) : (
               <p className="mt-2 text-[11px] text-ink-500">
                 {embeddingStatus === "disabled"
-                  ? "本次未启用语义匹配，基础分根据技能、文本和学历计算"
-                  : "本次暂未获得语义匹配结果，基础分根据技能、文本和学历计算"}
+                  ? "这次只按关键词算分，没有比较内容是否接近"
+                  : "内容相近程度暂时取不到，分数只按关键词算"}
               </p>
             )}
             {/* 只有真实 AI 成功（analysis_status=succeeded）时总分才按加权公式计算；模拟报告不参与加权 */}
             {item.report && item.analysis_status === "succeeded" ? (
               <p className="num mt-2 text-[11px] text-ink-500">
-                总分 {item.score} = 基础分 {item.stage1_score} × 35% + AI 诊断 {item.report.overall_score} × 65%（四舍五入）
+                综合分 {item.score} = 匹配分 {item.stage1_score} × 35% + AI 诊断 {item.report.overall_score} × 65%（四舍五入）
               </p>
             ) : null}
           </div>
@@ -404,20 +402,29 @@ function JobDetail({
   );
 }
 
-/** 语义匹配失败原因，面向用户简化，不暴露内部错误码 */
+/** 内容理解失败原因：只说用户能感知的现象，不暴露限流、鉴权、额度这类内部词 */
 const EMBEDDING_ERROR_TEXT: Record<EmbeddingError, string> = {
-  rate_limited: "语义服务限流",
-  timeout: "语义计算超时",
-  unavailable: "语义服务不可用",
-  input_too_large: "文本超出长度限制",
-  authentication_failed: "语义服务鉴权失败",
-  insufficient_balance: "语义服务额度不足",
-  invalid_vector: "语义结果异常",
+  rate_limited: "服务有点忙",
+  timeout: "响应太慢",
+  unavailable: "服务暂时不可用",
+  input_too_large: "内容太长",
+  authentication_failed: "服务暂时不可用",
+  insufficient_balance: "服务暂时不可用",
+  invalid_vector: "结果异常",
 };
 
+/** 把 0~1 的相近程度翻成学生能理解的档位 */
+function similarityLabel(value: number): string {
+  if (value >= 0.7) return "很像";
+  if (value >= 0.55) return "比较像";
+  if (value >= 0.4) return "一般";
+  if (value >= 0.25) return "不太像";
+  return "很不像";
+}
+
 /**
- * 语义（向量）匹配状态。
- * 关闭 / 降级时基础分只用规则分，必须说清楚，不能让人误以为用了向量。
+ * 「内容理解」状态：是否比较过简历与岗位描述讲的内容是否接近。
+ * 全程不使用语义、向量、Embedding、名次、规则分这类词。
  */
 function EmbeddingNotice({ status, error }: { status?: EmbeddingStatus; error?: EmbeddingError | null }) {
   const current = status ?? "unknown";
@@ -425,8 +432,10 @@ function EmbeddingNotice({ status, error }: { status?: EmbeddingStatus; error?: 
   if (current === "succeeded") {
     return (
       <p className="mt-3 flex items-center gap-1.5 text-[11px] leading-relaxed text-emerald-700">
-        <CheckIcon className="h-3.5 w-3.5 shrink-0" />
-        语义匹配已启用：基础分 = 规则分 × 80% + 语义名次 × 20%
+        <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+        <span>
+          已读懂岗位描述：除了看关键词对不对得上，还比较了简历和岗位要求讲的是不是同一类事。
+        </span>
       </p>
     );
   }
@@ -435,18 +444,18 @@ function EmbeddingNotice({ status, error }: { status?: EmbeddingStatus; error?: 
     return (
       <p className="mt-3 flex items-center gap-1.5 text-[11px] leading-relaxed text-brand-700">
         <SpinnerIcon className="h-3.5 w-3.5 shrink-0 animate-spin" />
-        正在计算语义匹配，完成后排序会自动更新
+        正在读岗位描述，稍后结果会更准
       </p>
     );
   }
 
   if (current === "degraded") {
-    const reason = error ? EMBEDDING_ERROR_TEXT[error] : "语义服务异常";
+    const reason = error ? EMBEDDING_ERROR_TEXT[error] : "服务暂时不可用";
     return (
       <p className="mt-3 flex items-start gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-800">
         <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         <span>
-          智能语义匹配暂未完成（{reason}），已改用关键词与文本信息排序；本次基础分未使用语义匹配结果。
+          这次没能读懂岗位描述（{reason}），先按关键词排了个序。分数只反映关键词对不对得上，可能不够准。
         </span>
       </p>
     );
@@ -456,7 +465,7 @@ function EmbeddingNotice({ status, error }: { status?: EmbeddingStatus; error?: 
     return (
       <p className="mt-3 flex items-start gap-1.5 rounded-lg bg-slate-50 px-3 py-2 text-[11px] leading-relaxed text-ink-500">
         <InfoIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-        <span>语义匹配未启用，当前基础分只由关键词、文本相似度与学历三项规则算出。</span>
+        <span>当前只按关键词匹配，没有比较简历和岗位要求的内容是否接近。</span>
       </p>
     );
   }
@@ -799,6 +808,23 @@ export function JobResultPage({
         <p className="mt-2 text-[12px] text-rose-700">{restartError}</p>
       ) : null}
 
+      {/* 无匹配结果：任务成功但没有可展示的岗位 */}
+      {items.length === 0 && task?.status === "succeeded" ? (
+        <div className="mt-5 rounded-xl2 border border-surface-line bg-white px-5 py-8 text-center">
+          <p className="text-[13px] font-medium text-ink-900">这次没有匹配出岗位</p>
+          <p className="mx-auto mt-2 max-w-md text-[12px] leading-relaxed text-ink-500">
+            可能是所选岗位已关闭、或简历内容不足以判断。可以回到上一步换个岗位组合再试一次。
+          </p>
+          <button
+            type="button"
+            onClick={onReset}
+            className="mt-4 rounded-xl bg-brand-600 px-4 py-2 text-[12px] font-semibold text-white hover:bg-brand-700"
+          >
+            重新选择岗位
+          </button>
+        </div>
+      ) : null}
+
       {/* 岗位卡片列表 */}
       <div className="mt-5 space-y-3">
         {items.map((item, index) => {
@@ -874,10 +900,10 @@ export function JobResultPage({
       <p className="mt-6 flex items-start gap-2 text-[11px] leading-relaxed text-ink-500">
         <InfoIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         <span>
-          所有岗位先算<b>规则分</b>（技能关键词 55% + 文本相似度 30% + 学历 15%）。
-          语义匹配开启时<b>基础分</b> = 规则分 × 80% + 语义名次 × 20%；语义关闭或降级时基础分即规则分。
-          排名靠前的岗位（默认前 8 个）再做 AI 深度分析，成功后总分 = 基础分 × 35% + AI 诊断分 × 65%。
-          标「基础评分」的岗位未获得有效 AI 报告（未入选、分析失败或超时等），总分即基础分。AI 判断仅供参考，请结合人工判断。
+          分数怎么来的：先看技能、学历这些关键词对不对得上，再比较简历和岗位要求讲的是不是同一类事。
+          排在前面的岗位会额外做一次 AI 深入分析，说明你哪里合适、哪里还差；
+          标「基础评分」的岗位没有这一步，分数只看关键词和内容相近程度。
+          AI 判断仅供参考，最终还要你自己判断。
         </span>
       </p>
 
