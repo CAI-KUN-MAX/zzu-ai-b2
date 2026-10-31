@@ -14,7 +14,8 @@ from app.ocr import OcrPage, OcrUnavailable
 def sample_image(format="PNG"):
     image = Image.new("RGB", (1400, 700), "white")
     font = None
-    for path in ("C:/Windows/Fonts/msyh.ttc", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"):
+    for path in ("C:/Windows/Fonts/msyh.ttc", "/System/Library/Fonts/Supplemental/Arial.ttf",
+                 "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"):
         if Path(path).exists():
             font = ImageFont.truetype(path, 36)
             break

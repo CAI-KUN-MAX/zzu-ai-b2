@@ -1,0 +1,968 @@
+{
+  "limitations": "HTTP 200 only confirms reachability, not correct job content or successful application. Anti-bot and network failures are not proof of job closure.",
+  "jobs": [
+    {
+      "job_id": "cgc-2027-welding",
+      "title": "2027届焊接技术员（海外岗）",
+      "company": "中地国际工程有限公司",
+      "source_url": {
+        "url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55328.html",
+        "status": 200,
+        "final_url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55328.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://ctgu.91wllm.cn/campus/view/id/1001059",
+        "status": 200,
+        "final_url": "https://ctgu.91wllm.cn/campus/view/id/1001059",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "cgc-2027-civil",
+      "title": "2027届土建技术员（海外岗）",
+      "company": "中地国际工程有限公司",
+      "source_url": {
+        "url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55326.html",
+        "status": 200,
+        "final_url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55326.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://ctgu.91wllm.cn/campus/view/id/1001059",
+        "status": 200,
+        "final_url": "https://ctgu.91wllm.cn/campus/view/id/1001059",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "keymed-2027-oligonucleotide",
+      "title": "寡核苷酸合成研究员",
+      "company": "康诺亚生物医药科技有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/118200.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/118200.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://wecruit.hotjob.cn/SU64799bd32f9d2433ba818856/mc/position/campus?postTypeCode=0%2F1227%2F37850530",
+        "status": 200,
+        "final_url": "https://wecruit.hotjob.cn/SU64799bd32f9d2433ba818856/mc/position/campus?postTypeCode=0%2F1227%2F37850530",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "cgc-2027-french",
+      "title": "2027届法语翻译（驻外）",
+      "company": "中地国际工程有限公司",
+      "source_url": {
+        "url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55331.html",
+        "status": 200,
+        "final_url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55331.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://ctgu.91wllm.cn/campus/view/id/1001059",
+        "status": 200,
+        "final_url": "https://ctgu.91wllm.cn/campus/view/id/1001059",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "richinfo-2027-ai-agent",
+      "title": "AI应用开发工程师（智能体方向）",
+      "company": "彩讯科技股份有限公司",
+      "source_url": {
+        "url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-Kz7bOsmHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+        "status": 200,
+        "final_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-Kz7bOsmHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://www.richinfo.cn/jobs/",
+        "status": 200,
+        "final_url": "https://www.richinfo.cn/jobs/",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "beisen-2027-backend",
+      "title": "2027届校招-后端工程师",
+      "company": "北森云计算有限公司",
+      "source_url": {
+        "url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-K0NSqypzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+        "status": 200,
+        "final_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-K0NSqypzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://beisen.zhiye.com/campus/jobs",
+        "status": 200,
+        "final_url": "https://beisen.zhiye.com/campus/jobs",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "anycubic-2027-material-rd",
+      "title": "材料研发工程师",
+      "company": "深圳市纵维立方科技有限公司",
+      "source_url": {
+        "url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9yKlLa6smHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+        "status": 200,
+        "final_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9yKlLa6smHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://anycubic.zhiye.com/",
+        "status": 200,
+        "final_url": "https://anycubic.zhiye.com/",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "tianjian-sichuan-2027-audit",
+      "title": "财务审计（2027校招）",
+      "company": "天健会计师事务所（特殊普通合伙）四川分所",
+      "source_url": {
+        "url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKzrbWynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+        "status": 200,
+        "final_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKzrbWynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://zhaopin.pccpa.cn/hr/recruit/school",
+        "status": 200,
+        "final_url": "https://zhaopin.pccpa.cn/hr/recruit/school",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "zhifei-2027-legal",
+      "title": "法务专员",
+      "company": "重庆智飞生物制品股份有限公司",
+      "source_url": {
+        "url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiK0dTOsmHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+        "status": 200,
+        "final_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiK0dTOsmHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://zp.zifibio.com",
+        "error": "ConnectError",
+        "classification": "needs_manual_review"
+      }
+    },
+    {
+      "job_id": "tbea-international-2027-market-assistant",
+      "title": "市场经理助理",
+      "company": "特变电工国际工程有限公司",
+      "source_url": {
+        "url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtrh5eN6K0NS6yGHRp7ugzc-GnZ2skMx9ZMN4gtKLipCwxKF0lZC5sq-0gqJv",
+        "status": 200,
+        "final_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtrh5eN6K0NS6yGHRp7ugzc-GnZ2skMx9ZMN4gtKLipCwxKF0lZC5sq-0gqJv",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://wecruit.hotjob.cn/SU612f55eebef57c0616450aa2/pb/school.html?orgCode=0%2F5",
+        "status": 200,
+        "final_url": "https://wecruit.hotjob.cn/SU612f55eebef57c0616450aa2/pb/school.html?orgCode=0%2F5",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "beisen-2027-ux",
+      "title": "2027届校招-UX设计师",
+      "company": "北森云计算有限公司",
+      "source_url": {
+        "url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-K0NSyyobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+        "status": 200,
+        "final_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-K0NSyyobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://beisen.zhiye.com/campus/jobs",
+        "status": 200,
+        "final_url": "https://beisen.zhiye.com/campus/jobs",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "ztccloud-2027-digital-consultant",
+      "title": "数智化咨询顾问",
+      "company": "深圳市中兴新云服务有限公司",
+      "source_url": {
+        "url": "https://www.ztccloud.com.cn/careers/campus-digital-consultant.html",
+        "status": 200,
+        "final_url": "https://www.ztccloud.com.cn/careers/campus-digital-consultant.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+        "status": 200,
+        "final_url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "ztccloud-2027-fde",
+      "title": "前沿部署工程师 FDE",
+      "company": "深圳市中兴新云服务有限公司",
+      "source_url": {
+        "url": "https://www.ztccloud.com.cn/careers/campus-forward-deployed-engineer.html",
+        "status": 200,
+        "final_url": "https://www.ztccloud.com.cn/careers/campus-forward-deployed-engineer.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+        "status": 200,
+        "final_url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "ztccloud-2027-implementation",
+      "title": "数智化产品实施顾问",
+      "company": "深圳市中兴新云服务有限公司",
+      "source_url": {
+        "url": "https://www.ztccloud.com.cn/careers/campus-implementation-consultant.html",
+        "status": 200,
+        "final_url": "https://www.ztccloud.com.cn/careers/campus-implementation-consultant.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+        "status": 200,
+        "final_url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "ztccloud-2027-ai-product-manager",
+      "title": "AI产品经理",
+      "company": "深圳市中兴新云服务有限公司",
+      "source_url": {
+        "url": "https://www.ztccloud.com.cn/careers/campus-product-manager.html",
+        "status": 200,
+        "final_url": "https://www.ztccloud.com.cn/careers/campus-product-manager.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+        "status": 200,
+        "final_url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "ztccloud-2027-sales-assistant",
+      "title": "销售助理",
+      "company": "深圳市中兴新云服务有限公司",
+      "source_url": {
+        "url": "https://www.ztccloud.com.cn/careers/campus-sales-assistant.html",
+        "status": 200,
+        "final_url": "https://www.ztccloud.com.cn/careers/campus-sales-assistant.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+        "status": 200,
+        "final_url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "ztccloud-2027-presales-assistant",
+      "title": "售前助理",
+      "company": "深圳市中兴新云服务有限公司",
+      "source_url": {
+        "url": "https://www.ztccloud.com.cn/careers/campus-presales-assistant.html",
+        "status": 200,
+        "final_url": "https://www.ztccloud.com.cn/careers/campus-presales-assistant.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+        "status": 200,
+        "final_url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "crrcpz-2027-quality-engineer",
+      "title": "质量/售后技术工程师",
+      "company": "中车南京浦镇车辆有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://crrc-pz.hotjob.cn/",
+        "status": 200,
+        "final_url": "https://crrc-pz.hotjob.cn/",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "crrcpz-2027-design-rd",
+      "title": "设计研发工程师",
+      "company": "中车南京浦镇车辆有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://crrc-pz.hotjob.cn/",
+        "status": 200,
+        "final_url": "https://crrc-pz.hotjob.cn/",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "polyhn-2027-civil-cost",
+      "title": "土建成本岗",
+      "company": "保利（海南）旅游发展有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/116870.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/116870.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://polynew.zhiye.com/jobs?queryId=877ba4a7-50e2-4422-8ff1-7c32dc2603e2",
+        "status": 200,
+        "final_url": "https://polynew.zhiye.com/jobs?queryId=877ba4a7-50e2-4422-8ff1-7c32dc2603e2",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "polyhn-2027-civil-engineer",
+      "title": "土建工程师",
+      "company": "保利（海南）旅游发展有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/116871.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/116871.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://polynew.zhiye.com/jobs?queryId=877ba4a7-50e2-4422-8ff1-7c32dc2603e2",
+        "status": 200,
+        "final_url": "https://polynew.zhiye.com/jobs?queryId=877ba4a7-50e2-4422-8ff1-7c32dc2603e2",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "polyhn-2027-architecture",
+      "title": "建筑规划岗",
+      "company": "保利（海南）旅游发展有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/116869.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/116869.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://polynew.zhiye.com/jobs?queryId=877ba4a7-50e2-4422-8ff1-7c32dc2603e2",
+        "status": 200,
+        "final_url": "https://polynew.zhiye.com/jobs?queryId=877ba4a7-50e2-4422-8ff1-7c32dc2603e2",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "dongfeng-2027-battery-rd",
+      "title": "新型电池研发岗",
+      "company": "东风汽车集团有限公司研发总院",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/116880.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/116880.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://app.mokahr.com/m/campus-recruitment/dfmc/164438#/home",
+        "status": 200,
+        "final_url": "https://app.mokahr.com/campus-recruitment/dfmc/164438#/home",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "geneseeq-2027-technical-support",
+      "title": "技术支持专员",
+      "company": "南京世和基因生物技术股份有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/119462.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119462.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://zh.geneseeq.com/",
+        "status": 200,
+        "final_url": "https://zh.geneseeq.com/",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "geneseeq-2027-research-assistant",
+      "title": "助理研究员",
+      "company": "南京世和基因生物技术股份有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/119452.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119452.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://zh.geneseeq.com/",
+        "status": 200,
+        "final_url": "https://zh.geneseeq.com/",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "geneseeq-2027-research-scientist",
+      "title": "研发科学家／高级研究员",
+      "company": "南京世和基因生物技术股份有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/119451.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119451.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://zh.geneseeq.com/",
+        "status": 200,
+        "final_url": "https://zh.geneseeq.com/",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "crrcpz-2027-legal",
+      "title": "法务岗",
+      "company": "中车南京浦镇车辆有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://crrc-pz.hotjob.cn/",
+        "status": 200,
+        "final_url": "https://crrc-pz.hotjob.cn/",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "startimes-2027-french-legal",
+      "title": "法务专员（法语）",
+      "company": "北京四达时代软件技术股份有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/118402.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/118402.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://career.hebut.edu.cn/home/correcruit/content/id/80333.html",
+        "status": 200,
+        "final_url": "https://career.hebut.edu.cn/home/correcruit/content/id/80333.html",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "crrcpz-2027-translator",
+      "title": "翻译类岗位",
+      "company": "中车南京浦镇车辆有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://crrc-pz.hotjob.cn/",
+        "status": 200,
+        "final_url": "https://crrc-pz.hotjob.cn/",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "suren-2027-product-designer",
+      "title": "产品设计师",
+      "company": "深圳市苏仁智能科技有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/118732.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/118732.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://jdjyw.jlu.edu.cn/mportal/recruit/details?id=5181632be32248b4b6b088acfae365db",
+        "status": 200,
+        "final_url": "https://jdjyw.jlu.edu.cn/mportal/recruit/details?id=5181632be32248b4b6b088acfae365db",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "dongfeng-2027-user-insight",
+      "title": "用户洞察及感知岗",
+      "company": "东风汽车集团有限公司研发总院",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/116880.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/116880.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://app.mokahr.com/m/campus-recruitment/dfmc/164438#/home",
+        "status": 200,
+        "final_url": "https://app.mokahr.com/campus-recruitment/dfmc/164438#/home",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "dongfeng-2027-interior-design",
+      "title": "造型设计-内饰设计岗",
+      "company": "东风汽车集团有限公司研发总院",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/116880.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/116880.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://app.mokahr.com/m/campus-recruitment/dfmc/164438#/home",
+        "status": 200,
+        "final_url": "https://app.mokahr.com/campus-recruitment/dfmc/164438#/home",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "muyuan-2026-environment",
+      "title": "环保工程师",
+      "company": "牧原食品股份有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/118091.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/118091.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://app.mokahr.com/m/campus_apply/muyuan/70116#/jobs",
+        "status": 200,
+        "final_url": "https://app.mokahr.com/campus_apply/muyuan/70116#/jobs",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "kingagroot-2026-field-development",
+      "title": "技术开发管培生",
+      "company": "青岛清原作物科学集团股份有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/119112.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119112.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/119113.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119113.html",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "kingagroot-2026-bioassay",
+      "title": "生测研究员",
+      "company": "青岛清原作物科学集团股份有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/119108.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119108.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/119113.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119113.html",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "numberslaw-2027-precision-structure",
+      "title": "精密机械结构工程师",
+      "company": "深圳市大数极限科技有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/119896.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119896.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://career.cup.edu.cn/job/view/id/622853",
+        "status": 403,
+        "final_url": "https://career.cup.edu.cn/job/view/id/622853",
+        "classification": "needs_manual_review"
+      }
+    },
+    {
+      "job_id": "numberslaw-2027-thin-film",
+      "title": "HDD薄膜材料与表界面化学工程师",
+      "company": "深圳市大数极限科技有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/119896.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119896.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://career.cup.edu.cn/job/view/id/622853",
+        "status": 403,
+        "final_url": "https://career.cup.edu.cn/job/view/id/622853",
+        "classification": "needs_manual_review"
+      }
+    },
+    {
+      "job_id": "geneseeq-2027-bioinformatics",
+      "title": "（高级）生信工程师",
+      "company": "南京世和基因生物技术股份有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/119453.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119453.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://zh.geneseeq.com/",
+        "status": 200,
+        "final_url": "https://zh.geneseeq.com/",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "startimes-2027-president-secretary",
+      "title": "总裁办秘书",
+      "company": "北京四达时代软件技术股份有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/118402.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/118402.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://career.hebut.edu.cn/home/correcruit/content/id/80333.html",
+        "status": 200,
+        "final_url": "https://career.hebut.edu.cn/home/correcruit/content/id/80333.html",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "huaan-2027-legal",
+      "title": "法务专员",
+      "company": "华安财产保险股份有限公司天津分公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/116840.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/116840.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55520.html",
+        "status": 200,
+        "final_url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55520.html",
+        "classification": "reachable"
+      }
+    },
+    {
+      "job_id": "gcbio-2026-field-bioassay",
+      "title": "生测专员/GLP试验员",
+      "company": "江苏功成生物科技有限公司",
+      "source_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/119576.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119576.html",
+        "classification": "reachable"
+      },
+      "application_url": {
+        "url": "https://career.nankai.edu.cn/correcruit/content/id/119576.html",
+        "status": 200,
+        "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119576.html",
+        "classification": "reachable"
+      }
+    }
+  ],
+  "unique_urls": 53,
+  "results": {
+    "https://anycubic.zhiye.com/": {
+      "status": 200,
+      "final_url": "https://anycubic.zhiye.com/",
+      "classification": "reachable"
+    },
+    "https://app.mokahr.com/m/campus-recruitment/dfmc/164438#/home": {
+      "status": 200,
+      "final_url": "https://app.mokahr.com/campus-recruitment/dfmc/164438#/home",
+      "classification": "reachable"
+    },
+    "https://app.mokahr.com/m/campus_apply/muyuan/70116#/jobs": {
+      "status": 200,
+      "final_url": "https://app.mokahr.com/campus_apply/muyuan/70116#/jobs",
+      "classification": "reachable"
+    },
+    "https://beisen.zhiye.com/campus/jobs": {
+      "status": 200,
+      "final_url": "https://beisen.zhiye.com/campus/jobs",
+      "classification": "reachable"
+    },
+    "https://career.cup.edu.cn/job/view/id/622853": {
+      "status": 403,
+      "final_url": "https://career.cup.edu.cn/job/view/id/622853",
+      "classification": "needs_manual_review"
+    },
+    "https://career.hebut.edu.cn/home/correcruit/content/id/80333.html": {
+      "status": 200,
+      "final_url": "https://career.hebut.edu.cn/home/correcruit/content/id/80333.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/116840.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/116840.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/116869.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/116869.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/116870.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/116870.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/116871.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/116871.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/116880.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/116880.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/118091.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/118091.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/118200.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/118200.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/118402.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/118402.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/118732.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/118732.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/118737.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/118737.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/119108.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119108.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/119112.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119112.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/119113.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119113.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/119451.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119451.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/119452.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119452.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/119453.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119453.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/119462.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119462.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/119576.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119576.html",
+      "classification": "reachable"
+    },
+    "https://career.nankai.edu.cn/correcruit/content/id/119896.html": {
+      "status": 200,
+      "final_url": "https://career.nankai.edu.cn/correcruit/content/id/119896.html",
+      "classification": "reachable"
+    },
+    "https://crrc-pz.hotjob.cn/": {
+      "status": 200,
+      "final_url": "https://crrc-pz.hotjob.cn/",
+      "classification": "reachable"
+    },
+    "https://ctgu.91wllm.cn/campus/view/id/1001059": {
+      "status": 200,
+      "final_url": "https://ctgu.91wllm.cn/campus/view/id/1001059",
+      "classification": "reachable"
+    },
+    "https://jdjyw.jlu.edu.cn/mportal/recruit/details?id=5181632be32248b4b6b088acfae365db": {
+      "status": 200,
+      "final_url": "https://jdjyw.jlu.edu.cn/mportal/recruit/details?id=5181632be32248b4b6b088acfae365db",
+      "classification": "reachable"
+    },
+    "https://jobs.tiangong.edu.cn/correcruit/content/id/55326.html": {
+      "status": 200,
+      "final_url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55326.html",
+      "classification": "reachable"
+    },
+    "https://jobs.tiangong.edu.cn/correcruit/content/id/55328.html": {
+      "status": 200,
+      "final_url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55328.html",
+      "classification": "reachable"
+    },
+    "https://jobs.tiangong.edu.cn/correcruit/content/id/55331.html": {
+      "status": 200,
+      "final_url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55331.html",
+      "classification": "reachable"
+    },
+    "https://jobs.tiangong.edu.cn/correcruit/content/id/55520.html": {
+      "status": 200,
+      "final_url": "https://jobs.tiangong.edu.cn/correcruit/content/id/55520.html",
+      "classification": "reachable"
+    },
+    "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKzrbWynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E": {
+      "status": 200,
+      "final_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKzrbWynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+      "classification": "reachable"
+    },
+    "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-K0NSqypzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E": {
+      "status": 200,
+      "final_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-K0NSqypzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+      "classification": "reachable"
+    },
+    "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-K0NSyyobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E": {
+      "status": 200,
+      "final_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-K0NSyyobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+      "classification": "reachable"
+    },
+    "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-Kz7bOsmHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E": {
+      "status": 200,
+      "final_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-Kz7bOsmHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+      "classification": "reachable"
+    },
+    "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9yKlLa6smHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E": {
+      "status": 200,
+      "final_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9yKlLa6smHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+      "classification": "reachable"
+    },
+    "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiK0dTOsmHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E": {
+      "status": 200,
+      "final_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiK0dTOsmHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+      "classification": "reachable"
+    },
+    "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtrh5eN6K0NS6yGHRp7ugzc-GnZ2skMx9ZMN4gtKLipCwxKF0lZC5sq-0gqJv": {
+      "status": 200,
+      "final_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtrh5eN6K0NS6yGHRp7ugzc-GnZ2skMx9ZMN4gtKLipCwxKF0lZC5sq-0gqJv",
+      "classification": "reachable"
+    },
+    "https://polynew.zhiye.com/jobs?queryId=877ba4a7-50e2-4422-8ff1-7c32dc2603e2": {
+      "status": 200,
+      "final_url": "https://polynew.zhiye.com/jobs?queryId=877ba4a7-50e2-4422-8ff1-7c32dc2603e2",
+      "classification": "reachable"
+    },
+    "https://wecruit.hotjob.cn/SU612f55eebef57c0616450aa2/pb/school.html?orgCode=0%2F5": {
+      "status": 200,
+      "final_url": "https://wecruit.hotjob.cn/SU612f55eebef57c0616450aa2/pb/school.html?orgCode=0%2F5",
+      "classification": "reachable"
+    },
+    "https://wecruit.hotjob.cn/SU64799bd32f9d2433ba818856/mc/position/campus?postTypeCode=0%2F1227%2F37850530": {
+      "status": 200,
+      "final_url": "https://wecruit.hotjob.cn/SU64799bd32f9d2433ba818856/mc/position/campus?postTypeCode=0%2F1227%2F37850530",
+      "classification": "reachable"
+    },
+    "https://www.richinfo.cn/jobs/": {
+      "status": 200,
+      "final_url": "https://www.richinfo.cn/jobs/",
+      "classification": "reachable"
+    },
+    "https://www.wenjuan.com/s/UZBZJvhceK/": {
+      "status": 200,
+      "final_url": "https://www.wenjuan.com/s/UZBZJvhceK/",
+      "classification": "reachable"
+    },
+    "https://www.ztccloud.com.cn/careers/campus-digital-consultant.html": {
+      "status": 200,
+      "final_url": "https://www.ztccloud.com.cn/careers/campus-digital-consultant.html",
+      "classification": "reachable"
+    },
+    "https://www.ztccloud.com.cn/careers/campus-forward-deployed-engineer.html": {
+      "status": 200,
+      "final_url": "https://www.ztccloud.com.cn/careers/campus-forward-deployed-engineer.html",
+      "classification": "reachable"
+    },
+    "https://www.ztccloud.com.cn/careers/campus-implementation-consultant.html": {
+      "status": 200,
+      "final_url": "https://www.ztccloud.com.cn/careers/campus-implementation-consultant.html",
+      "classification": "reachable"
+    },
+    "https://www.ztccloud.com.cn/careers/campus-presales-assistant.html": {
+      "status": 200,
+      "final_url": "https://www.ztccloud.com.cn/careers/campus-presales-assistant.html",
+      "classification": "reachable"
+    },
+    "https://www.ztccloud.com.cn/careers/campus-product-manager.html": {
+      "status": 200,
+      "final_url": "https://www.ztccloud.com.cn/careers/campus-product-manager.html",
+      "classification": "reachable"
+    },
+    "https://www.ztccloud.com.cn/careers/campus-sales-assistant.html": {
+      "status": 200,
+      "final_url": "https://www.ztccloud.com.cn/careers/campus-sales-assistant.html",
+      "classification": "reachable"
+    },
+    "https://zh.geneseeq.com/": {
+      "status": 200,
+      "final_url": "https://zh.geneseeq.com/",
+      "classification": "reachable"
+    },
+    "https://zhaopin.pccpa.cn/hr/recruit/school": {
+      "status": 200,
+      "final_url": "https://zhaopin.pccpa.cn/hr/recruit/school",
+      "classification": "reachable"
+    },
+    "https://zp.zifibio.com": {
+      "error": "ConnectError",
+      "classification": "needs_manual_review"
+    }
+  }
+}
