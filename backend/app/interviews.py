@@ -204,6 +204,33 @@ class QuestionRejected(ValueError):
 
 
 def parse_output(raw, context):
+    if isinstance(raw, str):
+        stripped = raw.strip()
+        lines = stripped.splitlines()
+        if len(lines) >= 3 and lines[0].lower() in {"```json", "```"} and lines[-1] == "```":
+            raw = "\n".join(lines[1:-1])
+    if context["action"] == "answer":
+        data = json.loads(raw)
+        feedback = data.get("feedback") if isinstance(data, dict) else None
+        if isinstance(feedback, dict):
+            # A model sometimes emits a single suggestion instead of an array.
+            # Preserve its text exactly; do not create missing feedback.
+            for key in ("improvements", "reference_points"):
+                if isinstance(feedback.get(key), str):
+                    feedback[key] = [feedback[key]]
+            strengths = feedback.get("strengths")
+            if isinstance(strengths, list):
+                # Unreferenced praise cannot be verified: discard it instead of
+                # inventing an answer_ref or failing the useful feedback.
+                feedback["strengths"] = [item for item in strengths
+                                          if isinstance(item, dict)
+                                          and isinstance(item.get("answer_ref"), str)]
+            # The five-item limit is presentation policy, not evidence validity.
+            # Keep the first five model items rather than rejecting the round.
+            for key in ("strengths", "improvements", "reference_points"):
+                if isinstance(feedback.get(key), list):
+                    feedback[key] = feedback[key][:5]
+        raw = json.dumps(data, ensure_ascii=False)
     # Feedback-only calls use server-generated followups; unused drafts cannot
     # invalidate otherwise valid feedback, including at the final round.
     if context["action"] == "answer" and context["round"] == MAX_ROUNDS:
@@ -399,6 +426,19 @@ class InterviewService:
                                     check = "schema"
                                 logger.warning("interview request_id=%s category=invalid_output check=%s attempt=%s",
                                                request_id, check, attempt + 1)
+                                if hasattr(validation_error, "errors"):
+                                    # Only schema-owned field names and fixed error types;
+                                    # never log model output, user input, or unknown keys.
+                                    safe_fields = {"question", "feedback", "next_question", "text", "focus",
+                                                   "evidence_refs", "answer_ref", "strengths", "improvements", "reference_points"}
+                                    safe_types = {"missing", "extra_forbidden", "string_type", "list_type",
+                                                  "model_type", "too_long", "too_short", "string_too_long",
+                                                  "string_too_short", "json_invalid", "literal_error"}
+                                    for error in validation_error.errors(include_input=False)[:5]:
+                                        field = ".".join(str(part) for part in error["loc"] if part in safe_fields)
+                                        kind = error["type"] if error["type"] in safe_types else "validation"
+                                        logger.warning("interview request_id=%s category=schema_detail field=%s type=%s",
+                                                       request_id, field or "root", kind)
                                 if attempt:
                                     if context["action"] == "create":
                                         fallback = fallback_first_question(context)

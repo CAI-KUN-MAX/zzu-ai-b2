@@ -40,6 +40,27 @@ def completion(data, finish="stop"):
 
 
 class InterviewTests(unittest.TestCase):
+    def test_model_excess_feedback_items_are_capped(self):
+        context = {"action": "answer", "round": 5, "resume": RESUME, "jd": JD, "answer": ANSWER, "history": []}
+        data = model_output(context)
+        for key in ("strengths", "improvements", "reference_points"):
+            data["feedback"][key] *= 8
+        result = parse_output(json.dumps(data), context)
+        self.assertEqual(len(result.feedback.reference_points), 5)
+        self.assertEqual(len(result.feedback.improvements), 5)
+        self.assertLessEqual(len(result.feedback.strengths), 5)
+
+    def test_safe_model_shape_repairs_do_not_invent_praise(self):
+        context = {"action": "answer", "round": 5, "resume": RESUME, "jd": JD, "answer": ANSWER, "history": []}
+        data = model_output(context)
+        data["feedback"]["strengths"] = ["没有引用的表扬", {"text": "缺引用"}]
+        data["feedback"]["improvements"] = "补充并发测试方法"
+        data["feedback"]["reference_points"] = "数据库唯一约束"
+        result = parse_output("```json\n" + json.dumps(data) + "\n```", context)
+        self.assertEqual(result.feedback.strengths, [])
+        self.assertEqual(result.feedback.improvements, ["补充并发测试方法"])
+        self.assertEqual(result.feedback.reference_points, ["数据库唯一约束"])
+
     def test_feedback_only_ignores_unused_invalid_question(self):
         context = {"action": "answer", "round": 5, "resume": RESUME, "jd": JD, "answer": ANSWER, "history": []}
         data = model_output(context)
