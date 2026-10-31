@@ -11,7 +11,7 @@ from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from docx import Document
-from fastapi.testclient import TestClient
+from fixture_client import FixtureClient as TestClient
 
 from app.main import app
 from app.job_repository import JobRepository
@@ -186,7 +186,7 @@ class JobMatchingTests(unittest.TestCase):
             self.assertEqual(response.json()["error"]["code"], code)
             self.assertTrue(response.json()["error"]["request_id"])
         with app.state.store.connect() as db:
-            self.assertEqual(db.execute("SELECT count(*) FROM tasks").fetchone()[0], 0)
+            self.assertEqual(db.execute("SELECT count(*) FROM tasks WHERE kind!='guest_acl'").fetchone()[0], 0)
         app.state.store.update("resumes", "r", status="parsing")
         self.assertEqual(self.client.post("/api/job-matches", json={"resume_id": "r", "job_ids": ["a"]}).status_code, 409)
         app.state.store.update("resumes", "r", status="ready", text="")

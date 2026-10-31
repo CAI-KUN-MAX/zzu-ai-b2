@@ -78,7 +78,7 @@ function buildApiError(parsed: unknown, status: number): ApiError {
 
   // 其余 5xx 多为大模型生成失败或网关报错，错误体通常不可读，统一给人话提示
   if (status >= 500) {
-    return new ApiError(withRequestId("AI 正在思考中，请稍后重试"), status, requestId);
+    return new ApiError(withRequestId("服务暂时未能完成请求，请稍后重试；已输入的内容会保留"), status, requestId);
   }
 
   if (status === 429 && !body.error?.message) {

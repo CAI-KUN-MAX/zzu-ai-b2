@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, patch
 
 from docx import Document
 from fastapi import HTTPException
-from fastapi.testclient import TestClient
+from fixture_client import FixtureClient as TestClient
 from openpyxl import load_workbook
 
 from app.main import app

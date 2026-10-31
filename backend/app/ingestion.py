@@ -212,6 +212,17 @@ class Store:
             db.execute(f"UPDATE {table} SET " + ",".join(f"{key}=?" for key in fields) + " WHERE id=?",
                        [*fields.values(), identifier])
 
+    def grant_guest(self, identifier, resources):
+        # Merge under a write transaction so parallel requests cannot lose grants.
+        with self.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("SELECT payload FROM tasks WHERE id=? AND kind='guest_acl'", (identifier,)).fetchone()
+            existing = set(json.loads(row["payload"])["resources"]) if row else set()
+            payload = json.dumps({"resources": sorted(existing | set(resources))})
+            db.execute("INSERT INTO tasks (id,kind,status,payload,created_at,updated_at) VALUES (?,'guest_acl','succeeded',?,?,?) "
+                       "ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,updated_at=excluded.updated_at",
+                       (identifier, payload, now(), now()))
+
     def enqueue(self, uploads):
         """Files are validated before this transaction; identical bytes share one row."""
         task_id = uuid.uuid4().hex

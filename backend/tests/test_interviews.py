@@ -14,7 +14,7 @@ from app.interviews import (FEEDBACK_MAX_TOKENS, InterviewService, SYSTEM_PROMPT
                             evidence_options, parse_output)
 from app.main import app
 from app.mock_data import MOCK_RESPONSES
-from fastapi.testclient import TestClient
+from fixture_client import FixtureClient as TestClient
 
 JD = "招聘后端开发实习生，本科及以上，熟悉Python、FastAPI和MySQL，能够设计REST接口、编写单元测试，并与前端团队协作。"
 RESUME = "计算机科学与技术本科，熟悉Python和MySQL，使用FastAPI开发校园活动报名接口，通过数据库唯一约束防止重复报名，参与单元测试。"
@@ -40,6 +40,35 @@ def completion(data, finish="stop"):
 
 
 class InterviewTests(unittest.TestCase):
+    def test_model_excess_feedback_items_are_capped(self):
+        context = {"action": "answer", "round": 5, "resume": RESUME, "jd": JD, "answer": ANSWER, "history": []}
+        data = model_output(context)
+        for key in ("strengths", "improvements", "reference_points"):
+            data["feedback"][key] *= 8
+        result = parse_output(json.dumps(data), context)
+        self.assertEqual(len(result.feedback.reference_points), 5)
+        self.assertEqual(len(result.feedback.improvements), 5)
+        self.assertLessEqual(len(result.feedback.strengths), 5)
+
+    def test_safe_model_shape_repairs_do_not_invent_praise(self):
+        context = {"action": "answer", "round": 5, "resume": RESUME, "jd": JD, "answer": ANSWER, "history": []}
+        data = model_output(context)
+        data["feedback"]["strengths"] = ["没有引用的表扬", {"text": "缺引用"}]
+        data["feedback"]["improvements"] = "补充并发测试方法"
+        data["feedback"]["reference_points"] = "数据库唯一约束"
+        result = parse_output("```json\n" + json.dumps(data) + "\n```", context)
+        self.assertEqual(result.feedback.strengths, [])
+        self.assertEqual(result.feedback.improvements, ["补充并发测试方法"])
+        self.assertEqual(result.feedback.reference_points, ["数据库唯一约束"])
+
+    def test_feedback_only_ignores_unused_invalid_question(self):
+        context = {"action": "answer", "round": 5, "resume": RESUME, "jd": JD, "answer": ANSWER, "history": []}
+        data = model_output(context)
+        data["next_question"] = {"unexpected": "unused model draft"}
+        result = parse_output(json.dumps(data), context)
+        self.assertIsNone(result.next_question)
+        self.assertTrue(result.feedback.reference_points)
+
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.env = patch.dict(os.environ, {"DATA_DIR": self.directory.name, "MATCH_LLM_TOP_K": "0",

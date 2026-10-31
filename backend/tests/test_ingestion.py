@@ -9,7 +9,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from docx import Document
-from fastapi.testclient import TestClient
+from fixture_client import FixtureClient as TestClient
 from pypdf import PdfWriter
 from pypdf.generic import DecodedStreamObject, DictionaryObject, NameObject
 
@@ -220,7 +220,7 @@ class IngestApiTests(unittest.TestCase):
         self.assert_error(response, 415, "UNSUPPORTED_FILE")
         with app.state.store.connect() as db:
             self.assertEqual(db.execute("SELECT count(*) FROM resumes").fetchone()[0], 0)
-            self.assertEqual(db.execute("SELECT count(*) FROM tasks").fetchone()[0], 0)
+            self.assertEqual(db.execute("SELECT count(*) FROM tasks WHERE kind!='guest_acl'").fetchone()[0], 0)
         self.assertFalse(list(Path(self.directory.name).glob("*.tmp")))
 
     def test_batch_limit_and_twenty_files(self):

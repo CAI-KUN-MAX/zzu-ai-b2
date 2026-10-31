@@ -23,7 +23,7 @@ from app.schemas import DiagnoseRequest, DiagnoseResponse
 
 logger = logging.getLogger(__name__)
 report_trace = contextvars.ContextVar("report_trace", default=None)
-PROMPT_VERSION = "screening-v1"
+PROMPT_VERSION = "screening-v2-summary-validation"
 LLM_ITEM_TIMEOUT = 90
 MATCH_TOTAL_TIMEOUT = 165
 EDUCATION = ((1, r"高中|中专"), (2, r"大专|专科"), (3, r"本科|学士"),
