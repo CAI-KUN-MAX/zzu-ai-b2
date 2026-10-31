@@ -46,18 +46,20 @@ app = FastAPI(
     openapi_url="/openapi.json" if ENABLE_DOCS else None,
 )
 
-# 只允许自己的前端跨域；多个地址用英文逗号分隔。接口不使用 Cookie，不携带凭据
+# 只允许可信前端跨域携带游客 Cookie；多个地址用英文逗号分隔。
 CORS_ORIGINS = [origin.strip() for origin in os.getenv(
     "CORS_ORIGINS", "https://8.163.105.39,http://localhost:5173,http://127.0.0.1:5173"
 ).split(",") if origin.strip()]
+if "*" in CORS_ORIGINS:
+    raise ValueError("CORS_ORIGINS cannot contain '*' with guest credentials")
+app.add_middleware(GuestAccessMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
-    allow_credentials=False,
+    allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Accept"],
 )
-app.add_middleware(GuestAccessMiddleware)
 
 def error_response(status, request_id=None, code=None, message=None):
     default_code, default_message = {

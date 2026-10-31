@@ -30,6 +30,10 @@ class GuestAccessTests(unittest.TestCase):
                 resume_id = parsed["items"][0]["resume_id"]
                 self.assertEqual(owner.get(f"/api/resumes/{resume_id}/text").status_code, 200)
                 stranger = TestClient(app)
+                denied = stranger.get(f"/api/resumes/{resume_id}/text", headers={"Origin": "http://localhost:5173"})
+                self.assertEqual(denied.status_code, 404)
+                self.assertEqual(denied.headers["access-control-allow-origin"], "http://localhost:5173")
+                self.assertEqual(denied.headers["access-control-allow-credentials"], "true")
                 for path in (f"/api/resumes/{resume_id}/text", f"/api/tasks/{task_id}"):
                     self.assertEqual(stranger.get(path).status_code, 404)
                 self.assertEqual(stranger.post("/api/interviews", json={"resume_id": resume_id, "jd_text": "岗位要求" * 20}).status_code, 404)

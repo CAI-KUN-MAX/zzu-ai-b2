@@ -143,6 +143,7 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   try {
     const res = await fetch(`${API_BASE}${path}`, {
       method,
+      credentials: "include",
       headers: { Accept: "application/json", ...headers },
       body,
       signal: controller.signal,

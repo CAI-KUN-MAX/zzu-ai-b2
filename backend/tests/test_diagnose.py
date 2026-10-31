@@ -363,7 +363,7 @@ class RouteTests(unittest.IsolatedAsyncioTestCase):
             self.assertNotIn("access-control-allow-origin", evil.headers)
             own = await client.options("/api/diagnose", headers={"Origin": "https://8.163.105.39", **preflight})
             self.assertEqual(own.headers["access-control-allow-origin"], "https://8.163.105.39")
-            self.assertNotIn("access-control-allow-credentials", own.headers)
+            self.assertEqual(own.headers["access-control-allow-credentials"], "true")
 
 
 if __name__ == "__main__":
