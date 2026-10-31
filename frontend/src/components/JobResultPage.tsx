@@ -329,7 +329,7 @@ function JobDetail({
             {/* 只有真的算过向量才展示相似度，避免把规则结果说成向量结果 */}
             {item.embedding_similarity != null ? (
               <p className="num mt-2 text-[11px] text-ink-500">
-                向量相似度 {(item.embedding_similarity * 100).toFixed(1)}%
+                语义关联度 {(item.embedding_similarity * 100).toFixed(1)}%
                 {item.rule_score != null ? ` · 规则分 ${item.rule_score}` : ""}
               </p>
             ) : (
@@ -446,7 +446,7 @@ function EmbeddingNotice({ status, error }: { status?: EmbeddingStatus; error?: 
       <p className="mt-3 flex items-start gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-800">
         <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         <span>
-          语义匹配降级（{reason}），已回退到关键词与文本相似度排序；本次基础分不含语义分量。
+          智能语义匹配暂未完成（{reason}），已改用关键词与文本信息排序；本次基础分未使用语义匹配结果。
         </span>
       </p>
     );

@@ -3,6 +3,7 @@ import io
 import json
 import os
 import tempfile
+import threading
 import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
@@ -11,7 +12,7 @@ from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from docx import Document
-from fastapi.testclient import TestClient
+from fixture_client import FixtureClient as TestClient
 
 from app.main import app
 from app.job_repository import JobRepository
@@ -186,7 +187,7 @@ class JobMatchingTests(unittest.TestCase):
             self.assertEqual(response.json()["error"]["code"], code)
             self.assertTrue(response.json()["error"]["request_id"])
         with app.state.store.connect() as db:
-            self.assertEqual(db.execute("SELECT count(*) FROM tasks").fetchone()[0], 0)
+            self.assertEqual(db.execute("SELECT count(*) FROM tasks WHERE kind!='guest_acl'").fetchone()[0], 0)
         app.state.store.update("resumes", "r", status="parsing")
         self.assertEqual(self.client.post("/api/job-matches", json={"resume_id": "r", "job_ids": ["a"]}).status_code, 409)
         app.state.store.update("resumes", "r", status="ready", text="")
@@ -242,7 +243,7 @@ class JobMatchingTests(unittest.TestCase):
         self.assertEqual(sum(not i["degraded"] for i in result["items"]), 2)
         self.assertEqual(next(i for i in result["items"] if i["job_id"] == "c")["degraded_reason"], "model_failed")
 
-    def test_item_timeout_cancel_and_pending_state(self):
+    def test_item_timeout_cancel(self):
         cancelled = []
         async def fake(resume, jd):
             try:
@@ -252,18 +253,34 @@ class JobMatchingTests(unittest.TestCase):
         with patch.dict(os.environ, {"MATCH_LLM_TOP_K": "8"}), patch("app.job_matching.ITEM_TIMEOUT", .05), \
                 patch("app.matching.run_diagnose", side_effect=fake):
             identifier = self.create()
-            observed = []
-            for _ in range(20):
-                current = self.client.get("/api/job-matches/" + identifier).json()
-                observed.extend(i["analysis_status"] for i in current["items"])
-                if current["items"]:
-                    break
-                time.sleep(.002)
             result = self.wait(identifier)
-        self.assertTrue(any(s in {"pending", "running"} for s in observed))
         self.assertEqual(len(cancelled), 2)
         self.assertTrue(all(i["degraded_reason"] == "item_timeout" for i in result["items"]))
         self.assertFalse(app.state.match_jobs.inflight)
+
+    def test_pending_state_is_visible_while_analysis_is_blocked(self):
+        started = threading.Event()
+        release = threading.Event()
+
+        async def blocked(resume, jd):
+            started.set()
+            while not release.is_set():
+                await asyncio.sleep(.01)
+            report = MOCK_RESPONSES["medium"].model_copy(deep=True)
+            report.meta.mode = "llm"
+            return report
+
+        with patch.dict(os.environ, {"MATCH_LLM_TOP_K": "8"}), \
+                patch("app.job_matching.ITEM_TIMEOUT", 10), \
+                patch("app.matching.run_diagnose", side_effect=blocked):
+            try:
+                identifier = self.create()
+                self.assertTrue(started.wait(5), "analysis did not start")
+                current = self.client.get("/api/job-matches/" + identifier).json()
+                self.assertTrue(any(i["analysis_status"] in {"pending", "running"} for i in current["items"]))
+            finally:
+                release.set()
+            self.assertEqual(self.wait(identifier)["status"], "succeeded")
 
     def test_timeout_logs_safe_stage_for_model_and_queue(self):
         async def slow(resume, jd):

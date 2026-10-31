@@ -1,0 +1,1801 @@
+{
+  "base": "https://8.163.105.39",
+  "samples": [
+    {
+      "major": "计算机",
+      "resume": "姓名：虚构测试甲 教育背景：虚构大学计算机科学与技术本科2027届。专业技能：Python、Java、SQL、MySQL、Docker、Git。项目经历：负责校园预约系统后端接口开发，使用Python进行数据处理，编写单元测试，优化数据库查询。实习经历：参与软件系统测试与接口联调，记录问题并验证修复。",
+      "rounds": [
+        {
+          "question": {
+            "id": "3c3ca05f513e4e8ab3c4ea28c40489c6",
+            "text": "你在校园预约系统后端接口开发中，是如何进行数据库查询优化的？",
+            "focus": "数据库查询优化",
+            "source": "llm"
+          },
+          "answer": "这是虚构测试回答。我在计算机项目中先确认需求与验收标准，再拆分任务并收集原始证据。遇到问题先复现并分析原因，记录修改过程，最后通过测试和同学反馈检查结果，并说明仍未验证的限制。第1轮。",
+          "result": {
+            "interview_id": "d65b391fa4b846b0bef23c517d5b8891",
+            "status": "active",
+            "round": 1,
+            "max_rounds": 5,
+            "feedback": {
+              "strengths": [
+                "在项目中确认需求与验收标准。",
+                "分析原因。",
+                "记录修改过程有助于追踪和复现问题。"
+              ],
+              "improvements": [
+                "在优化数据库查询时，可以考虑使用索引来提高查询效率",
+                "在测试阶段，可以引入压力测试来评估系统在高并发情况下的性能",
+                "可以进一步学习数据库优化技术，如查询缓存、分区表等"
+              ],
+              "reference_points": [
+                "数据库查询优化"
+              ]
+            },
+            "next_question": {
+              "id": "48590166e5504208a7cd758e5603d656",
+              "text": "你提到“这是虚构测试回答”，请具体说明当时是怎么做的、为什么这样设计，以及如何验证效果？",
+              "focus": "围绕本轮回答追问",
+              "source": "fallback"
+            }
+          }
+        },
+        {
+          "question": {
+            "id": "48590166e5504208a7cd758e5603d656",
+            "text": "你提到“这是虚构测试回答”，请具体说明当时是怎么做的、为什么这样设计，以及如何验证效果？",
+            "focus": "围绕本轮回答追问",
+            "source": "fallback"
+          },
+          "answer": "这是虚构测试回答。我在计算机项目中先确认需求与验收标准，再拆分任务并收集原始证据。遇到问题先复现并分析原因，记录修改过程，最后通过测试和同学反馈检查结果，并说明仍未验证的限制。第2轮。",
+          "result": {
+            "interview_id": "d65b391fa4b846b0bef23c517d5b8891",
+            "status": "active",
+            "round": 2,
+            "max_rounds": 5,
+            "feedback": {
+              "strengths": [
+                "在项目中能够系统地确认需求与验收标准。",
+                "能够有效拆分任务。",
+                "能够记录修改过程以便追踪和复现。"
+              ],
+              "improvements": [
+                "在项目中引入自动化测试流程以提高测试效率和准确性",
+                "优化问题记录和追踪系统，以便更好地管理修改过程",
+                "加强与团队成员的沟通，以便更快地获取反馈"
+              ],
+              "reference_points": [
+                "计算机项目中确认需求与验收标准",
+                "拆分任务并收集原始证据",
+                "问题复现与分析原因",
+                "记录修改过程",
+                "通过测试和同学反馈检查结果"
+              ]
+            },
+            "next_question": {
+              "id": "beb7a5b111be465ba73daa11d71b788b",
+              "text": "围绕“这是虚构测试回答”，当时遇到了哪些边界情况或失败场景，你是怎么处理的？",
+              "focus": "围绕本轮回答追问",
+              "source": "fallback"
+            }
+          }
+        },
+        {
+          "question": {
+            "id": "beb7a5b111be465ba73daa11d71b788b",
+            "text": "围绕“这是虚构测试回答”，当时遇到了哪些边界情况或失败场景，你是怎么处理的？",
+            "focus": "围绕本轮回答追问",
+            "source": "fallback"
+          },
+          "answer": "这是虚构测试回答。我在计算机项目中先确认需求与验收标准，再拆分任务并收集原始证据。遇到问题先复现并分析原因，记录修改过程，最后通过测试和同学反馈检查结果，并说明仍未验证的限制。第3轮。",
+          "result": {
+            "interview_id": "d65b391fa4b846b0bef23c517d5b8891",
+            "status": "active",
+            "round": 3,
+            "max_rounds": 5,
+            "feedback": {
+              "strengths": [
+                "能够先确认需求与验收标准，再拆分任务，收集原始证据。"
+              ],
+              "improvements": [
+                "在处理边界情况或失败场景时，可以进一步详细说明具体的处理步骤和采取的措施"
+              ],
+              "reference_points": [
+                "边界情况或失败场景的处理方法"
+              ]
+            },
+            "next_question": {
+              "id": "121909e39555467db7eca9143e4cb5f6",
+              "text": "对于“这是虚构测试回答”，你用了哪些指标判断方案有效，又做过哪些取舍？",
+              "focus": "围绕本轮回答追问",
+              "source": "fallback"
+            }
+          }
+        },
+        {
+          "question": {
+            "id": "121909e39555467db7eca9143e4cb5f6",
+            "text": "对于“这是虚构测试回答”，你用了哪些指标判断方案有效，又做过哪些取舍？",
+            "focus": "围绕本轮回答追问",
+            "source": "fallback"
+          },
+          "answer": "这是虚构测试回答。我在计算机项目中先确认需求与验收标准，再拆分任务并收集原始证据。遇到问题先复现并分析原因，记录修改过程，最后通过测试和同学反馈检查结果，并说明仍未验证的限制。第4轮。",
+          "result": {
+            "interview_id": "d65b391fa4b846b0bef23c517d5b8891",
+            "status": "active",
+            "round": 4,
+            "max_rounds": 5,
+            "feedback": {
+              "strengths": [
+                "在项目中能够明确需求和验收标准。"
+              ],
+              "improvements": [
+                "考虑使用自动化测试工具提高测试效率",
+                "优化问题复现流程以提高问题定位速度",
+                "引入版本控制系统来管理代码变更和版本迭代",
+                "加强与其他团队成员的沟通和协作以获取更多反馈",
+                "在项目初期进行风险评估以提前识别潜在问题"
+              ],
+              "reference_points": [
+                "确认需求与验收标准",
+                "拆分任务并收集原始证据",
+                "复现问题并分析原因",
+                "记录修改过程",
+                "通过测试和同学反馈检查结果"
+              ]
+            },
+            "next_question": {
+              "id": "2e23d6666e444a83998b8ea6fc5dcade",
+              "text": "你提到“这是虚构测试回答”，请说明当时如何与团队协作推进，并验证最终结果？",
+              "focus": "围绕本轮回答追问",
+              "source": "fallback"
+            }
+          }
+        },
+        {
+          "question": {
+            "id": "2e23d6666e444a83998b8ea6fc5dcade",
+            "text": "你提到“这是虚构测试回答”，请说明当时如何与团队协作推进，并验证最终结果？",
+            "focus": "围绕本轮回答追问",
+            "source": "fallback"
+          },
+          "answer": "这是虚构测试回答。我在计算机项目中先确认需求与验收标准，再拆分任务并收集原始证据。遇到问题先复现并分析原因，记录修改过程，最后通过测试和同学反馈检查结果，并说明仍未验证的限制。第5轮。",
+          "result": {
+            "interview_id": "d65b391fa4b846b0bef23c517d5b8891",
+            "status": "completed",
+            "round": 5,
+            "max_rounds": 5,
+            "feedback": {
+              "strengths": [
+                "能够明确项目需求和验收标准。",
+                "能够拆分任务，收集原始证据。",
+                "分析原因。",
+                "能够记录修改过程。",
+                "能够通过测试和反馈检查结果。"
+              ],
+              "improvements": [
+                "在项目推进过程中，可以进一步细化团队协作的流程和角色分配，以提高效率",
+                "在验证最终结果时，可以引入更多的测试用例和自动化测试工具，以确保结果的准确性",
+                "在遇到问题时，可以尝试引入更多的分析工具和方法，以更快速地定位问题根源",
+                "在记录修改过程时，可以考虑使用版本控制系统，以便更好地追踪代码变更和问题修复",
+                "在测试和反馈检查过程中，可以增加更多的用户参与，以获取更全面的反馈"
+              ],
+              "reference_points": [
+                "如何与团队协作推进项目",
+                "如何验证最终结果",
+                "项目中的问题解决方法",
+                "修改过程的记录方式",
+                "测试和反馈的检查过程"
+              ]
+            },
+            "next_question": null
+          }
+        }
+      ],
+      "ingest": {
+        "status": "succeeded",
+        "stage": "解析完成",
+        "progress": 100,
+        "error": null,
+        "error_code": null,
+        "items": [
+          {
+            "resume_id": "088002f2a6b44bc787c9968f9e412c74",
+            "name": "虚构测试_计算机.docx",
+            "chars": 151,
+            "status": "ready",
+            "preview": "姓名：虚构测试甲 教育背景：虚构大学计算机科学与技术本科2027届。专业技能：Python、Java、SQL、MySQL",
+            "error": null,
+            "low_conf": 0
+          }
+        ]
+      },
+      "matching": {
+        "status": "succeeded",
+        "stage": "岗位匹配完成",
+        "progress": 100,
+        "analysis_completed": 3,
+        "analysis_total": 3,
+        "analysis_started_at": "2026-10-31T07:31:58.533733Z",
+        "embedding_status": "succeeded",
+        "embedding_error": null,
+        "error": null,
+        "error_code": null,
+        "items": [
+          {
+            "job_id": "beisen-2027-backend",
+            "title": "2027届校招-后端工程师",
+            "score": 44,
+            "stage1_score": 52,
+            "rule_score": 40,
+            "embedding_similarity": 0.6505240671809983,
+            "level": "low",
+            "level_label": "存在缺口",
+            "subscores": [
+              {
+                "key": "skill_match",
+                "label": "技能关键词匹配",
+                "score": 33,
+                "weight": 0.55
+              },
+              {
+                "key": "text_similarity",
+                "label": "文本相似度",
+                "score": 23,
+                "weight": 0.3
+              },
+              {
+                "key": "education_match",
+                "label": "学历匹配",
+                "score": 100,
+                "weight": 0.15
+              }
+            ],
+            "matched": [
+              "Java",
+              "MySQL",
+              "SQL",
+              "计算机",
+              "软件"
+            ],
+            "missing": [
+              "C#",
+              "Kafka",
+              "RabbitMQ",
+              "Redis",
+              "SaaS",
+              "Server",
+              "一种后端语言",
+              "关系数据库",
+              "后端开发",
+              "大型项目实践",
+              "年毕业",
+              "性能问题",
+              "网络工程",
+              "解决",
+              "难题"
+            ],
+            "reason": "简历中具备一定的编程语言基础，但缺乏后端开发语言、数据库类型、设计模式等方面的经验，建议补充相关学习经历。",
+            "degraded": false,
+            "degraded_reason": null,
+            "analysis_status": "succeeded",
+            "report": {
+              "request_id": "b04baa81cd4441c6925010c21e85ba54",
+              "overall_score": 40,
+              "level": "low",
+              "level_label": "存在缺口",
+              "dimension_scores": [
+                {
+                  "key": "skill_match",
+                  "label": "技能匹配",
+                  "score": 40,
+                  "weight": 0.4
+                },
+                {
+                  "key": "experience_relevance",
+                  "label": "经历相关",
+                  "score": 40,
+                  "weight": 0.3
+                },
+                {
+                  "key": "keyword_coverage",
+                  "label": "关键词覆盖",
+                  "score": 40,
+                  "weight": 0.2
+                },
+                {
+                  "key": "education_match",
+                  "label": "教育/证书",
+                  "score": 40,
+                  "weight": 0.1
+                }
+              ],
+              "highlights": [
+                {
+                  "title": "编程语言掌握",
+                  "evidence": "Python、Java、SQL、MySQL、Docker、Git",
+                  "source": "resume"
+                }
+              ],
+              "gaps": [
+                {
+                  "title": "后端开发语言",
+                  "jd_requirement": "掌握C#、Java等至少一种后端语言",
+                  "resume_evidence": null,
+                  "suggestion": "学习C#或Java等后端开发语言",
+                  "rewrite_suggestion": "仅在确有相关经历时补充：学习C#或Java等后端开发语言，完成【项目名称】的开发，取得【真实成果】",
+                  "severity": "high"
+                },
+                {
+                  "title": "数据库类型",
+                  "jd_requirement": "SQL Server、MySQL等关系数据库",
+                  "resume_evidence": null,
+                  "suggestion": "学习SQL Server数据库",
+                  "rewrite_suggestion": "仅在确有相关经历时补充：学习SQL Server数据库，完成【项目名称】的数据库设计，取得【真实成果】",
+                  "severity": "high"
+                },
+                {
+                  "title": "设计模式",
+                  "jd_requirement": "理解面向对象设计和设计模式",
+                  "resume_evidence": null,
+                  "suggestion": "学习面向对象设计和设计模式",
+                  "rewrite_suggestion": "仅在确有相关经历时补充：学习面向对象设计和设计模式，应用于【项目名称】的设计，取得【真实成果】",
+                  "severity": "high"
+                },
+                {
+                  "title": "其他技术",
+                  "jd_requirement": "Redis、RabbitMQ、Kafka、SaaS或大型项目实践者优先",
+                  "resume_evidence": null,
+                  "suggestion": "学习Redis、RabbitMQ、Kafka等中间件技术",
+                  "rewrite_suggestion": "仅在确有相关经历时补充：学习Redis、RabbitMQ、Kafka等中间件技术，应用于【项目名称】的架构设计，取得【真实成果】",
+                  "severity": "medium"
+                }
+              ],
+              "summary": "简历中具备一定的编程语言基础，但缺乏后端开发语言、数据库类型、设计模式等方面的经验，建议补充相关学习经历。",
+              "disclaimer": "AI诊断结果仅供参考，请以实际岗位要求为准。",
+              "meta": {
+                "model": "glm-4-flash",
+                "mode": "llm",
+                "elapsed_ms": 19936
+              }
+            }
+          },
+          {
+            "job_id": "tianjian-sichuan-2027-audit",
+            "title": "财务审计（2027校招）",
+            "score": 20,
+            "stage1_score": 27,
+            "rule_score": 21,
+            "embedding_similarity": 0.6048211614337482,
+            "level": "low",
+            "level_label": "存在缺口",
+            "subscores": [
+              {
+                "key": "skill_match",
+                "label": "技能关键词匹配",
+                "score": 7,
+                "weight": 0.55
+              },
+              {
+                "key": "text_similarity",
+                "label": "文本相似度",
+                "score": 9,
+                "weight": 0.3
+              },
+              {
+                "key": "education_match",
+                "label": "学历匹配",
+                "score": 100,
+                "weight": 0.15
+              }
+            ],
+            "matched": [
+              "项目"
+            ],
+            "missing": [
+              "ACCA",
+              "CPA",
+              "IPO",
+              "从事财务审计",
+              "企业年报",
+              "信息管理系统",
+              "国际会计",
+              "审计",
+              "届本科",
+              "报告编制",
+              "整理审计资料",
+              "毅力",
+              "毕业生",
+              "沟通协作",
+              "理工科",
+              "经济",
+              "编写审计底稿",
+              "考试通过科目",
+              "英语四级",
+              "计算机审计",
+              "财会基础",
+              "财务会计",
+              "责任心",
+              "购重组"
+            ],
+            "reason": "简历中缺乏财务审计相关经验和专业背景，建议补充相关经历和技能。",
+            "degraded": false,
+            "degraded_reason": null,
+            "analysis_status": "succeeded",
+            "report": {
+              "request_id": "de927c09201741c586c8274e5bc43ebf",
+              "overall_score": 17,
+              "level": "low",
+              "level_label": "存在缺口",
+              "dimension_scores": [
+                {
+                  "key": "skill_match",
+                  "label": "技能匹配",
+                  "score": 15,
+                  "weight": 0.4
+                },
+                {
+                  "key": "experience_relevance",
+                  "label": "经历相关",
+                  "score": 15,
+                  "weight": 0.3
+                },
+                {
+                  "key": "keyword_coverage",
+                  "label": "关键词覆盖",
+                  "score": 15,
+                  "weight": 0.2
+                },
+                {
+                  "key": "education_match",
+                  "label": "教育/证书",
+                  "score": 30,
+                  "weight": 0.1
+                }
+              ],
+              "highlights": [],
+              "gaps": [
+                {
+                  "title": "财务审计相关经验",
+                  "jd_requirement": "从事财务审计工作",
+                  "resume_evidence": null,
+                  "suggestion": "建议补充财务审计相关项目或实习经验。",
+                  "rewrite_suggestion": "仅在确有相关经历时补充：参与【财务审计】项目，负责【具体任务】，取得【具体成果】",
+                  "severity": "high"
+                },
+                {
+                  "title": "财务会计或审计专业背景",
+                  "jd_requirement": "财务会计、国际会计、审计、计算机审计、信息管理系统等相关专业",
+                  "resume_evidence": null,
+                  "suggestion": "建议在简历中强调相关课程学习或专业背景。",
+                  "rewrite_suggestion": "仅在确有相关经历时补充：主修【专业名称】，学习过【相关课程】",
+                  "severity": "high"
+                },
+                {
+                  "title": "英语水平及证书",
+                  "jd_requirement": "英语四级以上、CPA/ACCA等考试通过科目者优先",
+                  "resume_evidence": null,
+                  "suggestion": "建议补充英语水平证书或CPA/ACCA相关科目成绩。",
+                  "rewrite_suggestion": "取得【英语水平证书】或通过【CPA/ACCA】科目考试",
+                  "severity": "medium"
+                }
+              ],
+              "summary": "简历中缺乏财务审计相关经验和专业背景，建议补充相关经历和技能。",
+              "disclaimer": "AI诊断结果仅供参考，请以实际岗位要求为准。",
+              "meta": {
+                "model": "glm-4-flash",
+                "mode": "llm",
+                "elapsed_ms": 17769
+              }
+            }
+          },
+          {
+            "job_id": "beisen-2027-ux",
+            "title": "2027届校招-UX设计师",
+            "score": 16,
+            "stage1_score": 14,
+            "rule_score": 17,
+            "embedding_similarity": 0.5766161805926596,
+            "level": "low",
+            "level_label": "存在缺口",
+            "subscores": [
+              {
+                "key": "skill_match",
+                "label": "技能关键词匹配",
+                "score": 0,
+                "weight": 0.55
+              },
+              {
+                "key": "text_similarity",
+                "label": "文本相似度",
+                "score": 7,
+                "weight": 0.3
+              },
+              {
+                "key": "education_match",
+                "label": "学历匹配",
+                "score": 100,
+                "weight": 0.15
+              }
+            ],
+            "matched": [],
+            "missing": [
+              "交互设计",
+              "PC",
+              "UI",
+              "产品沟通方案",
+              "产品设计",
+              "协助",
+              "原型图",
+              "届本科",
+              "投递需附作品",
+              "持续优化设计",
+              "数据分析",
+              "用户调研",
+              "移动端",
+              "组件整理",
+              "设计方法",
+              "设计稿",
+              "设计艺术",
+              "设计规范",
+              "输出流程图",
+              "需求梳理"
+            ],
+            "reason": "简历中缺乏与产品设计、UI/UX设计相关的经验和技能，需要进一步提升设计能力和数据分析能力。",
+            "degraded": false,
+            "degraded_reason": null,
+            "analysis_status": "succeeded",
+            "report": {
+              "request_id": "005ba8af70124e95adbed3f9d3720446",
+              "overall_score": 17,
+              "level": "low",
+              "level_label": "存在缺口",
+              "dimension_scores": [
+                {
+                  "key": "skill_match",
+                  "label": "技能匹配",
+                  "score": 15,
+                  "weight": 0.4
+                },
+                {
+                  "key": "experience_relevance",
+                  "label": "经历相关",
+                  "score": 15,
+                  "weight": 0.3
+                },
+                {
+                  "key": "keyword_coverage",
+                  "label": "关键词覆盖",
+                  "score": 15,
+                  "weight": 0.2
+                },
+                {
+                  "key": "education_match",
+                  "label": "教育/证书",
+                  "score": 30,
+                  "weight": 0.1
+                }
+              ],
+              "highlights": [],
+              "gaps": [
+                {
+                  "title": "设计能力不足",
+                  "jd_requirement": "掌握常用设计方法和工具，能独立输出流程图、原型图和设计稿",
+                  "resume_evidence": null,
+                  "suggestion": "提升设计技能，如学习设计软件和设计方法",
+                  "rewrite_suggestion": "仅在确有相关经历时补充：使用【设计软件】完成【设计任务】，取得【设计成果】",
+                  "severity": "high"
+                },
+                {
+                  "title": "缺乏产品设计经验",
+                  "jd_requirement": "产品设计、交互设计、设计艺术相关专业优先",
+                  "resume_evidence": null,
+                  "suggestion": "参与相关设计项目或课程，积累产品设计经验",
+                  "rewrite_suggestion": "仅在确有相关经历时补充：参与【项目名称】，负责【设计任务】，取得【设计成果】",
+                  "severity": "high"
+                },
+                {
+                  "title": "数据分析能力不足",
+                  "jd_requirement": "参与需求梳理、用户调研和数据分析",
+                  "resume_evidence": null,
+                  "suggestion": "学习数据分析方法，提升数据分析能力",
+                  "rewrite_suggestion": "仅在确有相关经历时补充：使用【数据分析工具】进行【数据分析】，得出【分析结论】",
+                  "severity": "medium"
+                }
+              ],
+              "summary": "简历中缺乏与产品设计、UI/UX设计相关的经验和技能，需要进一步提升设计能力和数据分析能力。",
+              "disclaimer": "AI诊断结果仅供参考，请以实际岗位要求为准。",
+              "meta": {
+                "model": "glm-4-flash",
+                "mode": "llm",
+                "elapsed_ms": 16742
+              }
+            }
+          }
+        ]
+      },
+      "job_detail": {
+        "job_id": "beisen-2027-backend",
+        "title": "2027届校招-后端工程师",
+        "company": "北森云计算有限公司",
+        "cities": [
+          "北京",
+          "成都",
+          "西安"
+        ],
+        "category": "计算机",
+        "education": "本科",
+        "education_requirement": "2027届本科及以上学历",
+        "majors": [
+          "计算机",
+          "软件工程",
+          "网络工程"
+        ],
+        "graduation_year": "2027",
+        "jd_text": "岗位职责：负责后端开发，解决技术难题和性能问题，并为产品设计提出建议。任职要求：2027年毕业，本科及以上学历，计算机、软件或网络工程相关专业；掌握C#、Java等至少一种后端语言及SQL Server、MySQL等关系数据库；理解面向对象设计和设计模式；有Redis、RabbitMQ、Kafka、SaaS或大型项目实践者优先。",
+        "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-K0NSqypzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+        "published_at": "2026-09-14",
+        "publication_type": "repost",
+        "application_url": "https://beisen.zhiye.com/campus/jobs",
+        "verified_at": "2026-10-26T16:30:00+08:00",
+        "application_status": "open",
+        "verification_note": "四川大学就业网明示发布时间、职责、2027届学历专业要求、企业网申入口及有效期至2027-08-14。"
+      },
+      "other_guest_resume_read_status": 200
+    },
+    {
+      "major": "经管财会",
+      "resume": "姓名：虚构测试乙 教育背景：虚构大学会计学本科2027届。专业技能：Excel、财务分析、会计核算、审计、财务报表。实习经历：负责核对会计凭证、整理审计工作底稿，参与财务报表检查。项目经历：分析模拟企业资产负债表与现金流量，使用Excel制作预算并检查账目差异。",
+      "rounds": [
+        {
+          "question": {
+            "id": "65bd9d4242d04b33ab25def59a58b06f",
+            "text": "在您的项目经历中，您提到分析了模拟企业的资产负债表与现金流量。请您详细说明一下，在分析资产负债表时，您是如何考虑企业资产和负债的流动性以及它们对企业财务状况的影响的？",
+            "focus": "考察点：资产负债表分析原理",
+            "source": "llm"
+          },
+          "answer": "这是虚构测试回答。我在经管财会项目中先确认需求与验收标准，再拆分任务并收集原始证据。遇到问题先复现并分析原因，记录修改过程，最后通过测试和同学反馈检查结果，并说明仍未验证的限制。第1轮。",
+          "result": {
+            "interview_id": "b33115395a1e4e54b7e603065af8e58d",
+            "status": "active",
+            "round": 1,
+            "max_rounds": 5,
+            "feedback": {
+              "strengths": [
+                "在回答中提到了项目经历和经管财会项目中的流程。"
+              ],
+              "improvements": [
+                "可以进一步详细说明在分析资产负债表时如何考虑资产和负债的流动性，以及它们对企业财务状况的具体影响"
+              ],
+              "reference_points": [
+                "资产负债表分析原理"
+              ]
+            },
+            "next_question": {
+              "id": "b235b6e017f94445a50c17adb76fd24e",
+              "text": "你提到“这是虚构测试回答”，请具体说明当时是怎么做的、为什么这样设计，以及如何验证效果？",
+              "focus": "围绕本轮回答追问",
+              "source": "fallback"
+            }
+          }
+        },
+        {
+          "question": {
+            "id": "b235b6e017f94445a50c17adb76fd24e",
+            "text": "你提到“这是虚构测试回答”，请具体说明当时是怎么做的、为什么这样设计，以及如何验证效果？",
+            "focus": "围绕本轮回答追问",
+            "source": "fallback"
+          },
+          "answer": "这是虚构测试回答。我在经管财会项目中先确认需求与验收标准，再拆分任务并收集原始证据。遇到问题先复现并分析原因，记录修改过程，最后通过测试和同学反馈检查结果，并说明仍未验证的限制。第2轮。",
+          "result": {
+            "interview_id": "b33115395a1e4e54b7e603065af8e58d",
+            "status": "active",
+            "round": 2,
+            "max_rounds": 5,
+            "feedback": {
+              "strengths": [
+                "详细描述了测试回答的设计过程和验证方法。",
+                "分析原因。",
+                "记录修改过程有助于追踪和复验。",
+                "通过测试和同学反馈检查结果。"
+              ],
+              "improvements": [
+                "在测试过程中可以增加更多不同类型的测试用例，以更全面地验证效果",
+                "在问题分析时可以进一步细化问题分类，以便更精准地定位问题根源",
+                "在记录修改过程时，可以采用更规范化的文档格式，以便于后续查阅和复用",
+                "在测试和反馈环节，可以引入更多外部反馈，如客户或专家的意见，以提高测试结果的客观性",
+                "对于验证限制的说明，可以更加具体地描述限制的原因和影响"
+              ],
+              "reference_points": [
+                "测试回答的设计过程",
+                "问题复现与分析",
+                "修改过程记录",
+                "测试与反馈检查",
+                "验证限制的说明"
+              ]
+            },
+            "next_question": {
+              "id": "dcc8142bd15549e898ec6795bc44194f",
+              "text": "围绕“这是虚构测试回答”，当时遇到了哪些边界情况或失败场景，你是怎么处理的？",
+              "focus": "围绕本轮回答追问",
+              "source": "fallback"
+            }
+          }
+        },
+        {
+          "question": {
+            "id": "dcc8142bd15549e898ec6795bc44194f",
+            "text": "围绕“这是虚构测试回答”，当时遇到了哪些边界情况或失败场景，你是怎么处理的？",
+            "focus": "围绕本轮回答追问",
+            "source": "fallback"
+          },
+          "answer": "这是虚构测试回答。我在经管财会项目中先确认需求与验收标准，再拆分任务并收集原始证据。遇到问题先复现并分析原因，记录修改过程，最后通过测试和同学反馈检查结果，并说明仍未验证的限制。第3轮。",
+          "result": {
+            "interview_id": "b33115395a1e4e54b7e603065af8e58d",
+            "status": "active",
+            "round": 3,
+            "max_rounds": 5,
+            "feedback": {
+              "strengths": [
+                "在项目中确认需求与验收标准，拆分任务收集原始证据。",
+                "遇到问题先复现，分析原因，记录修改过程。",
+                "通过测试和同学反馈检查结果。"
+              ],
+              "improvements": [
+                "进一步说明在处理边界情况或失败场景时采取的具体措施和策略"
+              ],
+              "reference_points": [
+                "边界情况或失败场景的处理方法"
+              ]
+            },
+            "next_question": {
+              "id": "a4e54f41d15444838d5af47604aa5e0e",
+              "text": "对于“这是虚构测试回答”，你用了哪些指标判断方案有效，又做过哪些取舍？",
+              "focus": "围绕本轮回答追问",
+              "source": "fallback"
+            }
+          }
+        },
+        {
+          "question": {
+            "id": "a4e54f41d15444838d5af47604aa5e0e",
+            "text": "对于“这是虚构测试回答”，你用了哪些指标判断方案有效，又做过哪些取舍？",
+            "focus": "围绕本轮回答追问",
+            "source": "fallback"
+          },
+          "answer": "这是虚构测试回答。我在经管财会项目中先确认需求与验收标准，再拆分任务并收集原始证据。遇到问题先复现并分析原因，记录修改过程，最后通过测试和同学反馈检查结果，并说明仍未验证的限制。第4轮。",
+          "result": {
+            "interview_id": "b33115395a1e4e54b7e603065af8e58d",
+            "status": "active",
+            "round": 4,
+            "max_rounds": 5,
+            "feedback": {
+              "strengths": [
+                "在项目中确认需求与验收标准，拆分任务收集原始证据。",
+                "遇到问题先复现，分析原因，记录修改过程。"
+              ],
+              "improvements": [
+                "详细说明所使用的具体指标和测试方法",
+                "进一步阐述在项目中的取舍依据和原因"
+              ],
+              "reference_points": [
+                "测试回答的有效性指标",
+                "项目取舍方法"
+              ]
+            },
+            "next_question": {
+              "id": "955f1c0d70eb4529aee60b1dd4a8184b",
+              "text": "你提到“这是虚构测试回答”，请说明当时如何与团队协作推进，并验证最终结果？",
+              "focus": "围绕本轮回答追问",
+              "source": "fallback"
+            }
+          }
+        },
+        {
+          "question": {
+            "id": "955f1c0d70eb4529aee60b1dd4a8184b",
+            "text": "你提到“这是虚构测试回答”，请说明当时如何与团队协作推进，并验证最终结果？",
+            "focus": "围绕本轮回答追问",
+            "source": "fallback"
+          },
+          "answer": "这是虚构测试回答。我在经管财会项目中先确认需求与验收标准，再拆分任务并收集原始证据。遇到问题先复现并分析原因，记录修改过程，最后通过测试和同学反馈检查结果，并说明仍未验证的限制。第5轮。",
+          "result": {
+            "interview_id": "b33115395a1e4e54b7e603065af8e58d",
+            "status": "completed",
+            "round": 5,
+            "max_rounds": 5,
+            "feedback": {
+              "strengths": [
+                "在项目中能够明确需求与验收标准。",
+                "能够拆分任务，收集原始证据。",
+                "遇到问题能够复现，分析原因。",
+                "能够记录修改过程。",
+                "能够通过测试和同学反馈检查结果。"
+              ],
+              "improvements": [
+                "进一步说明团队协作的具体方式，例如沟通工具和频率",
+                "详细描述如何验证结果的准确性，例如使用哪些测试方法或工具",
+                "探讨如何处理测试过程中发现的问题和限制"
+              ],
+              "reference_points": [
+                "如何与团队协作推进项目",
+                "如何验证最终结果",
+                "项目中的具体操作步骤"
+              ]
+            },
+            "next_question": null
+          }
+        }
+      ],
+      "ingest": {
+        "status": "succeeded",
+        "stage": "解析完成",
+        "progress": 100,
+        "error": null,
+        "error_code": null,
+        "items": [
+          {
+            "resume_id": "68af24732e5d464ba196ac504dbda61f",
+            "name": "虚构测试_经管财会.docx",
+            "chars": 131,
+            "status": "ready",
+            "preview": "姓名：虚构测试乙 教育背景：虚构大学会计学本科2027届。专业技能：Excel、财务分析、会计核算、审计、财务报表。实习",
+            "error": null,
+            "low_conf": 0
+          }
+        ]
+      },
+      "matching": {
+        "status": "succeeded",
+        "stage": "岗位匹配完成",
+        "progress": 100,
+        "analysis_completed": 3,
+        "analysis_total": 3,
+        "analysis_started_at": "2026-10-31T07:33:14.553087Z",
+        "embedding_status": "succeeded",
+        "embedding_error": null,
+        "error": null,
+        "error_code": null,
+        "items": [
+          {
+            "job_id": "tianjian-sichuan-2027-audit",
+            "title": "财务审计（2027校招）",
+            "score": 43,
+            "stage1_score": 44,
+            "rule_score": 30,
+            "embedding_similarity": 0.6730605351749969,
+            "level": "low",
+            "level_label": "存在缺口",
+            "subscores": [
+              {
+                "key": "skill_match",
+                "label": "技能关键词匹配",
+                "score": 13,
+                "weight": 0.55
+              },
+              {
+                "key": "text_similarity",
+                "label": "文本相似度",
+                "score": 24,
+                "weight": 0.3
+              },
+              {
+                "key": "education_match",
+                "label": "学历匹配",
+                "score": 100,
+                "weight": 0.15
+              }
+            ],
+            "matched": [
+              "审计",
+              "项目"
+            ],
+            "missing": [
+              "ACCA",
+              "CPA",
+              "IPO",
+              "从事财务审计",
+              "企业年报",
+              "信息管理系统",
+              "国际会计",
+              "届本科",
+              "报告编制",
+              "整理审计资料",
+              "毅力",
+              "毕业生",
+              "沟通协作",
+              "理工科",
+              "经济",
+              "编写审计底稿",
+              "考试通过科目",
+              "英语四级",
+              "计算机审计",
+              "财会基础",
+              "财务会计",
+              "责任心",
+              "购重组"
+            ],
+            "reason": "候选人具备一定的财务分析能力，但缺乏审计实践经验，且专业背景与JD要求不完全匹配。",
+            "degraded": false,
+            "degraded_reason": null,
+            "analysis_status": "succeeded",
+            "report": {
+              "request_id": "bccff2a13b154728b62b9dee59af0d41",
+              "overall_score": 42,
+              "level": "low",
+              "level_label": "存在缺口",
+              "dimension_scores": [
+                {
+                  "key": "skill_match",
+                  "label": "技能匹配",
+                  "score": 40,
+                  "weight": 0.4
+                },
+                {
+                  "key": "experience_relevance",
+                  "label": "经历相关",
+                  "score": 40,
+                  "weight": 0.3
+                },
+                {
+                  "key": "keyword_coverage",
+                  "label": "关键词覆盖",
+                  "score": 40,
+                  "weight": 0.2
+                },
+                {
+                  "key": "education_match",
+                  "label": "教育/证书",
+                  "score": 60,
+                  "weight": 0.1
+                }
+              ],
+              "highlights": [
+                {
+                  "title": "财务分析能力",
+                  "evidence": "分析模拟企业资产负债表与现金流量，使用Excel制作预算并检查账目差异。",
+                  "source": "resume"
+                }
+              ],
+              "gaps": [
+                {
+                  "title": "审计经验",
+                  "jd_requirement": "在项目经理指导下参与企业年报、IPO或并购重组等项目，编写审计底稿、整理审计资料并参与报告编制。",
+                  "resume_evidence": null,
+                  "suggestion": "在简历中添加具体的审计项目经历，例如：参与【项目名称】的审计工作，负责【具体职责】，取得【具体成果】。",
+                  "rewrite_suggestion": "仅在确有相关经历时补充：参与【项目名称】的审计工作，负责【具体职责】，取得【具体成果】。",
+                  "severity": "high"
+                },
+                {
+                  "title": "相关学历专业",
+                  "jd_requirement": "财务会计、国际会计、审计、计算机审计、信息管理系统等相关专业，或具备财会基础的经济、理工科背景",
+                  "resume_evidence": "虚构大学会计学本科",
+                  "suggestion": "如专业不符，可以考虑通过相关课程或培训提升专业背景。",
+                  "rewrite_suggestion": "仅在确有相关经历时补充：通过【课程/培训名称】提升【相关技能/知识】。",
+                  "severity": "medium"
+                }
+              ],
+              "summary": "候选人具备一定的财务分析能力，但缺乏审计实践经验，且专业背景与JD要求不完全匹配。",
+              "disclaimer": "AI诊断结果仅供参考，请以实际岗位要求为准。",
+              "meta": {
+                "model": "glm-4-flash",
+                "mode": "llm",
+                "elapsed_ms": 36543
+              }
+            }
+          },
+          {
+            "job_id": "beisen-2027-backend",
+            "title": "2027届校招-后端工程师",
+            "score": 23,
+            "stage1_score": 23,
+            "rule_score": 16,
+            "embedding_similarity": 0.5645450047293411,
+            "level": "low",
+            "level_label": "存在缺口",
+            "subscores": [
+              {
+                "key": "skill_match",
+                "label": "技能关键词匹配",
+                "score": 0,
+                "weight": 0.55
+              },
+              {
+                "key": "text_similarity",
+                "label": "文本相似度",
+                "score": 5,
+                "weight": 0.3
+              },
+              {
+                "key": "education_match",
+                "label": "学历匹配",
+                "score": 100,
+                "weight": 0.15
+              }
+            ],
+            "matched": [],
+            "missing": [
+              "C#",
+              "Java",
+              "Kafka",
+              "MySQL",
+              "RabbitMQ",
+              "Redis",
+              "SaaS",
+              "Server",
+              "SQL",
+              "一种后端语言",
+              "关系数据库",
+              "后端开发",
+              "大型项目实践",
+              "年毕业",
+              "性能问题",
+              "网络工程",
+              "解决",
+              "计算机",
+              "软件",
+              "难题"
+            ],
+            "reason": null,
+            "degraded": true,
+            "degraded_reason": "model_failed",
+            "analysis_status": "degraded"
+          },
+          {
+            "job_id": "beisen-2027-ux",
+            "title": "2027届校招-UX设计师",
+            "score": 14,
+            "stage1_score": 14,
+            "rule_score": 17,
+            "embedding_similarity": 0.5394926236168631,
+            "level": "low",
+            "level_label": "存在缺口",
+            "subscores": [
+              {
+                "key": "skill_match",
+                "label": "技能关键词匹配",
+                "score": 0,
+                "weight": 0.55
+              },
+              {
+                "key": "text_similarity",
+                "label": "文本相似度",
+                "score": 8,
+                "weight": 0.3
+              },
+              {
+                "key": "education_match",
+                "label": "学历匹配",
+                "score": 100,
+                "weight": 0.15
+              }
+            ],
+            "matched": [],
+            "missing": [
+              "交互设计",
+              "PC",
+              "UI",
+              "产品沟通方案",
+              "产品设计",
+              "协助",
+              "原型图",
+              "届本科",
+              "投递需附作品",
+              "持续优化设计",
+              "数据分析",
+              "用户调研",
+              "移动端",
+              "组件整理",
+              "设计方法",
+              "设计稿",
+              "设计艺术",
+              "设计规范",
+              "输出流程图",
+              "需求梳理"
+            ],
+            "reason": null,
+            "degraded": true,
+            "degraded_reason": "model_failed",
+            "analysis_status": "degraded"
+          }
+        ]
+      },
+      "job_detail": {
+        "job_id": "tianjian-sichuan-2027-audit",
+        "title": "财务审计（2027校招）",
+        "company": "天健会计师事务所（特殊普通合伙）四川分所",
+        "cities": [
+          "成都"
+        ],
+        "category": "经管财会",
+        "education": "本科",
+        "education_requirement": "2027届本科及以上学历",
+        "majors": [
+          "会计",
+          "审计",
+          "国际会计",
+          "计算机审计",
+          "信息管理系统"
+        ],
+        "graduation_year": "2027",
+        "jd_text": "岗位职责：从事财务审计工作，在项目经理指导下参与企业年报、IPO或并购重组等项目，编写审计底稿、整理审计资料并参与报告编制。任职要求：2027届本科及以上毕业生；财务会计、国际会计、审计、计算机审计、信息管理系统等相关专业，或具备财会基础的经济、理工科背景；英语四级以上、CPA/ACCA等考试通过科目者优先；具有沟通协作能力、责任心和毅力。",
+        "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKzrbWynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+        "published_at": "2026-09-21",
+        "publication_type": "repost",
+        "application_url": "https://zhaopin.pccpa.cn/hr/recruit/school",
+        "verified_at": "2026-10-28T19:00:00+08:00",
+        "application_status": "open",
+        "verification_note": "2026-10-28 核验：天健2027校园招聘当前开放，官方说明该地址为唯一网申通道；当前独立岗位页明确财务审计职责和2027届要求。"
+      },
+      "other_guest_resume_read_status": 200
+    },
+    {
+      "major": "艺术设计",
+      "resume": "姓名：虚构测试丙 教育背景：虚构艺术学院视觉传达设计本科2027届。专业技能：Figma、Photoshop、Illustrator、交互设计、用户研究。项目经历：负责校园服务应用界面设计，通过用户访谈整理需求，制作交互原型并组织可用性测试。实习经历：参与品牌视觉设计、海报和包装设计，记录反馈并迭代作品。",
+      "rounds": [
+        {
+          "question": {
+            "id": "4583d81c0bf047a4beddbe0c827fcc59",
+            "text": "在校园服务应用界面设计中，你是如何通过用户访谈整理需求的？",
+            "focus": "用户需求整理方法",
+            "source": "llm"
+          },
+          "answer": "这是虚构测试回答。我在艺术设计项目中先确认需求与验收标准，再拆分任务并收集原始证据。遇到问题先复现并分析原因，记录修改过程，最后通过测试和同学反馈检查结果，并说明仍未验证的限制。第1轮。",
+          "result": {
+            "interview_id": "bb94bcabaa1446d4b713ca2cc2dec55d",
+            "status": "active",
+            "round": 1,
+            "max_rounds": 5,
+            "feedback": {
+              "strengths": [
+                "在艺术设计项目中先确认需求与验收标准。",
+                "通过拆分任务，收集原始证据。",
+                "遇到问题先复现，分析原因。",
+                "记录修改过程。",
+                "通过测试和同学反馈检查结果。"
+              ],
+              "improvements": [
+                "可以进一步说明如何通过用户访谈收集需求，以及如何分析访谈结果以形成设计方向",
+                "在描述中增加对用户访谈的具体方法和技巧的描述，以展示更深入的用户需求理解能力",
+                "考虑在项目中引入更多样化的用户测试方法，如A/B测试，以验证设计效果",
+                "在记录修改过程时，可以采用更规范化的文档格式，以便于团队协作和知识共享",
+                "在检查结果时，可以引入更多用户反馈渠道，如在线调查，以获取更全面的用户评价"
+              ],
+              "reference_points": [
+                "用户需求整理方法"
+              ]
+            },
+            "next_question": {
+              "id": "92c1e226b7744b3296c082d35a3aa860",
+              "text": "你提到“这是虚构测试回答”，请具体说明当时是怎么做的、为什么这样设计，以及如何验证效果？",
+              "focus": "围绕本轮回答追问",
+              "source": "fallback"
+            }
+          }
+        },
+        {
+          "question": {
+            "id": "92c1e226b7744b3296c082d35a3aa860",
+            "text": "你提到“这是虚构测试回答”，请具体说明当时是怎么做的、为什么这样设计，以及如何验证效果？",
+            "focus": "围绕本轮回答追问",
+            "source": "fallback"
+          },
+          "answer": "这是虚构测试回答。我在艺术设计项目中先确认需求与验收标准，再拆分任务并收集原始证据。遇到问题先复现并分析原因，记录修改过程，最后通过测试和同学反馈检查结果，并说明仍未验证的限制。第2轮。",
+          "result": {
+            "interview_id": "bb94bcabaa1446d4b713ca2cc2dec55d",
+            "status": "active",
+            "round": 2,
+            "max_rounds": 5,
+            "feedback": {
+              "strengths": [
+                "在遇到问题时能够进行有效的复现和分析。",
+                "注重记录修改过程。",
+                "通过测试和反馈来检查结果。"
+              ],
+              "improvements": [
+                "进一步说明如何根据反馈进行设计优化",
+                "详细描述验证效果局限性的具体原因",
+                "探讨如何提高测试和反馈的效率",
+                "考虑引入更多用户参与测试以提高验证效果",
+                "在项目中尝试新的验证方法以增强效果的可信度"
+              ],
+              "reference_points": [
+                "艺术设计项目中的具体操作流程",
+                "问题复现与分析方法",
+                "修改过程记录",
+                "测试与反馈机制",
+                "验证效果的局限性"
+              ]
+            },
+            "next_question": {
+              "id": "473162b592e84ad685a8751f48e78902",
+              "text": "围绕“这是虚构测试回答”，当时遇到了哪些边界情况或失败场景，你是怎么处理的？",
+              "focus": "围绕本轮回答追问",
+              "source": "fallback"
+            }
+          }
+        },
+        {
+          "question": {
+            "id": "473162b592e84ad685a8751f48e78902",
+            "text": "围绕“这是虚构测试回答”，当时遇到了哪些边界情况或失败场景，你是怎么处理的？",
+            "focus": "围绕本轮回答追问",
+            "source": "fallback"
+          },
+          "answer": "这是虚构测试回答。我在艺术设计项目中先确认需求与验收标准，再拆分任务并收集原始证据。遇到问题先复现并分析原因，记录修改过程，最后通过测试和同学反馈检查结果，并说明仍未验证的限制。第3轮。",
+          "result": {
+            "interview_id": "bb94bcabaa1446d4b713ca2cc2dec55d",
+            "status": "active",
+            "round": 3,
+            "max_rounds": 5,
+            "feedback": {
+              "strengths": [
+                "在项目中确认需求与验收标准。",
+                "记录修改过程。",
+                "通过测试和反馈检查结果。"
+              ],
+              "improvements": [
+                "在处理边界情况时，可以进一步细化测试用例，以覆盖更多潜在问题。",
+                "在分析原因时，可以引入更多数据分析工具，以提高分析的准确性。",
+                "在记录修改过程时，可以考虑使用版本控制工具，以便更好地追踪代码变更。",
+                "在检查结果时，可以增加更多用户参与测试，以提高测试结果的可靠性。"
+              ],
+              "reference_points": [
+                "边界情况或失败场景的处理方法"
+              ]
+            },
+            "next_question": {
+              "id": "5a0f8e990aca49dbb464d64c7af35c3c",
+              "text": "对于“这是虚构测试回答”，你用了哪些指标判断方案有效，又做过哪些取舍？",
+              "focus": "围绕本轮回答追问",
+              "source": "fallback"
+            }
+          }
+        },
+        {
+          "question": {
+            "id": "5a0f8e990aca49dbb464d64c7af35c3c",
+            "text": "对于“这是虚构测试回答”，你用了哪些指标判断方案有效，又做过哪些取舍？",
+            "focus": "围绕本轮回答追问",
+            "source": "fallback"
+          },
+          "answer": "这是虚构测试回答。我在艺术设计项目中先确认需求与验收标准，再拆分任务并收集原始证据。遇到问题先复现并分析原因，记录修改过程，最后通过测试和同学反馈检查结果，并说明仍未验证的限制。第4轮。",
+          "result": {
+            "interview_id": "bb94bcabaa1446d4b713ca2cc2dec55d",
+            "status": "active",
+            "round": 4,
+            "max_rounds": 5,
+            "feedback": {
+              "strengths": [
+                "在项目中能够系统性地确认需求与验收标准。",
+                "能够有效地拆分任务，收集原始证据。",
+                "遇到问题能够先复现，分析原因。",
+                "注重记录修改过程。",
+                "通过测试和反馈检查结果。"
+              ],
+              "improvements": [
+                "进一步明确验证限制的具体方法",
+                "考虑引入更多用户反馈渠道以增强测试效果",
+                "优化任务拆分策略以提高效率",
+                "探索更先进的分析工具来辅助问题复现和分析",
+                "建立更完善的记录系统以方便后续查阅和优化"
+              ],
+              "reference_points": [
+                "艺术设计项目中的流程和指标判断",
+                "任务拆分和原始证据收集",
+                "问题复现和分析原因",
+                "修改过程记录",
+                "测试和反馈检查结果"
+              ]
+            },
+            "next_question": {
+              "id": "7ae4b7b2fc5245d28b9a1b49e68a685d",
+              "text": "你提到“这是虚构测试回答”，请说明当时如何与团队协作推进，并验证最终结果？",
+              "focus": "围绕本轮回答追问",
+              "source": "fallback"
+            }
+          }
+        },
+        {
+          "question": {
+            "id": "7ae4b7b2fc5245d28b9a1b49e68a685d",
+            "text": "你提到“这是虚构测试回答”，请说明当时如何与团队协作推进，并验证最终结果？",
+            "focus": "围绕本轮回答追问",
+            "source": "fallback"
+          },
+          "answer": "这是虚构测试回答。我在艺术设计项目中先确认需求与验收标准，再拆分任务并收集原始证据。遇到问题先复现并分析原因，记录修改过程，最后通过测试和同学反馈检查结果，并说明仍未验证的限制。第5轮。",
+          "result": {
+            "interview_id": "bb94bcabaa1446d4b713ca2cc2dec55d",
+            "status": "completed",
+            "round": 5,
+            "max_rounds": 5,
+            "feedback": {
+              "strengths": [
+                "在项目中确认需求与验收标准，拆分任务收集原始证据。",
+                "遇到问题先复现，分析原因，记录修改过程。",
+                "通过测试和同学反馈检查结果。"
+              ],
+              "improvements": [
+                "更详细地描述与团队成员的具体协作方式",
+                "提供具体的测试案例或反馈数据来验证结果"
+              ],
+              "reference_points": [
+                "项目协作过程",
+                "结果验证方法"
+              ]
+            },
+            "next_question": null
+          }
+        }
+      ],
+      "ingest": {
+        "status": "succeeded",
+        "stage": "解析完成",
+        "progress": 100,
+        "error": null,
+        "error_code": null,
+        "items": [
+          {
+            "resume_id": "fd4b7e16ce974c53a19df5a4ddaf071c",
+            "name": "虚构测试_艺术设计.docx",
+            "chars": 153,
+            "status": "ready",
+            "preview": "姓名：虚构测试丙 教育背景：虚构艺术学院视觉传达设计本科2027届。专业技能：Figma、Photoshop、Illus",
+            "error": null,
+            "low_conf": 0
+          }
+        ]
+      },
+      "matching": {
+        "status": "succeeded",
+        "stage": "岗位匹配完成",
+        "progress": 100,
+        "analysis_completed": 3,
+        "analysis_total": 3,
+        "analysis_started_at": "2026-10-31T07:34:29.060638Z",
+        "embedding_status": "succeeded",
+        "embedding_error": null,
+        "error": null,
+        "error_code": null,
+        "items": [
+          {
+            "job_id": "beisen-2027-ux",
+            "title": "2027届校招-UX设计师",
+            "score": 43,
+            "stage1_score": 43,
+            "rule_score": 29,
+            "embedding_similarity": 0.6070035135207262,
+            "level": "low",
+            "level_label": "存在缺口",
+            "subscores": [
+              {
+                "key": "skill_match",
+                "label": "技能关键词匹配",
+                "score": 7,
+                "weight": 0.55
+              },
+              {
+                "key": "text_similarity",
+                "label": "文本相似度",
+                "score": 35,
+                "weight": 0.3
+              },
+              {
+                "key": "education_match",
+                "label": "学历匹配",
+                "score": 100,
+                "weight": 0.15
+              }
+            ],
+            "matched": [
+              "交互设计"
+            ],
+            "missing": [
+              "PC",
+              "UI",
+              "产品沟通方案",
+              "产品设计",
+              "协助",
+              "原型图",
+              "届本科",
+              "投递需附作品",
+              "持续优化设计",
+              "数据分析",
+              "用户调研",
+              "移动端",
+              "组件整理",
+              "设计方法",
+              "设计稿",
+              "设计艺术",
+              "设计规范",
+              "输出流程图",
+              "需求梳理"
+            ],
+            "reason": null,
+            "degraded": true,
+            "degraded_reason": "model_failed",
+            "analysis_status": "degraded"
+          },
+          {
+            "job_id": "tianjian-sichuan-2027-audit",
+            "title": "财务审计（2027校招）",
+            "score": 10,
+            "stage1_score": 28,
+            "rule_score": 22,
+            "embedding_similarity": 0.541634361964207,
+            "level": "low",
+            "level_label": "存在缺口",
+            "subscores": [
+              {
+                "key": "skill_match",
+                "label": "技能关键词匹配",
+                "score": 7,
+                "weight": 0.55
+              },
+              {
+                "key": "text_similarity",
+                "label": "文本相似度",
+                "score": 11,
+                "weight": 0.3
+              },
+              {
+                "key": "education_match",
+                "label": "学历匹配",
+                "score": 100,
+                "weight": 0.15
+              }
+            ],
+            "matched": [
+              "项目"
+            ],
+            "missing": [
+              "ACCA",
+              "CPA",
+              "IPO",
+              "从事财务审计",
+              "企业年报",
+              "信息管理系统",
+              "国际会计",
+              "审计",
+              "届本科",
+              "报告编制",
+              "整理审计资料",
+              "毅力",
+              "毕业生",
+              "沟通协作",
+              "理工科",
+              "经济",
+              "编写审计底稿",
+              "考试通过科目",
+              "英语四级",
+              "计算机审计",
+              "财会基础",
+              "财务会计",
+              "责任心",
+              "购重组"
+            ],
+            "reason": "简历与岗位要求不匹配，缺乏财务审计相关技能和经验。",
+            "degraded": false,
+            "degraded_reason": null,
+            "analysis_status": "succeeded",
+            "report": {
+              "request_id": "9842a82e66bb4941b74a81a1a29edd63",
+              "overall_score": 0,
+              "level": "low",
+              "level_label": "存在缺口",
+              "dimension_scores": [
+                {
+                  "key": "skill_match",
+                  "label": "技能匹配",
+                  "score": 0,
+                  "weight": 0.4
+                },
+                {
+                  "key": "experience_relevance",
+                  "label": "经历相关",
+                  "score": 0,
+                  "weight": 0.3
+                },
+                {
+                  "key": "keyword_coverage",
+                  "label": "关键词覆盖",
+                  "score": 0,
+                  "weight": 0.2
+                },
+                {
+                  "key": "education_match",
+                  "label": "教育/证书",
+                  "score": 0,
+                  "weight": 0.1
+                }
+              ],
+              "highlights": [],
+              "gaps": [
+                {
+                  "title": "财务审计相关技能",
+                  "jd_requirement": "财务会计、国际会计、审计、计算机审计、信息管理系统等相关专业，或具备财会基础的经济、理工科背景",
+                  "resume_evidence": null,
+                  "suggestion": "建议补充财务审计相关课程或项目经验。",
+                  "rewrite_suggestion": "仅在确有相关经历时补充：参与【财务审计】项目，负责【具体任务】，取得【具体成果】",
+                  "severity": "high"
+                },
+                {
+                  "title": "审计报告编写能力",
+                  "jd_requirement": "编写审计底稿、整理审计资料并参与报告编制",
+                  "resume_evidence": null,
+                  "suggestion": "建议补充审计报告编写或相关项目经验。",
+                  "rewrite_suggestion": "仅在确有相关经历时补充：参与【审计报告】编写，负责【具体任务】，取得【具体成果】",
+                  "severity": "high"
+                },
+                {
+                  "title": "沟通协作能力",
+                  "jd_requirement": "具有沟通协作能力",
+                  "resume_evidence": null,
+                  "suggestion": "建议补充团队合作或沟通协调的相关经验。",
+                  "rewrite_suggestion": "仅在确有相关经历时补充：在【项目】中担任【角色】，与团队成员【具体协作】，取得【具体成果】",
+                  "severity": "high"
+                }
+              ],
+              "summary": "简历与岗位要求不匹配，缺乏财务审计相关技能和经验。",
+              "disclaimer": "AI诊断结果仅供参考，请以实际岗位要求为准。",
+              "meta": {
+                "model": "glm-4-flash",
+                "mode": "llm",
+                "elapsed_ms": 18844
+              }
+            }
+          },
+          {
+            "job_id": "beisen-2027-backend",
+            "title": "2027届校招-后端工程师",
+            "score": 5,
+            "stage1_score": 15,
+            "rule_score": 19,
+            "embedding_similarity": 0.5058270623548518,
+            "level": "low",
+            "level_label": "存在缺口",
+            "subscores": [
+              {
+                "key": "skill_match",
+                "label": "技能关键词匹配",
+                "score": 0,
+                "weight": 0.55
+              },
+              {
+                "key": "text_similarity",
+                "label": "文本相似度",
+                "score": 14,
+                "weight": 0.3
+              },
+              {
+                "key": "education_match",
+                "label": "学历匹配",
+                "score": 100,
+                "weight": 0.15
+              }
+            ],
+            "matched": [],
+            "missing": [
+              "C#",
+              "Java",
+              "Kafka",
+              "MySQL",
+              "RabbitMQ",
+              "Redis",
+              "SaaS",
+              "Server",
+              "SQL",
+              "一种后端语言",
+              "关系数据库",
+              "后端开发",
+              "大型项目实践",
+              "年毕业",
+              "性能问题",
+              "网络工程",
+              "解决",
+              "计算机",
+              "软件",
+              "难题"
+            ],
+            "reason": "简历与岗位要求不匹配，缺乏后端开发相关技能和经验。",
+            "degraded": false,
+            "degraded_reason": null,
+            "analysis_status": "succeeded",
+            "report": {
+              "request_id": "0d7e59486ec94aedb616e787739872b3",
+              "overall_score": 0,
+              "level": "low",
+              "level_label": "存在缺口",
+              "dimension_scores": [
+                {
+                  "key": "skill_match",
+                  "label": "技能匹配",
+                  "score": 0,
+                  "weight": 0.4
+                },
+                {
+                  "key": "experience_relevance",
+                  "label": "经历相关",
+                  "score": 0,
+                  "weight": 0.3
+                },
+                {
+                  "key": "keyword_coverage",
+                  "label": "关键词覆盖",
+                  "score": 0,
+                  "weight": 0.2
+                },
+                {
+                  "key": "education_match",
+                  "label": "教育/证书",
+                  "score": 0,
+                  "weight": 0.1
+                }
+              ],
+              "highlights": [],
+              "gaps": [
+                {
+                  "title": "后端开发技能",
+                  "jd_requirement": "掌握C#、Java等至少一种后端语言及SQL Server、MySQL等关系数据库",
+                  "resume_evidence": null,
+                  "suggestion": "学习并掌握至少一种后端开发语言和关系数据库，如C#或Java，以及SQL Server或MySQL。",
+                  "rewrite_suggestion": "仅在确有相关经历时补充：学习并掌握【后端开发语言】和【关系数据库】，如【C#】和【SQL Server】。",
+                  "severity": "high"
+                },
+                {
+                  "title": "面向对象设计和设计模式",
+                  "jd_requirement": "理解面向对象设计和设计模式",
+                  "resume_evidence": null,
+                  "suggestion": "学习并理解面向对象设计和设计模式的基本原理和应用。",
+                  "rewrite_suggestion": "仅在确有相关经历时补充：熟悉【面向对象设计】和【设计模式】，如【MVC】模式。",
+                  "severity": "high"
+                },
+                {
+                  "title": "后端相关工具和框架",
+                  "jd_requirement": "有Redis、RabbitMQ、Kafka、SaaS或大型项目实践者优先",
+                  "resume_evidence": null,
+                  "suggestion": "学习并实践Redis、RabbitMQ、Kafka等后端相关工具和框架。",
+                  "rewrite_suggestion": "仅在确有相关经历时补充：熟悉【后端相关工具和框架】，如【Redis】和【RabbitMQ】。",
+                  "severity": "medium"
+                }
+              ],
+              "summary": "简历与岗位要求不匹配，缺乏后端开发相关技能和经验。",
+              "disclaimer": "AI诊断结果仅供参考，请以实际岗位要求为准。",
+              "meta": {
+                "model": "glm-4-flash",
+                "mode": "llm",
+                "elapsed_ms": 16679
+              }
+            }
+          }
+        ]
+      },
+      "job_detail": {
+        "job_id": "beisen-2027-ux",
+        "title": "2027届校招-UX设计师",
+        "company": "北森云计算有限公司",
+        "cities": [
+          "北京"
+        ],
+        "category": "艺术设计",
+        "education": "本科",
+        "education_requirement": "2027届本科及以上学历",
+        "majors": [
+          "产品设计",
+          "交互设计",
+          "设计艺术"
+        ],
+        "graduation_year": "2027",
+        "jd_text": "岗位职责：协助完成PC端和移动端UI及交互设计，参与需求梳理、用户调研和数据分析，持续优化设计；与产品沟通方案并跟进开发测试落地，参与设计规范和组件整理。任职要求：2027届本科及以上学历，产品设计、交互设计、设计艺术相关专业优先；掌握常用设计方法和工具，能独立输出流程图、原型图和设计稿；投递需附作品。",
+        "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-K0NSyyobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+        "published_at": "2026-09-14",
+        "publication_type": "repost",
+        "application_url": "https://beisen.zhiye.com/campus/jobs",
+        "verified_at": "2026-10-26T16:30:00+08:00",
+        "application_status": "open",
+        "verification_note": "四川大学就业网明示发布时间、职责、2027届学历专业要求、作品要求、企业网申入口及有效期至2027-08-14。"
+      },
+      "other_guest_resume_read_status": 200
+    }
+  ],
+  "model_calls": "live API, no provider mocks",
+  "jobs": [
+    {
+      "job_id": "beisen-2027-backend",
+      "title": "2027届校招-后端工程师",
+      "company": "北森云计算有限公司",
+      "cities": [
+        "北京",
+        "成都",
+        "西安"
+      ],
+      "category": "计算机",
+      "education": "本科",
+      "education_requirement": "2027届本科及以上学历",
+      "majors": [
+        "计算机",
+        "软件工程",
+        "网络工程"
+      ],
+      "graduation_year": "2027",
+      "jd_text": "岗位职责：负责后端开发，解决技术难题和性能问题，并为产品设计提出建议。任职要求：2027年毕业，本科及以上学历，计算机、软件或网络工程相关专业；掌握C#、Java等至少一种后端语言及SQL Server、MySQL等关系数据库；理解面向对象设计和设计模式；有Redis、RabbitMQ、Kafka、SaaS或大型项目实践者优先。",
+      "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-K0NSqypzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+      "published_at": "2026-09-14",
+      "publication_type": "repost",
+      "application_url": "https://beisen.zhiye.com/campus/jobs",
+      "verified_at": "2026-10-26T16:30:00+08:00",
+      "application_status": "open",
+      "verification_note": "四川大学就业网明示发布时间、职责、2027届学历专业要求、企业网申入口及有效期至2027-08-14。"
+    },
+    {
+      "job_id": "tianjian-sichuan-2027-audit",
+      "title": "财务审计（2027校招）",
+      "company": "天健会计师事务所（特殊普通合伙）四川分所",
+      "cities": [
+        "成都"
+      ],
+      "category": "经管财会",
+      "education": "本科",
+      "education_requirement": "2027届本科及以上学历",
+      "majors": [
+        "会计",
+        "审计",
+        "国际会计",
+        "计算机审计",
+        "信息管理系统"
+      ],
+      "graduation_year": "2027",
+      "jd_text": "岗位职责：从事财务审计工作，在项目经理指导下参与企业年报、IPO或并购重组等项目，编写审计底稿、整理审计资料并参与报告编制。任职要求：2027届本科及以上毕业生；财务会计、国际会计、审计、计算机审计、信息管理系统等相关专业，或具备财会基础的经济、理工科背景；英语四级以上、CPA/ACCA等考试通过科目者优先；具有沟通协作能力、责任心和毅力。",
+      "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKzrbWynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+      "published_at": "2026-09-21",
+      "publication_type": "repost",
+      "application_url": "https://zhaopin.pccpa.cn/hr/recruit/school",
+      "verified_at": "2026-10-28T19:00:00+08:00",
+      "application_status": "open",
+      "verification_note": "2026-10-28 核验：天健2027校园招聘当前开放，官方说明该地址为唯一网申通道；当前独立岗位页明确财务审计职责和2027届要求。"
+    },
+    {
+      "job_id": "beisen-2027-ux",
+      "title": "2027届校招-UX设计师",
+      "company": "北森云计算有限公司",
+      "cities": [
+        "北京"
+      ],
+      "category": "艺术设计",
+      "education": "本科",
+      "education_requirement": "2027届本科及以上学历",
+      "majors": [
+        "产品设计",
+        "交互设计",
+        "设计艺术"
+      ],
+      "graduation_year": "2027",
+      "jd_text": "岗位职责：协助完成PC端和移动端UI及交互设计，参与需求梳理、用户调研和数据分析，持续优化设计；与产品沟通方案并跟进开发测试落地，参与设计规范和组件整理。任职要求：2027届本科及以上学历，产品设计、交互设计、设计艺术相关专业优先；掌握常用设计方法和工具，能独立输出流程图、原型图和设计稿；投递需附作品。",
+      "source_url": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9-K0NSyyobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+      "published_at": "2026-09-14",
+      "publication_type": "repost",
+      "application_url": "https://beisen.zhiye.com/campus/jobs",
+      "verified_at": "2026-10-26T16:30:00+08:00",
+      "application_status": "open",
+      "verification_note": "四川大学就业网明示发布时间、职责、2027届学历专业要求、作品要求、企业网申入口及有效期至2027-08-14。"
+    }
+  ],
+  "request_failures": [
+    {
+      "path": "/api/interviews/d65b391fa4b846b0bef23c517d5b8891/answers",
+      "status": 502,
+      "attempt": 1
+    },
+    {
+      "path": "/api/interviews/bb94bcabaa1446d4b713ca2cc2dec55d/answers",
+      "status": 502,
+      "attempt": 1
+    },
+    {
+      "path": "/api/interviews/bb94bcabaa1446d4b713ca2cc2dec55d/answers",
+      "status": 502,
+      "attempt": 2
+    }
+  ]
+}

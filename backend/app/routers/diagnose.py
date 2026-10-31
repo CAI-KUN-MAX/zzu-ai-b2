@@ -215,6 +215,8 @@ def parse_report(content, payload, request_id, elapsed_ms, lenient=False):
     data = json.loads(text)
     if not isinstance(data, dict):
         raise ValueError("not_object")
+    if str(data.get("summary", "")).strip().rstrip("。.!！") == "基于证据的一句话总体评价":
+        raise ValueError("摘要不能照抄示例占位文字，必须根据当前简历与岗位给出具体评价")
     report = DiagnoseResponse.model_validate({
         **{key: data[key] for key in ("dimension_scores", "highlights", "gaps", "summary")},
         "overall_score": 0,
