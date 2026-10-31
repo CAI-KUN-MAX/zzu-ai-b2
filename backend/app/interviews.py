@@ -204,6 +204,13 @@ class QuestionRejected(ValueError):
 
 
 def parse_output(raw, context):
+    # Feedback-only calls use server-generated followups; unused drafts cannot
+    # invalidate otherwise valid feedback, including at the final round.
+    if context["action"] == "answer" and context["round"] == MAX_ROUNDS:
+        data = json.loads(raw)
+        if isinstance(data, dict):
+            data["next_question"] = None
+        raw = json.dumps(data, ensure_ascii=False)
     draft = (FirstQuestionDraft if context["action"] == "create" else AnswerDraft).model_validate_json(raw)
     options = evidence_options(context)
     question = draft.question if context["action"] == "create" else draft.next_question

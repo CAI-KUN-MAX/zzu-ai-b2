@@ -1,5 +1,9 @@
 # 后端接口：简历解析与匹配排序
 
+## 游客访问隔离
+
+浏览器首次访问接口时取得 HttpOnly、SameSite=Lax 的 `resume_guest` Cookie；HTTPS 下启用 Secure。持有资源 ID 不能代替游客凭证。简历、解析任务、匹配任务、导出与面试必须属于当前游客，否则返回 404。重新上传同一文件可为该游客授予访问权限，但不能通过读取历史资源认领。旧记录不自动授予新游客，需重新上传。凭证持久保存在浏览器，清除 Cookie 后需重新上传；不引入登录功能。第三方跨域客户端不支持该工作流，应使用同源 API 代理。
+
 单份简历对多个岗位的新接口见 [JOB_MATCH_API.md](JOB_MATCH_API.md)，与原 `/api/match` 契约独立。岗位来源与数量验收见 [catalogue/VALIDATION.md](catalogue/VALIDATION.md)。单简历多岗位支持可选云端 Embedding；原 `/api/match` 不使用 Embedding，字符 2-gram 相似度不能称为语义向量匹配。
 
 新接口的测试结果和环境限制见 [JOB_MATCH_VALIDATION.md](JOB_MATCH_VALIDATION.md)。

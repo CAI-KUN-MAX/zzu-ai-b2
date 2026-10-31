@@ -16,6 +16,7 @@ from app.interviews import InterviewService
 from app.routers.interviews import router as interviews_router
 from app.job_repository import JobRepository
 from app.job_matching import JobMatchService
+from app.guest_access import GuestAccessMiddleware
 from app.routers.jobs import router as jobs_router
 
 
@@ -56,6 +57,7 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Accept"],
 )
+app.add_middleware(GuestAccessMiddleware)
 
 def error_response(status, request_id=None, code=None, message=None):
     default_code, default_message = {
