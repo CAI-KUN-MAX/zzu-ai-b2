@@ -226,7 +226,7 @@ export function JobMatchPage({
           上传一份简历，寻找适合的岗位
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-ink-500">
-          上传简历并勾选多个候选岗位，按匹配度排序并给出推荐理由与缺口。点开岗位可看诊断报告，并针对该岗位练五轮模拟面试。
+          上传简历、勾选想投的岗位，系统会按匹配度排好序，并说明你哪里合适、哪里还差。点开任意岗位能看到详细分析，还能针对它练五轮模拟面试。
         </p>
 
         <div className="mt-5">
@@ -477,10 +477,10 @@ export function JobMatchPage({
                     <button
                       type="button"
                       onClick={() => setJdJob(job)}
-                      aria-label={`查看 ${job.title} 的 JD`}
+                      aria-label={`查看 ${job.title} 的岗位要求`}
                       className="m-2 shrink-0 rounded-md px-2 py-1 text-[11px] font-medium text-brand-600 hover:bg-brand-50"
                     >
-                      查看 JD
+                      查看要求
                     </button>
                     </div>
                   );
