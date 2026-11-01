@@ -1,0 +1,1190 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Offer · 界面原型</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Noto+Sans+SC:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:"LXGW Neo XiHei";src:url("fonts/LXGWNeoXiHei.ttf") format("truetype");font-weight:400;font-style:normal;font-display:swap}
+body{margin:0;background:#E3EAEE}
+a{color:#3B5BD9}
+button{font-family:inherit}
+.bg{background-color:#E3EAEE;background-image:radial-gradient(40% 50% at 0% 0%,rgba(180,198,240,.85),transparent 70%),radial-gradient(36% 44% at 0% 100%,rgba(242,216,196,.82),transparent 70%),radial-gradient(40% 40% at 100% 0%,rgba(214,226,244,.6),transparent 70%)}
+.shell{position:relative;border-radius:36px;background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(248,251,252,.2));backdrop-filter:blur(30px) saturate(160%);-webkit-backdrop-filter:blur(30px) saturate(160%);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px rgba(255,255,255,.95),0 30px 70px -46px rgba(40,60,90,.45)}
+.stage{border-radius:30px;background-color:#D9E1EA;background-image:radial-gradient(rgba(28,36,51,.035) .8px,transparent 1px),linear-gradient(115deg,transparent 0 34%,rgba(255,255,255,.22) 42%,transparent 50%),linear-gradient(115deg,transparent 0 62%,rgba(255,255,255,.14) 68%,transparent 74%),radial-gradient(38% 34% at 22% 4%,rgba(158,186,222,.95),transparent 70%),radial-gradient(30% 30% at 50% 12%,rgba(198,215,236,.9),transparent 70%),radial-gradient(34% 42% at 4% 52%,rgba(242,221,203,.95),transparent 72%),radial-gradient(28% 32% at 38% 64%,rgba(232,216,214,.55),transparent 72%),radial-gradient(40% 48% at 98% 44%,rgba(184,201,223,.95),transparent 70%),radial-gradient(48% 40% at 60% 104%,rgba(224,231,240,.95),transparent 70%),linear-gradient(180deg,#CBD8E8 0%,#DCE3EA 55%,#D8E0E9 100%);background-size:3px 3px,auto,auto,auto,auto,auto,auto,auto,auto,auto}
+
+/* 面板：主面板更“实”、次要面板更“轻”，同一套液态玻璃 */
+.panel{position:relative;isolation:isolate;box-sizing:border-box;padding:24px;border-radius:26px;backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%)}
+.panel::after{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;padding:1.2px;pointer-events:none;background:linear-gradient(140deg,rgba(255,255,255,.98) 0%,rgba(198,210,255,.75) 32%,rgba(255,255,255,.55) 52%,rgba(255,224,206,.75) 76%,rgba(255,255,255,.95) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.main{background:linear-gradient(180deg,rgba(255,255,255,.66) 0%,rgba(255,255,255,.4) 42%,rgba(255,255,255,.32) 100%);box-shadow:inset 0 1px 1px #FFFFFF,inset 0 -16px 30px -22px rgba(90,110,170,.34),0 2px 4px rgba(40,60,95,.06),0 36px 60px -36px rgba(40,60,95,.55)}
+.sub{background:linear-gradient(180deg,rgba(255,255,255,.4) 0%,rgba(255,255,255,.2) 45%,rgba(255,255,255,.14) 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.85),inset 0 -12px 24px -20px rgba(90,110,170,.26),0 22px 44px -36px rgba(40,60,95,.4)}
+.sub::after{opacity:.6}
+.dialog{background:linear-gradient(180deg,rgba(255,255,255,.9) 0%,rgba(255,255,255,.74) 100%);box-shadow:inset 0 1px 1px #FFFFFF,0 2px 6px rgba(40,60,95,.08),0 40px 80px -30px rgba(40,60,95,.5)}
+.inset{background:linear-gradient(180deg,rgba(255,255,255,.6) 0%,rgba(255,255,255,.3) 55%,rgba(255,255,255,.24) 100%);border:1px solid rgba(255,255,255,.8);border-radius:18px;box-shadow:inset 0 1px 1px rgba(255,255,255,.98),inset 0 -8px 16px -12px rgba(90,110,170,.3),0 14px 26px -20px rgba(40,60,95,.45)}
+
+/* 栅格：两行对齐，左右同高；窄屏单列 */
+.g-home{display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);grid-template-rows:1fr auto;gap:20px}
+.g-84{display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:20px;align-items:stretch}
+.g-57{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:20px;align-items:stretch}
+@media (max-width:980px){.g-home,.g-84,.g-57{grid-template-columns:minmax(0,1fr);grid-template-rows:none}}
+
+/* 字号阶梯 36 / 22 / 17 / 14 / 12 */
+.h1{margin:0;font-size:36px;font-weight:600;line-height:1.25;letter-spacing:-.02em;color:#1C2433}
+.h2{margin:0;font-size:22px;font-weight:600;line-height:1.35;letter-spacing:-.01em;color:#1C2433}
+.h3{margin:0;font-size:17px;font-weight:500;line-height:1.4;color:#1C2433}
+.label{margin:0;font-size:12px;font-weight:400;color:#5D6880;letter-spacing:.04em}
+.muted{color:#5D6880}
+.num{font-family:'Inter','LXGW Neo XiHei','Noto Sans SC',sans-serif;font-variant-numeric:tabular-nums}
+.head{display:flex;align-items:center;gap:12px;min-height:28px}
+.divider{border-top:1px solid rgba(255,255,255,.6)}
+
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 13px;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.58));border:1px solid rgba(255,255,255,.95);font-size:13px;color:#47526A;white-space:nowrap;box-shadow:inset 0 1px 1px #FFFFFF,inset 0 -3px 6px rgba(120,140,190,.16),0 8px 14px -10px rgba(40,60,95,.4)}
+button.chip{cursor:pointer}
+.tag{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 9px;border-radius:999px;font-size:12px;white-space:nowrap}
+.tag-n{background:rgba(255,255,255,.62);color:#47526A}
+.btn-p{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 24px;border:1px solid rgba(255,255,255,.85);border-radius:999px;background:linear-gradient(180deg,#EEF2FF 0%,#CBD9FF 46%,#B3C7FF 100%);color:#1B2B57;font-size:14px;font-weight:500;cursor:pointer;box-shadow:inset 0 1px 1px #FFFFFF,inset 0 -5px 10px rgba(90,115,215,.22),0 18px 30px -14px rgba(96,126,236,.7),0 3px 6px -3px rgba(40,60,95,.25);transition:transform .15s ease,filter .2s ease}
+.btn-p:hover{filter:brightness(1.03);transform:translateY(-1px)}
+.btn-p:disabled{opacity:.6;cursor:default;transform:none;filter:none}
+.btn-g{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:0 18px;box-sizing:border-box;border:1px solid rgba(255,255,255,.92);border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.85) 0%,rgba(255,255,255,.45) 56%,rgba(255,255,255,.36) 100%);color:#1C2433;font-size:13px;font-weight:500;text-decoration:none;cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:inset 0 1px 1px #FFFFFF,inset 0 -4px 8px rgba(120,140,190,.18),0 12px 22px -14px rgba(40,60,95,.45)}
+.btn-g:hover{background:linear-gradient(180deg,rgba(255,255,255,.95) 0%,rgba(255,255,255,.6) 100%)}
+.link{display:inline-flex;align-items:center;gap:4px;min-height:32px;padding:0;border:0;background:transparent;color:#3B5BD9;font-size:13px;font-weight:500;cursor:pointer}
+.link:hover{color:#2F4FD6;text-decoration:underline;text-underline-offset:3px}
+.ico-btn{position:relative;width:42px;height:42px;border-radius:999px;display:grid;place-items:center;background:linear-gradient(180deg,rgba(255,255,255,.85) 0%,rgba(255,255,255,.42) 100%);border:1px solid rgba(255,255,255,.92);color:#1C2433;cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:inset 0 1px 1px #FFFFFF,inset 0 -4px 8px rgba(120,140,190,.18),0 12px 22px -14px rgba(40,60,95,.45)}
+.ico-btn:hover{background:linear-gradient(180deg,rgba(255,255,255,.98) 0%,rgba(255,255,255,.62) 100%)}
+.tile-w{width:44px;height:44px;flex-shrink:0;border-radius:13px;display:grid;place-items:center;background:linear-gradient(180deg,#FFFFFF,rgba(255,255,255,.7));border:1px solid rgba(255,255,255,.95);color:#47526A;box-shadow:inset 0 -3px 6px rgba(120,140,190,.14)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* 弹层：浮出菜单、整屏对话框、轻提示 */
+.pop{position:absolute;z-index:30;box-sizing:border-box;padding:6px;border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.95) 0%,rgba(255,255,255,.84) 100%);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.95);box-shadow:inset 0 1px 1px #FFFFFF,0 2px 6px rgba(40,60,95,.08),0 28px 50px -22px rgba(40,60,95,.45)}
+.menu-item{display:flex;align-items:center;gap:10px;width:100%;min-height:40px;box-sizing:border-box;padding:8px 12px;border:0;border-radius:14px;background:transparent;color:#1C2433;font-size:14px;text-align:left;cursor:pointer;transition:background .15s ease}
+.menu-item:hover{background:rgba(230,236,255,.75)}
+.row-btn{width:100%;box-sizing:border-box;text-align:left;cursor:pointer;color:inherit;transition:background .15s ease}
+.row-btn:hover{background:linear-gradient(180deg,rgba(255,255,255,.9) 0%,rgba(255,255,255,.58) 100%)}
+.catcher{position:fixed;inset:0;z-index:20;margin:0;padding:0;border:0;background:transparent;cursor:default}
+.scrim{position:fixed;inset:0;margin:0;padding:0;border:0;cursor:default;background:rgba(206,216,230,.42);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.field{display:flex;align-items:center;gap:8px;height:46px;padding:0 5px 0 18px;box-sizing:border-box;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.6));border:1px solid rgba(255,255,255,.95);box-shadow:inset 0 1px 1px #FFFFFF,inset 0 -4px 8px rgba(120,140,190,.16),0 14px 24px -16px rgba(40,60,95,.45)}
+.field:focus-within{box-shadow:inset 0 1px 1px #FFFFFF,inset 0 -4px 8px rgba(120,140,190,.16),0 0 0 3px rgba(143,166,248,.4),0 14px 24px -16px rgba(40,60,95,.45)}
+.field input{flex:1 1 0;min-width:0;border:0;outline:none;background:transparent;font-size:14px;font-family:inherit;color:#1C2433}
+.field-btn{padding:0 18px;color:#5D6880;font-size:14px;text-align:left;cursor:pointer}
+.field-btn:hover{background:linear-gradient(180deg,#FFFFFF,rgba(255,255,255,.74))}
+.drop{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px 16px;border-radius:20px;border:1.5px dashed rgba(111,141,245,.55);background:rgba(255,255,255,.42);text-align:center;transition:background .15s ease}
+.drop:hover{background:rgba(255,255,255,.66)}
+.drop:focus-within{outline:2px solid #6F8DF5;outline-offset:2px}
+ul.bul{margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.7;color:#2E384D}
+button:focus-visible,a:focus-visible,textarea:focus-visible{outline:2px solid #6F8DF5;outline-offset:2px}
+
+@keyframes pageIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.page-in{animation:pageIn .38s cubic-bezier(.2,.7,.2,1) backwards}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{animation:spin .9s linear infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.pulse{animation:pulse 1.1s ease-in-out infinite}
+@keyframes grow{from{width:8%}to{width:100%}}
+.grow{width:100%;animation:grow 1.6s ease-out backwards}
+@keyframes popIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.pop-in{animation:popIn .2s ease-out backwards}
+@media (prefers-reduced-motion: reduce){.page-in,.spin,.pulse,.grow,.pop-in{animation:none}}
+/* 手机：底部标签栏、单列、对话框从底部弹出（同一份原型，宽度 ≤720px 自动切换） */
+@media (max-width:720px){
+.bg{padding:0!important;overflow-x:clip}
+.shell{min-height:100vh!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.stage{margin:0!important;border-radius:0!important;padding:16px 16px 104px!important;gap:16px!important}
+.rail{position:fixed!important;left:0;right:0;bottom:0;z-index:40!important;flex-direction:row!important;align-items:stretch!important;gap:4px!important;padding:8px 10px calc(10px + env(safe-area-inset-bottom))!important;background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.9));backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border-top:1px solid rgba(255,255,255,.95);box-shadow:0 -12px 30px -22px rgba(40,60,95,.5)}
+.rail-logo,.rail-gap,.rail-help{display:none!important}
+.rail button{width:auto!important;flex:1 1 0;min-height:52px;justify-content:center}
+.panel{padding:16px!important}
+.g-home,.g-84,.g-57{gap:16px}
+.h1{font-size:26px}
+.h2{font-size:20px}
+.q-text{font-size:18px!important}
+.page-sub{display:none}
+.rec-grid{display:flex!important;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:2px 16px 12px;gap:12px!important}
+.rec-grid>div{flex:0 0 80%;scroll-snap-align:start}
+.cat-row{flex-wrap:nowrap!important;overflow-x:auto;max-width:100%}
+.cat-row button{flex-shrink:0}
+.job-search{flex:1 1 100%!important;max-width:none!important;margin-left:0!important}
+.job-grid{grid-template-columns:minmax(0,1fr)!important}
+.g-57 .divider .btn-p{flex:1 1 100%}
+.pop-notice{position:fixed!important;top:68px!important;left:12px!important;right:12px!important;width:auto!important}
+.ov{padding:0!important;align-items:flex-end!important}
+.ov-top{align-items:flex-start!important}
+.ov .dialog{max-width:none!important;max-height:88vh;overflow-y:auto;border-radius:24px 24px 0 0!important;padding:20px 16px 28px!important}
+.ov-top .dialog{border-radius:0 0 24px 24px!important;padding-top:16px!important}
+.help-grid{grid-template-columns:minmax(0,1fr)!important}
+.toast-wrap{bottom:96px!important}
+}
+
+</style>
+</head>
+<body>
+<!-- 由设计稿自动生成：模板在 <template> 里，由 runtime.js 渲染。打开 ?step=1~5 可直接进入某一页 -->
+<template id="dc-template">
+<div class="bg" style="min-height: 100vh; box-sizing: border-box; padding: 20px; color: #1C2433; font-family: 'Inter', 'LXGW Neo XiHei', 'Noto Sans SC', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 14px;">
+<div class="shell" style="min-height: calc(100vh - 40px); display: flex;">
+
+  <!-- 左：透明图标栏 -->
+  <nav class="rail" aria-label="主导航" style="flex: 0 0 84px; position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 24px 0;">
+    <span class="rail-logo" role="img" aria-label="Offer" style="width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; background: linear-gradient(140deg, #DCE6FF 0%, #AFC3FF 55%, #8FA8F5 100%); border: 1px solid rgba(255,255,255,0.9); box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 10px 20px -10px rgba(76,104,214,0.6);">
+      <svg aria-hidden="true" width="26" height="26" viewBox="0 0 32 32"><path d="M23.4 12.6 A8.4 8.4 0 1 1 19.6 8.3" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round"></path><path d="M24.5 4.5 C24.8 6.6 25.9 7.7 28 8 C25.9 8.3 24.8 9.4 24.5 11.5 C24.2 9.4 23.1 8.3 21 8 C23.1 7.7 24.2 6.6 24.5 4.5Z" fill="#FFFFFF"></path></svg>
+    </span>
+    <span class="rail-gap" style="height: 16px;"></span>
+    <sc-for list="{{rail}}" as="r" hint-placeholder-count="4">
+      <button type="button" onClick="{{r.go}}" aria-current="{{r.current}}" style="{{r.style}}">
+        <sc-if value="{{r.i1}}" hint-placeholder-val="{{true}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7"></path><path d="M6 10v10h12V10"></path></svg></sc-if>
+        <sc-if value="{{r.i2}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2.5"></rect><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3 12.5h18"></path></svg></sc-if>
+        <sc-if value="{{r.i3}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V12M12 20V5M19 20v-6"></path></svg></sc-if>
+        <sc-if value="{{r.i4}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"></path><path d="M19 11a7 7 0 0 1-14 0M12 18v3"></path></svg></sc-if>
+        <span>{{r.label}}</span>
+      </button>
+    </sc-for>
+    <span class="rail-gap" style="flex: 1 1 auto;"></span>
+    <button type="button" onClick="{{go5}}" aria-current="{{recCurrent}}" style="{{recStyle}}">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+      <span>记录</span>
+    </button>
+    <button type="button" class="rail-help" onClick="{{openHelp}}" aria-haspopup="dialog" style="{{helpStyle}}">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M9.6 9.2a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5M12 16.6h.01"></path></svg>
+      <span>帮助</span>
+    </button>
+  </nav>
+
+  <!-- 右：主区 -->
+  <div class="stage" style="flex: 1 1 auto; min-width: 0; position: relative; z-index: 1; margin: 10px 10px 10px 0; padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+    <header style="display: flex; align-items: center; gap: 12px; min-height: 44px;">
+      <sc-if value="{{showTitle}}" hint-placeholder-val="{{false}}">
+        <div style="flex: 1 1 0; min-width: 0;">
+          <h1 class="h2">{{title}}</h1>
+          <p class="muted page-sub" style="margin: 4px 0 0; font-size: 14px;">{{subtitle}}</p>
+        </div>
+      </sc-if>
+      <!-- 首页顶栏放搜索框；其他页左边是页面标题，右边放搜索按钮 -->
+      <sc-if value="{{is1}}" hint-placeholder-val="{{true}}">
+        <button type="button" class="field field-btn" aria-haspopup="dialog" onClick="{{openSearch}}" style="flex: 0 1 440px;">
+          <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <span style="flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">搜索岗位、公司或功能</span>
+        </button>
+        <span style="flex: 1 1 0;"></span>
+      </sc-if>
+      <sc-if value="{{showTitle}}" hint-placeholder-val="{{false}}"><button type="button" class="ico-btn" aria-label="搜索" aria-haspopup="dialog" onClick="{{openSearch}}"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg></button></sc-if>
+
+      <div style="position: relative;">
+        <button type="button" class="ico-btn" aria-label="通知，{{unreadLabel}}" aria-expanded="{{noticeOpen}}" onClick="{{toggleNotice}}"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg><sc-if value="{{hasUnread}}" hint-placeholder-val="{{true}}"><span aria-hidden="true" style="position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 999px; background: #E59A72; border: 1.5px solid #FFFFFF;"></span></sc-if></button>
+        <sc-if value="{{noticeOpen}}" hint-placeholder-val="{{false}}">
+          <div class="pop pop-in pop-notice" role="region" aria-label="通知" style="top: 52px; right: -54px; width: 360px;">
+            <div style="display: flex; align-items: center; gap: 8px; padding: 8px 8px 6px 12px;">
+              <p style="margin: 0; flex: 1 1 0; font-size: 15px; font-weight: 500;">通知</p>
+              <span class="muted num" style="font-size: 12px;">{{unreadText}}</span>
+              <button type="button" class="link" onClick="{{readAll}}" style="min-height: 28px; padding: 0 4px;">全部已读</button>
+            </div>
+            <div class="divider" style="margin: 0 6px 4px;"></div>
+            <sc-for list="{{notices}}" as="n" hint-placeholder-count="3">
+              <button type="button" class="menu-item" onClick="{{n.open}}" style="align-items: flex-start; gap: 12px; padding: 10px;">
+                <span style="{{n.iconStyle}}">
+                  <sc-if value="{{n.cal}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"></rect><path d="M8 3v4M16 3v4M3.5 10h17"></path></svg></sc-if>
+                  <sc-if value="{{n.chart}}" hint-placeholder-val="{{true}}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V12M12 20V5M19 20v-6"></path></svg></sc-if>
+                  <sc-if value="{{n.mic}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"></path><path d="M19 11a7 7 0 0 1-14 0M12 18v3"></path></svg></sc-if>
+                </span>
+                <span style="flex: 1 1 0; min-width: 0;">
+                  <span style="display: block; font-size: 12px; color: #5D6880;">{{n.kind}} · <span class="num">{{n.time}}</span></span>
+                  <span style="display: block; margin-top: 2px; font-size: 14px; line-height: 1.55;">{{n.text}}</span>
+                </span>
+                <sc-if value="{{n.unread}}" hint-placeholder-val="{{true}}"><span role="img" aria-label="未读" style="width: 8px; height: 8px; margin-top: 6px; flex-shrink: 0; border-radius: 999px; background: #E59A72;"></span></sc-if>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="position: relative;">
+        <button type="button" aria-label="账号菜单" aria-expanded="{{meOpen}}" onClick="{{toggleMe}}" style="width: 42px; height: 42px; padding: 0; border-radius: 999px; display: grid; place-items: center; background: linear-gradient(135deg, #DCE6FF, #F6DCCB); border: 2px solid #FFFFFF; color: #1B2B57; font-size: 15px; font-weight: 500; cursor: pointer; box-shadow: 0 6px 16px -10px rgba(24,39,75,0.5);">张</button>
+        <sc-if value="{{meOpen}}" hint-placeholder-val="{{false}}">
+          <div class="pop pop-in" role="region" aria-label="账号" style="top: 52px; right: 0; width: 240px;">
+            <div style="display: flex; align-items: center; gap: 10px; padding: 10px 10px 12px;">
+              <span aria-hidden="true" style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 999px; display: grid; place-items: center; background: linear-gradient(135deg, #DCE6FF, #F6DCCB); border: 2px solid #FFFFFF; color: #1B2B57; font-size: 14px; font-weight: 500;">张</span>
+              <span style="min-width: 0;"><span style="display: block; font-size: 15px; font-weight: 500;">张晨</span><span class="muted num" style="font-size: 12px;">{{meSub}}</span></span>
+            </div>
+            <div class="divider" style="margin: 0 6px 6px;"></div>
+            <button type="button" class="menu-item" onClick="{{openUpload}}"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5D6880" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg>更换简历</button>
+            <button type="button" class="menu-item" onClick="{{go5}}"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5D6880" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>历史记录</button>
+            <button type="button" class="menu-item" onClick="{{openHelp}}"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5D6880" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M9.6 9.2a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5M12 16.6h.01"></path></svg>使用帮助</button>
+          </div>
+        </sc-if>
+      </div>
+    </header>
+    <!-- 浮出菜单打开时，点空白处关闭 -->
+    <sc-if value="{{popOpen}}" hint-placeholder-val="{{false}}"><button type="button" class="catcher" aria-label="关闭菜单" onClick="{{closePop}}"></button></sc-if>
+
+    <!-- ① 首页：两行对齐栅格（主卡片 | 近期截止 / 为你推荐 | 今日练习） -->
+    <sc-if value="{{is1}}" hint-placeholder-val="{{true}}">
+      <div class="page-in g-home" style="flex: 1 1 auto;">
+        <section class="panel main" style="display: flex; flex-direction: column; gap: 16px; z-index: {{heroZ}};">
+          <h1 class="h1">今天想投什么岗位？</h1>
+          <div class="inset" style="padding: 16px; display: flex; align-items: center; gap: 16px;">
+            <span class="tile-w"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg></span>
+            <span style="flex: 1 1 0; min-width: 0;">
+              <span style="display: block; font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{resume}}</span>
+              <span class="muted num" style="display: block; margin-top: 2px; font-size: 12px;">238 字 · Python 后端 · 2027 届本科</span>
+              <span style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;"><span class="tag tag-n">Python</span><span class="tag tag-n">FastAPI</span><span class="tag tag-n">MySQL</span><span class="tag tag-n">Redis</span><span class="tag tag-n">Linux</span></span>
+            </span>
+            <span style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+              <span class="tag" style="background: #E6ECFF; color: #2F4FD6;"><span style="width: 6px; height: 6px; border-radius: 999px; background: #5E7FEF;"></span>已解析</span>
+              <button type="button" class="link" aria-haspopup="dialog" onClick="{{openUpload}}">换一份</button>
+            </span>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+            <p class="label" style="width: 64px;">求职偏好</p>
+            <sc-for list="{{prefs}}" as="pf" hint-placeholder-count="4">
+              <div style="position: relative;">
+                <button type="button" class="chip num" aria-label="{{pf.name}}：{{pf.value}}" aria-expanded="{{pf.open}}" onClick="{{pf.toggle}}">{{pf.value}}<svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5D6880" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></button>
+                <sc-if value="{{pf.open}}" hint-placeholder-val="{{false}}">
+                  <div class="pop pop-in" role="region" aria-label="{{pf.name}}" style="top: 40px; left: 0; min-width: 156px;">
+                    <p class="label" style="padding: 6px 12px 4px;">{{pf.name}}</p>
+                    <sc-for list="{{pf.options}}" as="o" hint-placeholder-count="4">
+                      <button type="button" class="menu-item num" aria-pressed="{{o.on}}" onClick="{{o.pick}}" style="{{o.style}}"><span style="flex: 1 1 0;">{{o.label}}</span><sc-if value="{{o.on}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4F68DC" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg></sc-if></button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <!-- 上次匹配：和线上“上次匹配”提示一致，点击直接看结果 -->
+          <sc-if value="{{hasResults}}" hint-placeholder-val="{{true}}">
+            <button type="button" class="inset row-btn" onClick="{{go3}}" style="display: flex; align-items: center; gap: 12px; padding: 8px 16px 8px 8px;">
+              <span style="width: 32px; height: 32px; flex-shrink: 0; border-radius: 10px; display: grid; place-items: center; background: #E6ECFF; color: #2F4FD6;"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V12M12 20V5M19 20v-6"></path></svg></span>
+              <span class="muted" style="flex-shrink: 0; font-size: 12px;">上次匹配</span>
+              <span class="num" style="flex: 1 1 0; min-width: 0; font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{lastMatch}}</span>
+              <span class="link" style="flex-shrink: 0;">查看结果<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+            </button>
+          </sc-if>
+          <sc-if value="{{noResults}}" hint-placeholder-val="{{false}}">
+            <button type="button" class="inset row-btn" onClick="{{go2}}" style="display: flex; align-items: center; gap: 12px; padding: 8px 16px 8px 8px;">
+              <span style="width: 32px; height: 32px; flex-shrink: 0; border-radius: 10px; display: grid; place-items: center; background: #E6ECFF; color: #2F4FD6;"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V12M12 20V5M19 20v-6"></path></svg></span>
+              <span class="muted" style="flex: 1 1 0; min-width: 0; font-size: 14px;">还没有匹配记录，先挑几个想投的岗位</span>
+              <span class="link" style="flex-shrink: 0;">去挑选<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+            </button>
+          </sc-if>
+          <div class="divider" style="margin-top: auto; padding-top: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px;">
+            <p class="muted num" style="margin: 0; flex: 1 1 200px; font-size: 14px;">岗位库共 11 个可投岗位，覆盖 5 类专业</p>
+            <button type="button" onClick="{{go2}}" class="btn-p">挑选岗位<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+          </div>
+        </section>
+
+        <section class="panel sub" aria-label="近期截止" style="display: flex; flex-direction: column; gap: 16px;">
+          <div class="head"><p class="h3" style="flex: 1 1 0;">近期截止</p><button type="button" class="link num" aria-haspopup="dialog" onClick="{{openDeadlines}}">全部 {{dlTotal}} 项<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button></div>
+          <div class="num" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px;">
+            <sc-for list="{{strip}}" as="sd" hint-placeholder-count="14">
+              <span style="{{sd.style}}"><span style="{{sd.wkStyle}}">{{sd.wk}}</span><span>{{sd.n}}</span><sc-if value="{{sd.dl}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; bottom: 4px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 999px; background: #E59A72;"></span></sc-if></span>
+            </sc-for>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <sc-for list="{{deadlines}}" as="dl" hint-placeholder-count="3">
+              <button type="button" class="inset row-btn" aria-haspopup="dialog" onClick="{{dl.open}}" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 6px;">
+                <span class="num" style="width: 44px; flex-shrink: 0; text-align: center; font-size: 11px; color: #5D6880; line-height: 1.3;"><span style="display: block; font-size: 17px; font-weight: 600; color: #1C2433;">{{dl.day}}</span>11 月</span>
+                <span style="flex: 1 1 0; min-width: 0;"><span style="display: block; font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{dl.who}}</span><span class="muted" style="font-size: 12px;">{{dl.what}}</span></span>
+                <span class="tag num" style="{{dl.tagStyle}}">{{dl.left}}</span>
+              </button>
+            </sc-for>
+          </div>
+        </section>
+
+        <section class="panel sub" aria-label="为你推荐" style="display: flex; flex-direction: column; gap: 16px;">
+          <div class="head"><p class="h3">为你推荐</p><span class="muted" style="flex: 1 1 0; font-size: 12px;">根据简历和偏好</span><button type="button" onClick="{{go2}}" class="link">查看全部<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button></div>
+          <div class="rec-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+            <sc-for list="{{featured}}" as="f" hint-placeholder-count="3">
+              <div class="inset" style="display: flex; flex-direction: column; gap: 12px; padding: 16px;">
+                <span style="display: flex; align-items: center; gap: 12px;">
+                  <span style="{{f.logoStyle}}">{{f.initial}}</span>
+                  <span style="min-width: 0;"><span style="display: block; font-size: 14px; font-weight: 500;">{{f.company}}</span><span class="muted" style="font-size: 12px;">{{f.city}}</span></span>
+                </span>
+                <span style="font-size: 17px; font-weight: 500; line-height: 1.4;">{{f.title}}</span>
+                <span class="muted" style="font-size: 12px; line-height: 1.65; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{f.desc}}</span>
+                <span style="display: flex; flex-wrap: wrap; gap: 6px;"><span class="tag tag-n">{{f.cat}}</span><span class="tag tag-n">本科</span><span class="tag tag-n num">2027 届</span></span>
+                <span class="divider" style="margin-top: auto; padding-top: 8px; display: flex; justify-content: space-between; gap: 8px;">
+                  <button type="button" class="link" aria-haspopup="dialog" onClick="{{f.openJd}}" style="color: #47526A;">查看 JD</button>
+                  <button type="button" onClick="{{f.choose}}" class="link">{{f.chooseLabel}}<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <section class="panel sub" aria-label="今日练习" style="display: flex; flex-direction: column; gap: 16px;">
+          <div class="head"><p class="h3" style="flex: 1 1 0;">今日练习</p><span class="muted" style="font-size: 12px;">模拟面试 · 共 5 轮</span></div>
+          <div class="inset" style="padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+            <span style="display: flex; align-items: center; gap: 12px;">
+              <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 13px; display: grid; place-items: center; background: linear-gradient(180deg, #EEF2FF 0%, #CBD9FF 46%, #B3C7FF 100%); color: #1B2B57; box-shadow: inset 0 1px 1px #FFFFFF, inset 0 -3px 6px rgba(90,115,215,0.22);"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"></path><path d="M19 11a7 7 0 0 1-14 0M12 18v3"></path></svg></span>
+              <span style="flex: 1 1 0; min-width: 0;"><span style="display: block; font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ivShort}}</span><span class="muted num" style="font-size: 12px;">{{ivProgress}}</span></span>
+            </span>
+            <span style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.7); overflow: hidden;"><span style="display: block; width: {{ivPct}}%; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #B9CBFF, #6F8DF5);"></span></span>
+            <button type="button" onClick="{{go4}}" class="btn-p" style="min-height: 40px; font-size: 13px;">{{ivCta}}</button>
+          </div>
+          <p class="muted" style="margin: auto 0 0; display: flex; gap: 8px; font-size: 12px; line-height: 1.7;"><svg aria-hidden="true" style="flex-shrink: 0; margin-top: 2px;" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5E7FEF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"></path></svg>回答时带上数字（耗时、数据量、提升幅度），比只讲做法更有说服力。</p>
+        </section>
+      </div>
+    </sc-if>
+
+    <!-- ② 选择岗位 -->
+    <sc-if value="{{is2}}" hint-placeholder-val="{{false}}">
+      <div class="page-in g-84" style="flex: 1 1 auto;">
+        <div style="min-width: 0; display: flex; flex-direction: column; gap: 20px;">
+          <section class="panel sub" style="padding: 12px 12px 12px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
+            <div class="cat-row" role="group" aria-label="岗位分类" style="display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.6);">
+              <sc-for list="{{cats}}" as="c" hint-placeholder-count="5"><button type="button" onClick="{{c.pick}}" aria-pressed="{{c.active}}" style="{{c.style}}">{{c.label}}<span class="num" style="{{c.countStyle}}">{{c.count}}</span></button></sc-for>
+            </div>
+            <label class="field job-search" style="flex: 1 1 200px; max-width: 300px; margin-left: auto;">
+              <span class="sr">搜索岗位</span>
+              <input type="search" value="{{jq}}" onChange="{{setJq}}" placeholder="搜索岗位或公司">
+              <span aria-hidden="true" style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 999px; display: grid; place-items: center; color: #1B2B57; background: linear-gradient(180deg, #EEF2FF 0%, #CBD9FF 46%, #B3C7FF 100%); border: 1px solid rgba(255,255,255,0.9); box-shadow: inset 0 1px 1px #FFFFFF, inset 0 -3px 6px rgba(90,115,215,0.22), 0 8px 14px -6px rgba(96,126,236,0.6);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg></span>
+            </label>
+          </section>
+          <div class="job-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; align-content: start;">
+            <sc-for list="{{jobs}}" as="j" hint-placeholder-count="6">
+              <div style="{{j.cardStyle}}">
+                <button type="button" onClick="{{j.toggle}}" aria-pressed="{{j.selected}}" style="display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 12px; border: 0; background: transparent; text-align: left; cursor: pointer; color: inherit;">
+                  <span style="display: flex; align-items: center; gap: 12px; width: 100%;">
+                    <span style="{{j.logoStyle}}">{{j.initial}}</span>
+                    <span style="flex: 1 1 0; min-width: 0;"><span style="display: block; font-size: 14px; font-weight: 500;">{{j.company}}</span><span class="muted" style="font-size: 12px;">{{j.city}}</span></span>
+                    <span style="{{j.checkStyle}}"><sc-if value="{{j.selected}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4F68DC" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg></sc-if></span>
+                  </span>
+                  <span style="font-size: 17px; font-weight: 500; line-height: 1.4; min-height: 48px;">{{j.title}}</span>
+                  <span style="display: flex; gap: 6px;"><span class="tag tag-n">{{j.cat}}</span><span class="tag tag-n">本科</span></span>
+                </button>
+                <div class="divider" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 16px;">
+                  <button type="button" class="link" aria-haspopup="dialog" aria-label="查看 {{j.title}} 的 JD" onClick="{{j.openJd}}">查看 JD<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+                  <span style="{{j.stateStyle}}">{{j.action}}</span>
+                </div>
+              </div>
+            </sc-for>
+            <sc-if value="{{noJobs}}" hint-placeholder-val="{{false}}">
+              <div class="inset" style="grid-column: 1 / -1; padding: 32px 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;">
+                <p style="margin: 0; font-size: 14px;">没有找到「{{jq}}」相关的岗位</p>
+                <button type="button" class="link" onClick="{{clearJobSearch}}">清除搜索，显示全部岗位</button>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+
+        <div style="min-width: 0; display: flex; flex-direction: column; gap: 20px;">
+          <aside class="panel main" aria-label="已选岗位" style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="head"><p class="h3" style="flex: 1 1 0;">已选岗位</p><span class="num" style="font-size: 28px; font-weight: 700; line-height: 1;">{{count}}</span><span class="muted num" style="font-size: 14px;">/ {{total}}</span></div>
+            <sc-if value="{{empty}}" hint-placeholder-val="{{false}}"><p class="inset muted" style="margin: 0; padding: 16px; text-align: center; font-size: 14px;">还没有选，点左边的卡片勾选</p></sc-if>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <sc-for list="{{pickedJobs}}" as="p" hint-placeholder-count="4">
+                <div class="inset" style="display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 12px;">
+                  <span style="{{p.logoStyle}}">{{p.initial}}</span>
+                  <span style="flex: 1 1 0; min-width: 0;"><span style="display: block; font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{p.title}}</span><span class="muted" style="font-size: 12px;">{{p.company}}</span></span>
+                  <button type="button" onClick="{{p.toggle}}" aria-label="移除 {{p.title}}" style="width: 32px; height: 32px; border: 0; border-radius: 10px; background: rgba(255,255,255,0.9); display: grid; place-items: center; cursor: pointer; color: #5D6880;"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+                </div>
+              </sc-for>
+            </div>
+            <p class="muted" style="margin: 0; font-size: 12px; line-height: 1.7;">每个岗位都会给出匹配分、推荐理由和缺口，约 1 分钟。</p>
+            <button type="button" onClick="{{startMatch}}" disabled="{{cantMatch}}" class="btn-p" style="width: 100%;">
+              <sc-if value="{{matching}}" hint-placeholder-val="{{false}}"><svg class="spin" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.2-8.56"></path></svg>正在匹配…</sc-if>
+              <sc-if value="{{notMatching}}" hint-placeholder-val="{{true}}">开始匹配<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></sc-if>
+            </button>
+          </aside>
+
+          <section class="panel sub" aria-label="用于匹配的简历" style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 16px;">
+            <p class="h3">用于匹配的简历</p>
+            <div class="inset" style="padding: 12px; display: flex; align-items: center; gap: 12px;">
+              <span class="tile-w" style="width: 40px; height: 40px; border-radius: 12px;"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg></span>
+              <span style="flex: 1 1 0; min-width: 0;"><span style="display: block; font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{resume}}</span><span class="muted num" style="font-size: 12px;">238 字 · Python 后端 · 2027 届本科</span></span>
+            </div>
+            <p class="label">简历里的技能</p>
+            <span style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: -8px;"><span class="tag tag-n">Python</span><span class="tag tag-n">FastAPI</span><span class="tag tag-n">MySQL</span><span class="tag tag-n">Redis</span><span class="tag tag-n">Linux</span></span>
+            <div class="divider" style="margin-top: auto; padding-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px;"><span class="muted" style="font-size: 14px;">想换一份简历？</span><button type="button" class="btn-g" aria-haspopup="dialog" onClick="{{openUpload}}">重新上传</button></div>
+          </section>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ③ 匹配结果 -->
+    <sc-if value="{{is3}}" hint-placeholder-val="{{false}}">
+      <div class="page-in g-57" style="flex: 1 1 auto;">
+        <sc-if value="{{noResults}}" hint-placeholder-val="{{false}}">
+          <section class="panel sub" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center;">
+            <p class="h3">还没有匹配结果</p>
+            <p class="muted" style="margin: 0; font-size: 14px;">先选几个想投的岗位，再点「开始匹配」。</p>
+            <button type="button" class="btn-p" onClick="{{go2}}">去选择岗位</button>
+          </section>
+        </sc-if>
+        <sc-if value="{{hasResults}}" hint-placeholder-val="{{true}}">
+          <section class="panel sub" aria-label="匹配排序" style="display: flex; flex-direction: column; gap: 8px; padding: 16px;">
+            <div class="head" style="padding: 4px 14px 8px;"><p class="h3" style="flex: 1 1 0;">匹配排序</p><span class="tag num" style="background: #E6ECFF; color: #2F4FD6;">AI 分析完成 {{resultCount}} / {{resultCount}}</span></div>
+            <sc-for list="{{ranks}}" as="r" hint-placeholder-count="4">
+              <button type="button" onClick="{{r.pick}}" aria-pressed="{{r.active}}" style="{{r.style}}">
+                <span class="num" style="{{r.badge}}">{{r.rank}}</span>
+                <span style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; text-align: left;">
+                  <span style="font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{r.title}}</span>
+                  <span class="muted" style="font-size: 12px;">{{r.company}}</span>
+                  <span style="height: 4px; border-radius: 999px; background: rgba(255,255,255,0.6); overflow: hidden;"><span style="{{r.bar}}"></span></span>
+                </span>
+                <span class="num" style="font-size: 22px; font-weight: 700; min-width: 34px; text-align: right;">{{r.score}}</span>
+              </button>
+            </sc-for>
+            <!-- 整体建议：按本次匹配的岗位给出最值得补的几项 -->
+            <div class="inset" style="margin-top: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+              <span style="display: flex; align-items: center; gap: 8px;"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5E7FEF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"></path></svg><span style="font-size: 14px; font-weight: 500;">整体建议</span></span>
+              <sc-for list="{{suggestions}}" as="sg" hint-placeholder-count="3">
+                <div style="display: flex; gap: 10px; align-items: flex-start;">
+                  <span class="num" style="width: 22px; height: 22px; flex-shrink: 0; border-radius: 999px; display: grid; place-items: center; font-size: 11px; font-weight: 600; background: #FBEDE4; color: #A3542C;">{{sg.n}}</span>
+                  <span style="flex: 1 1 0; min-width: 0;"><span style="display: block; font-size: 14px; line-height: 1.6; color: #2E384D;">{{sg.text}}</span><span class="muted" style="font-size: 12px;">提升：{{sg.who}}</span></span>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+
+          <section class="panel main" aria-label="岗位详情" style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 20px;">
+              <div style="flex: 1 1 260px; min-width: 0;">
+                <p class="muted" style="margin: 0; font-size: 14px;">{{d.company}} · {{d.city}}</p>
+                <p class="h2" style="margin-top: 6px; font-weight: 500;">{{d.title}}</p>
+                <span class="tag" style="margin-top: 12px; background: #FBEDE4; color: #A3542C;">{{d.level}}</span>
+              </div>
+              <div style="position: relative; width: 112px; height: 112px; flex-shrink: 0;">
+                <svg role="img" aria-label="匹配分 {{d.score}}" width="112" height="112" viewBox="0 0 112 112"><defs><linearGradient id="rf-ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B9CBFF"></stop><stop offset="1" stop-color="#5E7FEF"></stop></linearGradient></defs><circle cx="56" cy="56" r="46" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="9"></circle><circle cx="56" cy="56" r="46" fill="none" stroke="url(#rf-ring)" stroke-width="9" stroke-linecap="round" stroke-dasharray="{{d.dash}}" transform="rotate(-90 56 56)"></circle></svg>
+                <span class="num" style="position: absolute; inset: 15px; border-radius: 999px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,255,255,0.42)); border: 1px solid rgba(255,255,255,0.95); box-shadow: inset 0 1px 1px #FFFFFF, inset 0 -8px 14px -8px rgba(90,110,170,0.32), 0 10px 18px -10px rgba(40,60,95,0.45);"><span style="font-size: 32px; font-weight: 700; line-height: 1;">{{d.score}}</span><span class="muted" style="font-size: 11px;">/ 100</span></span>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px;">
+              <sc-for list="{{d.dims}}" as="m" hint-placeholder-count="4">
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                  <span style="display: flex; justify-content: space-between; font-size: 14px;"><span style="color: #47526A;">{{m.label}}</span><span class="num" style="font-weight: 700;">{{m.value}}</span></span>
+                  <span style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.6); overflow: hidden;"><span style="{{m.bar}}"></span></span>
+                </div>
+              </sc-for>
+            </div>
+
+            <div class="inset" style="padding: 16px;">
+              <p class="label">推荐理由</p>
+              <p style="margin: 8px 0 0; font-size: 14px; line-height: 1.8; color: #2E384D;">{{d.reason}}</p>
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 24px;">
+              <div style="flex: 1 1 200px; display: flex; flex-direction: column; gap: 8px;"><p class="label">已命中</p><span style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{{d.hits}}" as="h" hint-placeholder-count="3"><span class="tag" style="background: #E6ECFF; color: #2F4FD6;">{{h}}</span></sc-for><sc-if value="{{d.noHits}}" hint-placeholder-val="{{false}}"><span class="muted" style="font-size: 12px; line-height: 24px;">暂时没有明显命中的要求</span></sc-if></span></div>
+              <div style="flex: 1 1 200px; display: flex; flex-direction: column; gap: 8px;"><p class="label">还缺少</p><span style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{{d.misses}}" as="m" hint-placeholder-count="2"><span class="tag" style="background: rgba(255,255,255,0.8); border: 1px dashed #E3AE90; color: #A3542C;">{{m}}</span></sc-for></span></div>
+            </div>
+
+            <div class="divider" style="margin-top: auto; padding-top: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
+              <button type="button" class="btn-g" aria-haspopup="dialog" onClick="{{d.openJd}}">查看 JD</button>
+              <a class="btn-g" href="{{d.url}}" target="_blank" rel="noopener noreferrer">前往投递<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg></a>
+              <span style="flex: 1 1 0;"></span>
+              <button type="button" onClick="{{d.practice}}" class="btn-p">针对这个岗位练面试<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+            </div>
+          </section>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- ④ 模拟面试 -->
+    <sc-if value="{{is4}}" hint-placeholder-val="{{false}}">
+      <div class="page-in g-84" style="flex: 1 1 auto;">
+        <section class="panel main" aria-label="本轮问答" style="display: flex; flex-direction: column; gap: 20px;">
+          <sc-if value="{{ivActive}}" hint-placeholder-val="{{true}}">
+            <div class="head">
+              <span class="tag num" style="background: #E6ECFF; color: #2F4FD6;">第 {{iv.n}} 轮 · {{iv.topic}}</span>
+              <span style="flex: 1 1 0;"></span>
+              <span class="muted" style="font-size: 12px;">建议 2–3 分钟</span>
+            </div>
+            <div style="display: flex; gap: 16px; align-items: flex-start;">
+              <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 13px; display: grid; place-items: center; background: linear-gradient(140deg, #DCE6FF 0%, #AFC3FF 55%, #8FA8F5 100%); border: 1px solid rgba(255,255,255,0.9); box-shadow: inset 0 1px 1px #FFFFFF, 0 8px 16px -10px rgba(76,104,214,0.6);"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 32 32"><path d="M23.4 12.6 A8.4 8.4 0 1 1 19.6 8.3" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round"></path><path d="M24.5 4.5 C24.8 6.6 25.9 7.7 28 8 C25.9 8.3 24.8 9.4 24.5 11.5 C24.2 9.4 23.1 8.3 21 8 C23.1 7.7 24.2 6.6 24.5 4.5Z" fill="#FFFFFF"></path></svg></span>
+              <div style="flex: 1 1 0; min-width: 0;">
+                <p class="label">AI 面试官</p>
+                <p class="h2 q-text" style="margin-top: 6px; font-weight: 500; line-height: 1.55;">{{iv.q}}</p>
+              </div>
+            </div>
+            <label style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 8px;">
+              <span class="label">你的回答</span>
+              <textarea rows="7" value="{{answer}}" onChange="{{setAnswer}}" placeholder="按“做了什么 → 怎么判断 → 结果如何”来讲" style="flex: 1 1 auto; min-height: 180px; resize: none; border: 1px solid rgba(255,255,255,0.9); border-radius: 18px; padding: 16px 18px; background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0.66)); font-size: 14px; line-height: 1.85; color: #1C2433; font-family: inherit; box-shadow: inset 0 3px 8px rgba(90,110,170,0.16), inset 0 -1px 1px rgba(255,255,255,0.9), 0 1px 0 rgba(255,255,255,0.7);"></textarea>
+            </label>
+            <sc-if value="{{recording}}" hint-placeholder-val="{{false}}"><p role="status" style="margin: -8px 0 0; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #A3542C;"><span class="pulse" style="width: 8px; height: 8px; border-radius: 999px; background: #E59A72;"></span>正在听你说…说完再点一次「结束录音」</p></sc-if>
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
+              <button type="button" class="btn-g" aria-pressed="{{recording}}" onClick="{{toggleVoice}}" style="{{voiceStyle}}">
+                <sc-if value="{{notRecording}}" hint-placeholder-val="{{true}}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"></path><path d="M19 11a7 7 0 0 1-14 0M12 18v3"></path></svg>语音输入</sc-if>
+                <sc-if value="{{recording}}" hint-placeholder-val="{{false}}"><span class="pulse" style="width: 8px; height: 8px; border-radius: 999px; background: #E59A72;"></span>结束录音</sc-if>
+              </button>
+              <span class="muted num" style="flex: 1 1 0; font-size: 12px;">{{answerLen}} / 1500 字</span>
+              <button type="button" class="btn-g" onClick="{{skip}}">跳过本题</button>
+              <button type="button" class="btn-p" onClick="{{submit}}" disabled="{{submitting}}">
+                <sc-if value="{{submitting}}" hint-placeholder-val="{{false}}"><svg class="spin" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.2-8.56"></path></svg>正在分析…</sc-if>
+                <sc-if value="{{notSubmitting}}" hint-placeholder-val="{{true}}">提交回答</sc-if>
+              </button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ivDone}}" hint-placeholder-val="{{false}}">
+            <div style="flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center;">
+              <span style="width: 72px; height: 72px; border-radius: 999px; display: grid; place-items: center; background: linear-gradient(180deg, #EEF2FF 0%, #CBD9FF 46%, #B3C7FF 100%); color: #1B2B57; border: 1px solid rgba(255,255,255,0.9); box-shadow: inset 0 1px 1px #FFFFFF, inset 0 -6px 12px rgba(90,115,215,0.22), 0 18px 30px -14px rgba(96,126,236,0.7);"><svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg></span>
+              <p class="h2">5 轮面试完成</p>
+              <p class="muted num" style="margin: 0; max-width: 420px; font-size: 14px; line-height: 1.75;">回答了 {{doneCount}} 轮，跳过 {{skipCount}} 轮。点右侧已完成的轮次，可以回看每一轮的反馈。</p>
+              <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;">
+                <button type="button" class="btn-g" onClick="{{go5}}">查看记录</button>
+                <button type="button" class="btn-p" onClick="{{restart}}">再练一次</button>
+              </div>
+            </div>
+          </sc-if>
+        </section>
+
+        <div style="min-width: 0; display: flex; flex-direction: column; gap: 20px;">
+          <section class="panel sub" aria-label="五轮进度" style="display: flex; flex-direction: column; gap: 12px;">
+            <p class="h3">五轮进度</p>
+            <ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column;">
+              <sc-for list="{{rounds}}" as="r" hint-placeholder-count="5">
+                <li style="display: flex; gap: 12px;">
+                  <span style="display: flex; flex-direction: column; align-items: center;">
+                    <span class="num" style="{{r.marker}}"><sc-if value="{{r.done}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg></sc-if><sc-if value="{{r.showNum}}" hint-placeholder-val="{{true}}">{{r.n}}</sc-if></span>
+                    <sc-if value="{{r.hasLine}}" hint-placeholder-val="{{true}}"><span style="{{r.line}}"></span></sc-if>
+                  </span>
+                  <button type="button" onClick="{{r.view}}" disabled="{{r.locked}}" style="{{r.row}}"><span style="display: block; font-size: 14px; font-weight: 500;">{{r.topic}}</span><span class="muted" style="font-size: 12px;">{{r.note}}</span></button>
+                </li>
+              </sc-for>
+            </ol>
+          </section>
+
+          <section class="panel sub" aria-label="本轮反馈" style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 16px;">
+            <sc-if value="{{fb.has}}" hint-placeholder-val="{{true}}">
+              <p class="h3 num">第 {{fb.n}} 轮反馈 · {{fb.topic}}</p>
+              <div style="display: flex; gap: 12px;"><span style="width: 24px; height: 24px; flex-shrink: 0; border-radius: 999px; display: grid; place-items: center; background: #E6ECFF; color: #2F4FD6;"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg></span><p style="margin: 0; font-size: 14px; line-height: 1.75; color: #2E384D;"><span style="font-weight: 500;">做得好：</span>{{fb.good}}</p></div>
+              <div style="display: flex; gap: 12px;"><span style="width: 24px; height: 24px; flex-shrink: 0; border-radius: 999px; display: grid; place-items: center; background: #FBEDE4; color: #A3542C;"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 6v12M6 12h12"></path></svg></span><p style="margin: 0; font-size: 14px; line-height: 1.75; color: #2E384D;"><span style="font-weight: 500;">可以补充：</span>{{fb.more}}</p></div>
+              <span style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{{fb.tags}}" as="t" hint-placeholder-count="3"><span class="tag tag-n">{{t}}</span></sc-for></span>
+            </sc-if>
+            <sc-if value="{{fb.none}}" hint-placeholder-val="{{false}}">
+              <p class="h3">本轮反馈</p>
+              <p class="inset muted" style="margin: 0; padding: 16px; font-size: 14px; line-height: 1.75;">提交第一轮回答后，这里会出现 AI 的反馈：哪里答得好、还可以补充什么。</p>
+            </sc-if>
+            <p class="muted" style="margin: auto 0 0; font-size: 12px;">反馈由 AI 生成，仅供参考</p>
+          </section>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ⑤ 记录 -->
+    <sc-if value="{{is5}}" hint-placeholder-val="{{false}}">
+      <div class="page-in g-84" style="flex: 1 1 auto;">
+        <section class="panel main" aria-label="最近动态" style="display: flex; flex-direction: column; gap: 16px;">
+          <p class="h3">最近动态</p>
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            <sc-for list="{{timeline}}" as="g" hint-placeholder-count="3">
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <p class="label num">{{g.day}}</p>
+                <sc-for list="{{g.items}}" as="it" hint-placeholder-count="2">
+                  <div class="inset" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px 12px 12px;">
+                    <span style="{{it.iconStyle}}">
+                      <sc-if value="{{it.iDoc}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg></sc-if>
+                      <sc-if value="{{it.iChart}}" hint-placeholder-val="{{true}}"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V12M12 20V5M19 20v-6"></path></svg></sc-if>
+                      <sc-if value="{{it.iMic}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"></path><path d="M19 11a7 7 0 0 1-14 0M12 18v3"></path></svg></sc-if>
+                    </span>
+                    <span style="flex: 1 1 0; min-width: 0;">
+                      <span style="display: block; font-size: 12px; color: #5D6880;"><span class="num">{{it.time}}</span> · {{it.kind}}</span>
+                      <span style="display: block; margin-top: 2px; font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{it.text}}</span>
+                    </span>
+                    <sc-if value="{{it.hasAct}}" hint-placeholder-val="{{false}}"><button type="button" class="link" onClick="{{it.act}}">{{it.actLabel}}<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button></sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <div style="min-width: 0; display: flex; flex-direction: column; gap: 20px;">
+          <section class="panel sub" aria-label="模拟面试记录" style="display: flex; flex-direction: column; gap: 12px;">
+            <p class="h3">模拟面试</p>
+            <sc-for list="{{sessions}}" as="se" hint-placeholder-count="2">
+              <div class="inset" style="padding: 12px 16px; display: flex; flex-direction: column; gap: 8px;">
+                <span style="display: flex; align-items: center; gap: 12px;">
+                  <span style="flex: 1 1 0; min-width: 0;"><span style="display: block; font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{se.title}}</span><span class="muted num" style="font-size: 12px;">{{se.status}}</span></span>
+                  <sc-if value="{{se.hasAct}}" hint-placeholder-val="{{true}}"><button type="button" class="link" onClick="{{se.act}}">{{se.actLabel}}<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button></sc-if>
+                </span>
+                <span style="height: 4px; border-radius: 999px; background: rgba(255,255,255,0.7); overflow: hidden;"><span style="{{se.bar}}"></span></span>
+              </div>
+            </sc-for>
+          </section>
+
+          <section class="panel sub" aria-label="我的简历" style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 12px;">
+            <p class="h3">我的简历</p>
+            <sc-for list="{{resumes}}" as="rs" hint-placeholder-count="2">
+              <div class="inset" style="padding: 10px 12px; display: flex; align-items: center; gap: 12px;">
+                <span class="tile-w" style="width: 36px; height: 36px; border-radius: 11px;"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg></span>
+                <span style="flex: 1 1 0; min-width: 0;"><span style="display: block; font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{rs.name}}</span><span class="muted num" style="font-size: 12px;">{{rs.date}}</span></span>
+                <sc-if value="{{rs.current}}" hint-placeholder-val="{{true}}"><span class="tag" style="background: #E6ECFF; color: #2F4FD6;">当前使用</span></sc-if>
+                <sc-if value="{{rs.other}}" hint-placeholder-val="{{false}}"><button type="button" class="link" onClick="{{rs.use}}">设为当前</button></sc-if>
+              </div>
+            </sc-for>
+            <div class="divider" style="margin-top: auto; padding-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px;"><span class="muted" style="font-size: 12px;">PDF、DOCX、PNG、JPG，15MB 以内</span><button type="button" class="btn-g" aria-haspopup="dialog" onClick="{{openUpload}}">上传新简历</button></div>
+          </section>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</div>
+
+<!-- 对话框：搜索 / 帮助 / 更换简历 / 岗位 JD / 全部截止 -->
+<sc-if value="{{ovOpen}}" hint-placeholder-val="{{false}}">
+  <div class="ov {{ovClass}}" onKeyDown="{{dialogKey}}" style="position: fixed; inset: 0; z-index: 50; box-sizing: border-box; padding: 8vh 16px 24px; overflow-y: auto; display: flex; justify-content: center; align-items: flex-start;">
+    <button type="button" class="scrim" aria-label="关闭对话框" onClick="{{closeOverlay}}"></button>
+
+    <sc-if value="{{isSearch}}" hint-placeholder-val="{{false}}">
+      <section class="panel dialog pop-in" role="dialog" aria-modal="true" aria-label="搜索" style="position: relative; z-index: 1; width: 100%; max-width: 640px; padding: 16px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <label class="field" style="flex: 1 1 0; padding-left: 16px; padding-right: 16px;">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5D6880" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+            <span class="sr">搜索岗位、公司或功能</span>
+            <input ref="{{focusEl}}" type="search" value="{{q}}" onChange="{{setQ}}" placeholder="搜索岗位、公司或功能">
+          </label>
+          <button type="button" class="ico-btn" aria-label="关闭搜索" onClick="{{closeOverlay}}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+        </div>
+        <sc-if value="{{noQ}}" hint-placeholder-val="{{true}}">
+          <div style="display: flex; flex-direction: column; gap: 8px; padding: 0 4px;">
+            <p class="label">最近搜索</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;"><sc-for list="{{recent}}" as="rc" hint-placeholder-count="3"><button type="button" class="chip" onClick="{{rc.use}}">{{rc.label}}</button></sc-for></div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <p class="label" style="padding: 0 4px 6px;">快捷入口</p>
+            <sc-for list="{{quick}}" as="qk" hint-placeholder-count="4">
+              <button type="button" class="menu-item" onClick="{{qk.act}}" style="padding: 8px;">
+                <span class="tile-w" style="width: 36px; height: 36px; border-radius: 11px;">
+                  <sc-if value="{{qk.iDoc}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg></sc-if>
+                  <sc-if value="{{qk.iChart}}" hint-placeholder-val="{{true}}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V12M12 20V5M19 20v-6"></path></svg></sc-if>
+                  <sc-if value="{{qk.iMic}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"></path><path d="M19 11a7 7 0 0 1-14 0M12 18v3"></path></svg></sc-if>
+                  <sc-if value="{{qk.iClock}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></sc-if>
+                </span>
+                <span style="flex: 1 1 0; min-width: 0;"><span style="display: block; font-size: 14px; font-weight: 500;">{{qk.label}}</span><span class="muted num" style="font-size: 12px;">{{qk.hint}}</span></span>
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5D6880" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{hasQ}}" hint-placeholder-val="{{false}}">
+          <p class="label num" style="padding: 0 4px;">岗位 · {{qCount}} 个结果</p>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <sc-for list="{{qJobs}}" as="qj" hint-placeholder-count="3">
+              <button type="button" class="menu-item" onClick="{{qj.open}}" style="padding: 8px;">
+                <span style="{{qj.logoStyle}}">{{qj.initial}}</span>
+                <span style="flex: 1 1 0; min-width: 0;"><span style="display: block; font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{qj.title}}</span><span class="muted" style="font-size: 12px;">{{qj.company}} · {{qj.city}}</span></span>
+                <span class="tag tag-n">{{qj.cat}}</span>
+              </button>
+            </sc-for>
+          </div>
+          <sc-if value="{{qEmpty}}" hint-placeholder-val="{{false}}"><p class="inset muted" style="margin: 0; padding: 20px; text-align: center; font-size: 14px;">没有找到「{{q}}」相关的岗位，换个关键词试试</p></sc-if>
+        </sc-if>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{isHelp}}" hint-placeholder-val="{{false}}">
+      <section class="panel dialog pop-in" role="dialog" aria-modal="true" aria-label="使用帮助" style="position: relative; z-index: 1; width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 16px;">
+        <div class="head"><h2 class="h2" style="flex: 1 1 0;">使用帮助</h2><button type="button" ref="{{focusEl}}" class="ico-btn" aria-label="关闭" onClick="{{closeOverlay}}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></button></div>
+        <div class="help-grid" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+          <sc-for list="{{helpSteps}}" as="hs" hint-placeholder-count="4">
+            <div class="inset" style="padding: 14px 16px; display: flex; flex-direction: column; gap: 6px;">
+              <span style="display: flex; align-items: center; gap: 8px;"><span class="num" style="width: 22px; height: 22px; border-radius: 999px; display: grid; place-items: center; font-size: 11px; font-weight: 600; background: linear-gradient(180deg, #EEF2FF 0%, #CBD9FF 46%, #B3C7FF 100%); color: #1B2B57;">{{hs.n}}</span><span style="font-size: 14px; font-weight: 500;">{{hs.title}}</span></span>
+              <span class="muted" style="font-size: 12px; line-height: 1.65;">{{hs.text}}</span>
+            </div>
+          </sc-for>
+        </div>
+        <p class="label" style="margin-top: 4px;">常见问题</p>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: -8px;">
+          <sc-for list="{{faqs}}" as="fq" hint-placeholder-count="4">
+            <div class="inset" style="padding: 0; overflow: hidden;">
+              <button type="button" onClick="{{fq.toggle}}" aria-expanded="{{fq.open}}" style="display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 12px 16px; border: 0; background: transparent; text-align: left; cursor: pointer; color: #1C2433; font-size: 14px; font-weight: 500;"><span style="flex: 1 1 0;">{{fq.q}}</span><svg aria-hidden="true" style="{{fq.chevron}}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5D6880" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></button>
+              <sc-if value="{{fq.open}}" hint-placeholder-val="{{false}}"><p style="margin: 0; padding: 0 16px 14px; font-size: 14px; line-height: 1.75; color: #2E384D;">{{fq.a}}</p></sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display: flex; justify-content: flex-end;"><button type="button" class="btn-p" onClick="{{closeOverlay}}">知道了</button></div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{isUpload}}" hint-placeholder-val="{{false}}">
+      <section class="panel dialog pop-in" role="dialog" aria-modal="true" aria-label="更换简历" style="position: relative; z-index: 1; width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 16px;">
+        <div class="head"><h2 class="h2" style="flex: 1 1 0;">更换简历</h2><button type="button" ref="{{focusEl}}" class="ico-btn" aria-label="关闭" onClick="{{closeOverlay}}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></button></div>
+        <div class="inset" style="padding: 12px; display: flex; align-items: center; gap: 12px;">
+          <span class="tile-w" style="width: 40px; height: 40px; border-radius: 12px;"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg></span>
+          <span style="flex: 1 1 0; min-width: 0;"><span style="display: block; font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{resume}}</span><span class="muted" style="font-size: 12px;">当前使用</span></span>
+        </div>
+        <sc-if value="{{upIdle}}" hint-placeholder-val="{{true}}">
+          <div class="drop">
+            <span style="width: 52px; height: 52px; border-radius: 999px; display: grid; place-items: center; background: linear-gradient(180deg, #EEF2FF 0%, #CBD9FF 46%, #B3C7FF 100%); color: #1B2B57; border: 1px solid rgba(255,255,255,0.9); box-shadow: inset 0 1px 1px #FFFFFF, inset 0 -4px 8px rgba(90,115,215,0.22), 0 12px 22px -12px rgba(96,126,236,0.7);"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"></path><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"></path></svg></span>
+            <p style="margin: 0; font-size: 15px; font-weight: 500;">把简历拖到这里，或点击选择文件</p>
+            <p class="muted" style="margin: 0; font-size: 12px; line-height: 1.7;">支持 PDF、DOCX，也可以上传 PNG / JPG 照片；单个文件不超过 15MB</p>
+            <input type="file" accept=".pdf,.docx,.png,.jpg,.jpeg" aria-label="选择简历文件" onChange="{{pickFile}}" style="position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer;">
+          </div>
+        </sc-if>
+        <sc-if value="{{upParsing}}" hint-placeholder-val="{{false}}">
+          <div class="inset" role="status" style="padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+            <span style="display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 14px;"><svg class="spin" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5E7FEF" stroke-width="2.4" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.2-8.56"></path></svg><span style="flex-shrink: 0;">正在解析</span><span style="min-width: 0; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{upName}}</span></span>
+            <span style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.7); overflow: hidden;"><span class="grow" style="display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #B9CBFF, #6F8DF5);"></span></span>
+          </div>
+        </sc-if>
+        <sc-if value="{{hasUpErr}}" hint-placeholder-val="{{false}}"><p role="alert" style="margin: 0; padding: 10px 14px; border-radius: 14px; background: #FBEDE4; color: #A3542C; font-size: 14px;">{{upErr}}</p></sc-if>
+        <p class="muted" style="margin: 0; font-size: 12px; line-height: 1.7;">换了简历之后，建议重新匹配一次岗位。</p>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{isJd}}" hint-placeholder-val="{{false}}">
+      <section class="panel dialog pop-in" role="dialog" aria-modal="true" aria-label="岗位详情" style="position: relative; z-index: 1; width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; align-items: flex-start; gap: 16px;">
+          <span style="{{jd.logoStyle}}">{{jd.initial}}</span>
+          <div style="flex: 1 1 0; min-width: 0;">
+            <p class="muted" style="margin: 0; font-size: 14px;">{{jd.company}}</p>
+            <h2 class="h2" style="margin-top: 4px; font-weight: 500;">{{jd.title}}</h2>
+          </div>
+          <button type="button" ref="{{focusEl}}" class="ico-btn" aria-label="关闭" onClick="{{closeOverlay}}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+        </div>
+        <span style="display: flex; flex-wrap: wrap; gap: 6px;"><span class="tag tag-n">{{jd.cat}}</span><span class="tag tag-n">{{jd.edu}}</span><span class="tag tag-n num">2027 届</span><span class="tag tag-n">{{jd.cities}}</span></span>
+        <div class="inset" style="padding: 16px;"><p class="label">岗位职责</p><ul class="bul"><sc-for list="{{jd.duties}}" as="x" hint-placeholder-count="2"><li>{{x}}</li></sc-for></ul></div>
+        <div class="inset" style="padding: 16px;"><p class="label">任职要求</p><ul class="bul"><sc-for list="{{jd.reqs}}" as="x" hint-placeholder-count="3"><li>{{x}}</li></sc-for></ul></div>
+        <p class="muted" style="margin: 0; font-size: 12px;">信息整理自企业招聘页面，投递前请以官网为准。</p>
+        <div class="divider" style="padding-top: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
+          <a class="btn-g" href="{{jd.url}}" target="_blank" rel="noopener noreferrer">前往投递<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg></a>
+          <span style="flex: 1 1 0;"></span>
+          <sc-if value="{{jd.picked}}" hint-placeholder-val="{{false}}"><button type="button" class="btn-g" onClick="{{jd.toggle}}">已在已选岗位 · 移除</button></sc-if>
+          <sc-if value="{{jd.notPicked}}" hint-placeholder-val="{{true}}"><button type="button" class="btn-p" onClick="{{jd.toggle}}">加入已选岗位</button></sc-if>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{isDeadlines}}" hint-placeholder-val="{{false}}">
+      <section class="panel dialog pop-in" role="dialog" aria-modal="true" aria-label="近期截止" style="position: relative; z-index: 1; width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 16px;">
+        <div class="head"><h2 class="h2" style="flex: 1 1 0;">近期截止</h2><button type="button" ref="{{focusEl}}" class="ico-btn" aria-label="关闭" onClick="{{closeOverlay}}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></button></div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <sc-for list="{{dlAll}}" as="dl" hint-placeholder-count="4">
+            <button type="button" class="inset row-btn" onClick="{{dl.open}}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px 10px 8px;">
+              <span class="num" style="width: 44px; flex-shrink: 0; text-align: center; font-size: 11px; color: #5D6880; line-height: 1.3;"><span style="display: block; font-size: 17px; font-weight: 600; color: #1C2433;">{{dl.day}}</span>11 月</span>
+              <span style="flex: 1 1 0; min-width: 0;"><span style="display: block; font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{dl.who}}</span><span class="muted" style="font-size: 12px;">{{dl.what}}</span></span>
+              <span class="tag num" style="{{dl.tagStyle}}">{{dl.left}}</span>
+              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5D6880" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg>
+            </button>
+          </sc-for>
+        </div>
+        <p class="muted" style="margin: 0; font-size: 12px;">截止时间以企业官网为准，点任意一项查看岗位详情。</p>
+      </section>
+    </sc-if>
+  </div>
+</sc-if>
+
+<!-- 轻提示 -->
+<div class="toast-wrap" role="status" aria-live="polite" style="position: fixed; left: 0; right: 0; bottom: 32px; z-index: 60; display: flex; justify-content: center; pointer-events: none;">
+  <sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+    <span class="pop-in" style="display: inline-flex; align-items: center; gap: 8px; max-width: calc(100% - 32px); padding: 10px 18px 10px 12px; border-radius: 999px; background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.82)); border: 1px solid #FFFFFF; box-shadow: inset 0 1px 1px #FFFFFF, 0 18px 36px -18px rgba(40,60,95,0.55); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); font-size: 14px; color: #1C2433;"><span style="width: 22px; height: 22px; flex-shrink: 0; border-radius: 999px; display: grid; place-items: center; background: #E6ECFF; color: #2F4FD6;"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg></span>{{toast}}</span>
+  </sc-if>
+</div>
+</div>
+</template>
+<div id="app"></div>
+<script src="runtime.js"></script>
+<script>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      step: Number(props.initialStep) || 1,
+      cat: '全部', jq: '', picked: ['be', 'ai', 'cs', 'fde'], matched: ['be', 'ai', 'cs', 'fde'], detail: 0, matching: false,
+      overlay: null, pop: null, q: '', jdId: 'be', faq: 0, read: { n3: true },
+      prefs: { major: '计算机', degree: '本科', city: '北京', grad: '2027 届' },
+      resume: '01_张晨_后端_高匹配.docx',
+      resumes: [{ name: '01_张晨_后端_高匹配.docx', date: '11 月 1 日' }, { name: '00_张晨_初版.docx', date: '10 月 30 日' }],
+      upload: 'idle', upName: '', upErr: '',
+      ivJob: 'be', round: 2, marks: { 1: 'done' }, fbRound: 1, recording: false, submitting: false,
+      answer: '我用 EXPLAIN 看到是全表扫描，于是给 activity_id 加了索引，响应时间从大约 800 毫秒降到 60 毫秒左右；之后又用 Redis 缓存了热门活动的人数。',
+      toast: ''
+    };
+    this.timers = [];
+    // 对话框打开时把焦点移进去：搜索框可以直接输入，按 Esc 也能关闭
+    this.focusEl = (el) => { if (el) el.focus({ preventScroll: true }); };
+  }
+
+  componentWillUnmount() { this.timers.forEach((t) => clearTimeout(t)); }
+
+  later(fn, ms) { this.timers.push(setTimeout(fn, ms)); }
+
+  say(msg) {
+    clearTimeout(this.toastTimer);
+    this.setState({ toast: msg });
+    this.toastTimer = setTimeout(() => this.setState({ toast: '' }), 2400);
+    this.timers.push(this.toastTimer);
+  }
+
+  renderVals() {
+    const s = this.state;
+    const step = s.step;
+    const go = (n) => () => this.setState({ step: n, overlay: null, pop: null });
+    const open = (overlay) => () => this.setState({ overlay, pop: null, upErr: '' });
+    const openJd = (id) => () => this.setState({ overlay: 'jd', jdId: id, pop: null });
+    const closeOverlay = () => this.setState({ overlay: null, upErr: '' });
+    const togglePop = (name) => () => this.setState({ pop: s.pop === name ? null : name });
+
+    const GRAD = 'linear-gradient(180deg, #DCE6FF 0%, #BCCEFF 100%)';
+    const LIQ_BTN = 'linear-gradient(180deg, #EEF2FF 0%, #CBD9FF 46%, #B3C7FF 100%)';
+    const ACC = 'linear-gradient(90deg, #B9CBFF, #6F8DF5)';
+    const LIQUID = 'background: linear-gradient(180deg, rgba(255,255,255,0.66) 0%, rgba(255,255,255,0.32) 46%, rgba(255,255,255,0.24) 100%); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.8); box-shadow: inset 0 1px 1px rgba(255,255,255,0.95), inset 0 -12px 22px -16px rgba(90,110,170,0.32), 0 20px 34px -24px rgba(40,60,95,0.5);';
+    const CUR = 'background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.5)); color: #2F4FD6; font-weight: 500; border: 1px solid rgba(255,255,255,0.95); box-shadow: inset 0 1px 1px #FFFFFF, inset 0 -4px 8px rgba(120,140,190,0.16), 0 10px 18px -12px rgba(40,60,95,0.45);';
+    const IDLE = 'background: transparent; color: #5D6880; border: 1px solid transparent;';
+
+    // 岗位：职责和要求整理自岗位库
+    const all = [
+      { id: 'be', title: '2027届校招-后端工程师', short: '后端工程师', company: '北森云计算', city: '北京 / 成都 / 西安', cities: '北京 / 成都 / 西安', cat: '计算机', edu: '本科及以上', initial: 'B', url: 'https://beisen.zhiye.com/campus/jobs',
+        duties: ['负责后端开发，解决技术难题和性能问题', '为产品设计提出建议'],
+        reqs: ['2027 年毕业，本科及以上，计算机、软件或网络工程相关专业', '掌握 C#、Java 等至少一种后端语言，以及 SQL Server、MySQL 等关系数据库', '理解面向对象设计和设计模式', '有 Redis、RabbitMQ、Kafka、SaaS 或大型项目经验者优先'] },
+      { id: 'ai', title: 'AI应用开发工程师', short: 'AI 应用开发工程师', company: '彩讯科技', city: '北京 等 5 城', cities: '北京 / 杭州 / 广州 / 深圳 / 成都', cat: '计算机', edu: '本科及以上', initial: 'C', url: 'https://www.richinfo.cn/jobs/',
+        duties: ['参与企业级智能体、RAG、模型评测与微调等 AI 应用的开发、调试、交付和复盘', '面向政企真实场景完成工程化落地'],
+        reqs: ['2027 届本科及以上，计算机、软件工程、人工智能、大数据等相关专业', '具备 Python 和基础工程能力', '有可演示的 Agent / RAG、LLM 评测、模型微调、竞赛或 AI 实习成果者优先', '重视问题闭环，有责任心和学习能力'] },
+      { id: 'cs', title: '数智化咨询顾问', short: '数智化咨询顾问', company: '中兴新云', city: '北京 等 7 城', cities: '北京 / 西安 / 长沙 / 上海 / 广州 / 成都 / 长春', cat: '经管财会', edu: '本科及以上', initial: 'Z', url: 'https://www.wenjuan.com/s/UZBZJvhceK/',
+        duties: ['负责财务数智化咨询项目的需求调研、方案规划设计和落地', '与客户沟通、识别需求、控制项目风险，推进交付', '沉淀项目知识，优化咨询方法'],
+        reqs: ['本科及以上学历，专业不限', '具备沟通协调、逻辑思维、自主学习和团队协作能力', '能写文档、做 PPT，有项目制实习经验者优先', '能够适应出差'] },
+      { id: 'fde', title: '前沿部署工程师 FDE', short: '前沿部署工程师 FDE', company: '中兴新云', city: '北京 等 7 城', cities: '北京 / 西安 / 长沙 / 上海 / 广州 / 成都 / 长春', cat: '计算机', edu: '本科及以上', initial: 'Z', url: 'https://www.wenjuan.com/s/UZBZJvhceK/',
+        duties: ['深入客户业务场景，识别 AI 应用机会，输出可落地的解决方案', '联动产品、研发和解决方案团队，推动项目交付与持续优化'],
+        reqs: ['本科及以上学历，计算机、人工智能、软件工程等相关专业优先', '具备沟通协调、逻辑思维、自主学习、团队协作和创新能力', '有项目制实习经验者优先', '能够适应出差'] },
+      { id: 'ux', title: '2027届校招-UX设计师', short: 'UX 设计师', company: '北森云计算', city: '北京', cities: '北京', cat: '艺术设计', edu: '本科及以上', initial: 'B', url: 'https://beisen.zhiye.com/campus/jobs',
+        duties: ['协助完成 PC 端和移动端的 UI 与交互设计', '参与需求梳理、用户调研和数据分析，持续优化设计', '与产品沟通方案，跟进开发测试落地，参与整理设计规范和组件'],
+        reqs: ['2027 届本科及以上，产品设计、交互设计、设计艺术相关专业优先', '掌握常用设计方法和工具，能独立输出流程图、原型图和设计稿', '投递需附作品集'] },
+      { id: 'mat', title: '材料研发工程师', short: '材料研发工程师', company: '纵维立方', city: '深圳', cities: '深圳', cat: '化工材料', edu: '本科', initial: 'Z', url: 'https://anycubic.zhiye.com/',
+        duties: ['协助工程师完成材料实验、设备清理和实验室维护', '参与测试并形成完整的测试报告'],
+        reqs: ['2027 届本科，材料化学、有机化学、高分子化学等专业', '熟悉材料加工和高分子材料基础知识', '有良好的专业素养、学习能力和吃苦耐劳精神'] }
+    ].map((j, i) => ({ ...j, i }));
+    const byId = {};
+    all.forEach((j) => { byId[j.id] = j; });
+    // 公司色块：冷蓝、雾灰、晨光
+    const tones = ['linear-gradient(145deg, #E8EDFF, #CDD8FF)', 'linear-gradient(145deg, #F0F4F9, #D9E2EE)', 'linear-gradient(145deg, #FCF3EC, #F1DCCD)'];
+    const tile = (i, size) => 'width: ' + size + 'px; height: ' + size + 'px; flex-shrink: 0; border-radius: ' + Math.round(size * 0.3) + 'px; display: grid; place-items: center; font-family: Inter, sans-serif; font-size: ' + Math.round(size * 0.4) + 'px; font-weight: 600; color: #33415E; border: 1px solid rgba(255,255,255,0.9); background: ' + tones[i % 3] + ';';
+    const hit = (j, k) => !k || [j.title, j.company, j.cities, j.cat].join(' ').toLowerCase().indexOf(k) >= 0;
+    const isPicked = (id) => s.picked.indexOf(id) >= 0;
+
+    // 模拟面试：技术岗问技术题，其他岗位问通用题
+    const TECH_Q = [
+      { topic: '数据库设计', q: '报名表要防止同一个人重复报名，你在数据库层面是怎么保证的？', good: '用组合唯一约束防止重复报名，并捕获冲突返回 409。', more: '说明高并发下约束冲突的比例，以及有没有压测验证。', tags: ['数据库设计', '并发控制', '测试验证'] },
+      { topic: '数据库性能优化', q: '统计报名人数的接口变慢时，你是怎么定位问题、又是怎么优化的？', good: '用 EXPLAIN 定位到全表扫描，并给出了优化前后的耗时对比。', more: '再讲讲为什么选这个索引，以及缓存失效时怎么兜底。', tags: ['索引优化', '性能分析', '缓存'] },
+      { topic: '缓存一致性', q: '用 Redis 缓存报名人数后，数据库更新了，怎么保证不会读到旧数据？', good: '知道先更新数据库再删除缓存，思路是对的。', more: '补充删除失败或并发读写时怎么处理，比如延迟双删或设置过期时间。', tags: ['缓存一致性', 'Redis', '并发'] },
+      { topic: '后端语言', q: '岗位要求 Java 或 C#，如果入职后要用 Java 写服务，你打算怎么快速上手？', good: '能把 Python 的经验迁移到 Java，学习路径清楚。', more: '举一个已经用 Java 写过的小练习，证明你已经开始上手。', tags: ['Java', '学习能力', '经验迁移'] },
+      { topic: '排查与测试', q: '线上接口偶尔报 500 错误，你会按什么顺序排查？上线前又怎么测试？', good: '排查顺序清楚：先看日志和监控，再复现问题。', more: '补充上线前的测试手段，比如单元测试和灰度发布。', tags: ['问题排查', '日志监控', '测试'] }
+    ];
+    const GENERAL_Q = [
+      { topic: '自我介绍', q: '用 1 分钟介绍一下自己，以及为什么想投这个岗位？', good: '先讲结论再讲经历，重点突出。', more: '把投这个岗位的理由和你的一段具体经历连起来。', tags: ['自我介绍', '表达结构'] },
+      { topic: '项目经历', q: '讲一个你做过的最有挑战的项目，你具体负责哪一部分？', good: '分工讲得清楚，能说出自己的贡献。', more: '补充结果数据，比如完成时间、用户数或效率提升。', tags: ['项目经历', '结果量化'] },
+      { topic: '团队协作', q: '和队友意见不一致的时候，你一般怎么处理？', good: '先对齐目标再讨论方案，态度积极。', more: '举一个真实的例子，说明最后是怎么达成一致的。', tags: ['团队协作', '沟通'] },
+      { topic: '岗位匹配', q: '对照岗位要求，你觉得自己最欠缺哪一点？打算怎么补？', good: '能坦诚说出短板，并给出计划。', more: '计划可以更具体，比如时间安排和能拿出来的成果。', tags: ['岗位理解', '自我认知'] },
+      { topic: '职业规划', q: '你对未来 3 年的职业规划是什么？', good: '方向清楚，和岗位的发展路径一致。', more: '说明第一年想达到的具体目标。', tags: ['职业规划'] }
+    ];
+    const ivJob = byId[s.ivJob] || all[0];
+    const qset = ['be', 'ai', 'fde'].indexOf(ivJob.id) >= 0 ? TECH_Q : GENERAL_Q;
+    const total = qset.length;
+    const finished = s.round > total;
+    const markKeys = Object.keys(s.marks);
+    const doneCount = markKeys.filter((k) => s.marks[k] === 'done').length;
+    const skipCount = markKeys.filter((k) => s.marks[k] === 'skip').length;
+    const ivPct = Math.round(markKeys.length / total * 100);
+
+    const titles = ['', '选择岗位', '匹配结果', '模拟面试', '记录'];
+    const subs = ['', '挑几个想投的岗位，可以跨分类多选', '按匹配度从高到低排列，点左侧岗位查看详情', ivJob.title + ' · ' + ivJob.company, '最近的匹配、面试和简历都在这里'];
+
+    const railBase = 'width: 60px; padding: 9px 0 7px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 11px; cursor: pointer; transition: background .2s ease, color .2s ease; ';
+    const rail = ['首页', '选岗', '结果', '面试'].map((label, i) => {
+      const current = i + 1 === step;
+      return { label, go: go(i + 1), current: current ? 'page' : 'false', i1: i === 0, i2: i === 1, i3: i === 2, i4: i === 3, style: railBase + (current ? CUR : IDLE) };
+    });
+
+    // 通知：点一条就标记已读并跳到对应位置
+    const noticeData = [
+      { id: 'n3', kind: '面试反馈', time: '15:42', text: '第 1 轮「数据库设计」的反馈已生成', tone: 'info', mic: true, act: go(4) },
+      { id: 'n2', kind: '匹配完成', time: '15:20', text: '4 个岗位已出结果，最高 39 分', tone: 'info', chart: true, act: go(3) },
+      { id: 'n1', kind: '截止提醒', time: '09:00', text: '北森云计算 · 后端工程师 网申还剩 7 天', tone: 'warn', cal: true, act: openJd('be') }
+    ];
+    const notices = noticeData.map((n) => ({
+      ...n, cal: !!n.cal, chart: !!n.chart, mic: !!n.mic, unread: !s.read[n.id],
+      open: () => { this.setState({ read: { ...s.read, [n.id]: true } }); n.act(); },
+      iconStyle: 'width: 32px; height: 32px; flex-shrink: 0; border-radius: 10px; display: grid; place-items: center; ' + (n.tone === 'warn' ? 'background: #FBEDE4; color: #A3542C;' : 'background: #E6ECFF; color: #2F4FD6;')
+    }));
+    const unread = notices.filter((n) => n.unread).length;
+    const readAll = () => { const read = {}; noticeData.forEach((n) => { read[n.id] = true; }); this.setState({ read }); };
+
+    // 求职偏好：每个胶囊是一个下拉
+    const PREF_OPTS = { major: ['计算机', '经管财会', '艺术设计', '化工材料'], degree: ['大专', '本科', '硕士', '博士'], city: ['北京', '上海', '深圳', '成都', '西安', '不限'], grad: ['2026 届', '2027 届', '2028 届'] };
+    const PREF_NAMES = { major: '专业方向', degree: '学历', city: '意向城市', grad: '毕业届别' };
+    const prefs = ['major', 'degree', 'city', 'grad'].map((k) => ({
+      name: PREF_NAMES[k], value: s.prefs[k], open: s.pop === 'pref-' + k, toggle: togglePop('pref-' + k),
+      options: PREF_OPTS[k].map((label) => ({
+        label, on: label === s.prefs[k],
+        pick: () => this.setState({ prefs: { ...s.prefs, [k]: label }, pop: null }),
+        style: label === s.prefs[k] ? 'color: #2F4FD6; font-weight: 500;' : ''
+      }))
+    }));
+    const prefOpen = String(s.pop || '').indexOf('pref-') === 0;
+
+    // 截止日程（首页显示两周内的 3 项，“全部”里有 4 项）
+    const dlAll = [
+      { day: 8, id: 'be', who: '北森云计算 · 后端工程师', what: '网申截止', left: '剩 7 天', urgent: true },
+      { day: 12, id: 'cs', who: '中兴新云 · 数智化咨询顾问', what: '在线笔试', left: '剩 11 天' },
+      { day: 14, id: 'ai', who: '彩讯科技 · AI 应用开发工程师', what: '网申截止', left: '剩 13 天' },
+      { day: 22, id: 'fde', who: '中兴新云 · 前沿部署工程师 FDE', what: '网申截止', left: '剩 21 天' }
+    ].map((x) => ({ ...x, open: openJd(x.id), tagStyle: x.urgent ? 'background: #FBEDE4; color: #A3542C;' : 'background: rgba(255,255,255,0.7); color: #47526A;' }));
+    const deadlines = dlAll.filter((x) => x.day <= 14);
+    const dlDays = {};
+    deadlines.forEach((x) => { dlDays[x.day] = true; });
+    const wkNames = ['日', '一', '二', '三', '四', '五', '六'];
+    const strip = [];
+    for (let n = 1; n <= 14; n++) {
+      const today = n === 1;
+      strip.push({
+        n, wk: wkNames[(n - 1) % 7], dl: !!dlDays[n],
+        style: 'position: relative; height: 48px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; font-size: 14px; ' +
+          (today ? 'background: ' + LIQ_BTN + '; color: #1B2B57; font-weight: 600; box-shadow: inset 0 1px 1px #FFFFFF, inset 0 -3px 6px rgba(90,115,215,0.22), 0 8px 14px -6px rgba(96,126,236,0.65);'
+                 : dlDays[n] ? 'background: rgba(255,255,255,0.5); color: #1C2433; border: 1px solid rgba(255,255,255,0.75);' : 'color: #2E384D;'),
+        wkStyle: 'font-size: 11px; ' + (today ? 'color: #1B2B57;' : 'color: #5D6880;')
+      });
+    }
+
+    const descs = { be: '负责后端服务开发与性能优化，要求掌握 C# 或 Java，熟悉 SQL Server / MySQL。', ai: '参与大模型应用与智能体开发，熟悉 Python 和常用 AI 框架者优先。', cs: '参与企业数智化咨询项目，需要业务分析、方案撰写和沟通表达能力。' };
+    const featured = all.slice(0, 3).map((j) => ({
+      ...j, desc: descs[j.id], logoStyle: tile(j.i, 40), openJd: openJd(j.id), chooseLabel: isPicked(j.id) ? '已选择' : '去选择',
+      choose: () => {
+        const already = isPicked(j.id);
+        this.setState({ picked: already ? s.picked : s.picked.concat(j.id), step: 2, cat: '全部', jq: '', pop: null });
+        this.say(already ? '这个岗位已经在已选岗位里了' : '已加入已选岗位：' + j.title);
+      }
+    }));
+    const toggleOf = (id) => () => this.setState({ picked: isPicked(id) ? s.picked.filter((x) => x !== id) : s.picked.concat(id) });
+
+    const cats = ['全部', '计算机', '经管财会', '艺术设计', '化工材料'].map((label) => {
+      const active = s.cat === label;
+      const count = label === '全部' ? all.length : all.filter((j) => j.cat === label).length;
+      return {
+        label, active, count, pick: () => this.setState({ cat: label }),
+        style: 'display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border: 0; border-radius: 999px; font-size: 14px; cursor: pointer; transition: background .2s ease; ' +
+          (active ? 'background: linear-gradient(180deg, #FFFFFF, rgba(255,255,255,0.72)); color: #1C2433; font-weight: 500; box-shadow: inset 0 -2px 4px rgba(120,140,190,0.18), 0 8px 16px -8px rgba(40,60,95,0.45);' : 'background: transparent; color: #47526A;'),
+        countStyle: 'min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 999px; display: inline-grid; place-items: center; font-size: 11px; font-weight: 500; ' +
+          (active ? 'background: #E6ECFF; color: #2F4FD6;' : 'background: rgba(255,255,255,0.8); color: #5D6880;')
+      };
+    });
+    const jk = s.jq.trim().toLowerCase();
+    const jobs = all.filter((j) => (s.cat === '全部' || j.cat === s.cat) && hit(j, jk)).map((j) => {
+      const selected = isPicked(j.id);
+      return {
+        ...j, selected, toggle: toggleOf(j.id), openJd: openJd(j.id), action: selected ? '已选择' : '点击选择', logoStyle: tile(j.i, 40),
+        cardStyle: 'display: flex; flex-direction: column; border-radius: 20px; overflow: hidden; transition: box-shadow .2s ease, background .2s ease; ' +
+          (selected ? 'background: linear-gradient(180deg, rgba(246,248,255,0.9) 0%, rgba(228,236,255,0.6) 50%, rgba(214,226,255,0.48) 100%); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.95); box-shadow: inset 0 1px 1px #FFFFFF, inset 0 -12px 22px -16px rgba(96,126,236,0.4), 0 20px 34px -24px rgba(40,60,95,0.5);' : LIQUID),
+        checkStyle: 'width: 24px; height: 24px; flex-shrink: 0; border-radius: 8px; display: grid; place-items: center; background: linear-gradient(180deg, #FFFFFF, rgba(255,255,255,0.7)); ' +
+          (selected ? 'border: 1px solid #FFFFFF; box-shadow: inset 0 -2px 4px rgba(120,140,190,0.2), 0 0 0 2px rgba(143,166,248,0.55), 0 6px 12px -6px rgba(96,126,236,0.7);' : 'border: 1px solid rgba(203,211,225,0.9); box-shadow: inset 0 -2px 4px rgba(120,140,190,0.18), 0 4px 8px -5px rgba(40,60,95,0.35);'),
+        stateStyle: 'font-size: 12px; ' + (selected ? 'padding: 3px 10px; border-radius: 999px; background: #E6ECFF; color: #2F4FD6; font-weight: 500;' : 'color: #5D6880;')
+      };
+    });
+    const pickedJobs = all.filter((j) => isPicked(j.id)).map((j) => ({ title: j.title, company: j.company, initial: j.initial, logoStyle: tile(j.i, 34), toggle: toggleOf(j.id) }));
+    const startMatch = () => {
+      if (!s.picked.length || s.matching) return;
+      this.setState({ matching: true });
+      this.later(() => this.setState({ matching: false, matched: this.state.picked.slice(), step: 3, detail: 0 }), 1400);
+    };
+
+    // 匹配结果：最近一次匹配的岗位，按分数从高到低（改了已选岗位要重新匹配才会变）
+    const RESULTS = [
+      { id: 'be', score: 39, reason: '有 Python 后端经验，熟悉 FastAPI、MySQL 和 Redis，做过慢查询优化；岗位要求的 C# / Java 与 SQL Server 经验，简历里还没有体现。', hits: ['MySQL', 'Redis', '后端开发', '计算机专业'], misses: ['Java', 'C#', 'SQL Server'], dims: [62, 48, 90, 55] },
+      { id: 'ai', score: 35, reason: '后端基础扎实，可以承担接口开发；岗位更看重大模型应用与智能体项目经历，简历里暂时没有。', hits: ['Python', '接口开发'], misses: ['LLM', 'Agent', 'RAG'], dims: [50, 36, 90, 52] },
+      { id: 'cs', score: 27, reason: '具备技术背景，但缺少咨询方法论、业务分析与财务相关经历。', hits: ['数据分析'], misses: ['咨询', '财务'], dims: [30, 24, 70, 40] },
+      { id: 'fde', score: 27, reason: '能写后端服务，缺少客户现场交付与部署运维经验。', hits: ['Linux'], misses: ['交付', '运维'], dims: [34, 22, 90, 38] },
+      { id: 'ux', score: 15, reason: '有技术背景，能理解开发流程；岗位更看重设计作品集、原型和用户调研经验，简历里还没有体现。', hits: [], misses: ['作品集', '原型设计', '用户调研'], dims: [18, 12, 35, 30] },
+      { id: 'mat', score: 6, reason: '专业方向差异较大：岗位要求材料化学、高分子等专业和实验经历，简历以软件开发为主。', hits: [], misses: ['材料专业', '实验经历', '测试报告'], dims: [6, 4, 10, 25] }
+    ].map((r) => ({ ...r, title: byId[r.id].title, company: byId[r.id].company, city: byId[r.id].city, url: byId[r.id].url }));
+    const results = RESULTS.filter((r) => s.matched.indexOf(r.id) >= 0);
+    const sel = Math.min(s.detail, Math.max(results.length - 1, 0));
+    const ranks = results.map((r, i) => {
+      const active = i === sel;
+      return {
+        ...r, rank: i + 1, active, pick: () => this.setState({ detail: i }),
+        style: 'display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px; border-radius: 16px; cursor: pointer; color: inherit; transition: background .2s ease, box-shadow .2s ease; ' +
+          (active ? 'background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.42)); border: 1px solid rgba(255,255,255,0.92); box-shadow: inset 3px 0 0 #6F8DF5, inset 0 1px 1px #FFFFFF, inset 0 -8px 16px -12px rgba(90,110,170,0.3), 0 16px 28px -20px rgba(40,60,95,0.5);' : 'background: transparent; border: 1px solid transparent;'),
+        badge: 'width: 26px; height: 26px; flex-shrink: 0; border-radius: 8px; display: grid; place-items: center; font-size: 12px; font-weight: 700; ' +
+          (i === 0 ? 'background: ' + GRAD + '; color: #1B2B57;' : 'background: rgba(255,255,255,0.55); color: #47526A;'),
+        bar: 'display: block; height: 100%; border-radius: 999px; width: ' + r.score + '%; background: ' + (active ? ACC : 'rgba(157,180,255,0.7)') + ';'
+      };
+    });
+    const r0 = results[sel] || RESULTS[0];
+    const dimLabels = ['技能匹配', '经历相关', '学历专业', '综合潜力'];
+    const d = {
+      ...r0, level: r0.score >= 30 ? '存在缺口' : '匹配较低', noHits: r0.hits.length === 0, openJd: openJd(r0.id),
+      dash: (r0.score / 100 * 289).toFixed(1) + ' 289',
+      dims: r0.dims.map((v, i) => ({ label: dimLabels[i], value: v, bar: 'display: block; height: 100%; border-radius: 999px; width: ' + v + '%; background: ' + ACC + ';' })),
+      // 换了岗位就从第 1 轮重新练
+      practice: () => {
+        if (r0.id !== s.ivJob) this.setState({ ivJob: r0.id, round: 1, marks: {}, fbRound: 0, answer: '', recording: false, submitting: false, step: 4 });
+        else this.setState({ step: 4 });
+      }
+    };
+    const has = (id) => results.some((r) => r.id === id);
+    const sugg = [];
+    if (has('be') || has('fde')) sugg.push({ text: '补一段 Java 或 C# 的项目经历', who: [has('be') ? '后端工程师' : '', has('fde') ? 'FDE' : ''].filter((x) => x).join(' · ') });
+    if (has('ai')) sugg.push({ text: '做一个能演示的大模型应用小项目（Agent / RAG）', who: 'AI 应用开发工程师' });
+    sugg.push({ text: '把简历里的性能优化写成具体数字，比如响应时间降了多少', who: '全部岗位' });
+    if (has('cs')) sugg.push({ text: '补一段项目制实习，写清楚你负责的沟通和交付', who: '数智化咨询顾问' });
+    if (has('ux')) sugg.push({ text: '准备一份作品集，附上原型和设计稿', who: 'UX 设计师' });
+    if (has('mat')) sugg.push({ text: '材料方向和你的专业差异较大，建议优先投计算机类岗位', who: '材料研发工程师' });
+    const suggestions = sugg.slice(0, 3).map((x, i) => ({ ...x, n: i + 1 }));
+
+    // 模拟面试进行中
+    const cur = finished ? qset[total - 1] : qset[s.round - 1];
+    const iv = { n: Math.min(s.round, total), topic: cur.topic, q: cur.q };
+    const rounds = qset.map((x, i) => {
+      const n = i + 1;
+      const st = s.marks[n] || (n === s.round ? 'now' : 'next');
+      return {
+        n, topic: x.topic, done: st === 'done', showNum: st !== 'done', hasLine: n < total, locked: st !== 'done',
+        note: st === 'done' ? (s.fbRound === n ? '已完成 · 正在查看反馈' : '已完成 · 点击查看反馈') : st === 'skip' ? '已跳过' : st === 'now' ? '进行中' : '待开始',
+        view: () => this.setState({ fbRound: n }),
+        marker: 'width: 26px; height: 26px; flex-shrink: 0; box-sizing: border-box; border-radius: 999px; display: grid; place-items: center; font-size: 12px; font-weight: 700; ' +
+          (st === 'done' ? 'background: linear-gradient(180deg, #9DB4FF, #5E7FEF);' : st === 'now' ? 'background: #FFFFFF; color: #2F4FD6; border: 2px solid #6F8DF5; box-shadow: 0 0 0 4px rgba(111,141,245,0.15);' : st === 'skip' ? 'background: transparent; color: #8A93A8; border: 1.5px dashed #CBD3E1;' : 'background: transparent; color: #5D6880; border: 1.5px solid #CBD3E1;'),
+        line: 'display: block; width: 2px; flex: 1 1 auto; min-height: 16px; margin: 4px 0; border-radius: 2px; background: ' + (st === 'done' ? '#9DB4FF' : 'rgba(255,255,255,0.7)') + ';',
+        row: 'flex: 1 1 0; display: block; width: 100%; margin: 0 0 8px; padding: 8px 12px; border-radius: 12px; text-align: left; font: inherit; color: #1C2433; ' +
+          (st === 'now' ? 'background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.42)); border: 1px solid rgba(255,255,255,0.92); box-shadow: inset 0 1px 1px #FFFFFF, inset 0 -8px 16px -12px rgba(90,110,170,0.3), 0 14px 24px -18px rgba(40,60,95,0.5); cursor: default;'
+            : st === 'done' && s.fbRound === n ? 'background: rgba(230,236,255,0.6); border: 1px solid rgba(255,255,255,0.8); cursor: pointer;'
+            : st === 'done' ? 'background: transparent; border: 1px solid transparent; cursor: pointer;' : 'background: transparent; border: 1px solid transparent; cursor: default;')
+      };
+    });
+    const fbData = s.fbRound ? qset[s.fbRound - 1] : null;
+    const fb = fbData ? { has: true, none: false, n: s.fbRound, topic: fbData.topic, good: fbData.good, more: fbData.more, tags: fbData.tags } : { has: false, none: true, n: 0, topic: '', good: '', more: '', tags: [] };
+    const setAnswer = (e) => this.setState({ answer: e.target.value.slice(0, 1500) });
+    // 演示：结束录音时插入一句示例转写
+    const toggleVoice = () => {
+      if (!s.recording) { this.setState({ recording: true }); return; }
+      const said = '我会先说结论，再结合具体的数字和例子展开。';
+      const base = s.answer.trim();
+      this.setState({ recording: false, answer: (base && !/[。！？]$/.test(base) ? base + '。' : base) + said });
+    };
+    const skip = () => {
+      if (finished || s.submitting) return;
+      const n = s.round;
+      this.setState({ marks: { ...s.marks, [n]: 'skip' }, round: n + 1, answer: '', recording: false });
+      this.say('已跳过第 ' + n + ' 轮');
+    };
+    const submit = () => {
+      if (finished || s.submitting) return;
+      if (!s.answer.trim()) { this.say('先写下你的回答，或者用语音输入'); return; }
+      this.setState({ submitting: true, recording: false });
+      this.later(() => {
+        const n = this.state.round;
+        this.setState({ marks: { ...this.state.marks, [n]: 'done' }, round: n + 1, fbRound: n, answer: '', submitting: false });
+      }, 1200);
+    };
+    const restart = () => this.setState({ round: 1, marks: {}, fbRound: 0, answer: '', recording: false, submitting: false });
+
+    // 搜索
+    const qk = s.q.trim().toLowerCase();
+    const qJobs = qk ? all.filter((j) => hit(j, qk)).map((j) => ({ ...j, logoStyle: tile(j.i, 36), open: openJd(j.id) })) : [];
+    const recent = ['后端', 'AI', '北森'].map((label) => ({ label, use: () => this.setState({ q: label }) }));
+    const top = results[0];
+    const quick = [
+      { label: '更换简历', hint: '支持 PDF、DOCX、PNG、JPG', act: open('upload'), iDoc: true, iChart: false, iMic: false, iClock: false },
+      { label: '查看匹配结果', hint: top ? results.length + ' 个岗位 · 最高 ' + top.score + ' 分' : '还没有匹配结果', act: go(3), iDoc: false, iChart: true, iMic: false, iClock: false },
+      { label: '继续模拟面试', hint: ivJob.short + ' · ' + (finished ? '已完成' : '第 ' + s.round + ' / ' + total + ' 轮'), act: go(4), iDoc: false, iChart: false, iMic: true, iClock: false },
+      { label: '历史记录', hint: '匹配、面试和简历', act: go(5), iDoc: false, iChart: false, iMic: false, iClock: true }
+    ];
+
+    // 帮助（内容与线上一致：格式、大小、页数、语音、保存时长）
+    const helpSteps = [
+      { n: 1, title: '上传简历', text: '支持 PDF、DOCX，也可以拍照上传 PNG / JPG，单个文件不超过 15MB。' },
+      { n: 2, title: '选择岗位', text: '从岗位库里挑想投的岗位，可以跨分类多选。' },
+      { n: 3, title: '查看匹配', text: '每个岗位给出匹配分和推荐理由，并列出简历里还缺什么。' },
+      { n: 4, title: '模拟面试', text: '针对选中的岗位练 5 轮问答，每轮都有 AI 反馈。' }
+    ];
+    const FAQ = [
+      { q: '匹配分是怎么来的？', a: '系统把简历内容和岗位要求逐项比对，分数越高越值得优先投递；结果里会列出已经命中的要求和还缺少的经历。' },
+      { q: 'PDF 上传失败怎么办？', a: 'PDF 最多 10 页，而且不能加密。如果是扫描件，也可以截图后用 PNG / JPG 上传。' },
+      { q: '可以用语音回答面试题吗？', a: '可以。点「语音输入」开始说，再点一次结束。语音识别由浏览器完成，Chrome / Edge 比较稳定，第一次使用需要允许麦克风；用不了时直接打字就行。' },
+      { q: '匹配结果会保存多久？', a: '最近一次匹配结果会保存在当前浏览器里 24 小时，刷新页面后也能恢复。' }
+    ];
+    const faqs = FAQ.map((f, i) => ({ ...f, open: s.faq === i, toggle: () => this.setState({ faq: s.faq === i ? -1 : i }), chevron: 'flex-shrink: 0; transition: transform .2s ease; transform: rotate(' + (s.faq === i ? 180 : 0) + 'deg);' }));
+
+    // 更换简历：真的读取所选文件名，按线上规则校验格式和大小
+    const pickFile = (e) => {
+      const input = e.target;
+      const f = input.files && input.files[0];
+      if (!f) return;
+      const ext = (f.name.split('.').pop() || '').toLowerCase();
+      if (['pdf', 'docx', 'png', 'jpg', 'jpeg'].indexOf(ext) < 0) { input.value = ''; this.setState({ upErr: '仅支持 PDF、DOCX、PNG、JPG' }); return; }
+      if (f.size > 15 * 1024 * 1024) { input.value = ''; this.setState({ upErr: f.name + '：超过 15MB' }); return; }
+      this.setState({ upload: 'parsing', upName: f.name, upErr: '' });
+      this.later(() => {
+        const list = [{ name: f.name, date: '刚刚' }].concat(this.state.resumes.filter((x) => x.name !== f.name));
+        this.setState({ upload: 'idle', resume: f.name, resumes: list, overlay: null });
+        this.say('简历已更新：' + f.name);
+      }, 1600);
+    };
+
+    const jdJob = byId[s.jdId] || all[0];
+    const jdPicked = isPicked(jdJob.id);
+    const jd = {
+      ...jdJob, logoStyle: tile(jdJob.i, 52), picked: jdPicked, notPicked: !jdPicked,
+      toggle: () => {
+        this.setState({ picked: jdPicked ? s.picked.filter((x) => x !== jdJob.id) : s.picked.concat(jdJob.id) });
+        this.say(jdPicked ? '已从已选岗位移除' : '已加入已选岗位：' + jdJob.title);
+      }
+    };
+
+    // 记录页
+    const ICON_LIQ = 'width: 36px; height: 36px; flex-shrink: 0; border-radius: 11px; display: grid; place-items: center; background: ' + LIQ_BTN + '; color: #1B2B57; box-shadow: inset 0 1px 1px #FFFFFF, inset 0 -3px 6px rgba(90,115,215,0.2);';
+    const ICON_W = 'width: 36px; height: 36px; flex-shrink: 0; border-radius: 11px; display: grid; place-items: center; background: linear-gradient(180deg, #FFFFFF, rgba(255,255,255,0.7)); border: 1px solid rgba(255,255,255,0.95); color: #47526A;';
+    const item = (x) => ({ iDoc: false, iChart: false, iMic: false, hasAct: !!x.act, actLabel: '', iconStyle: x.iDoc ? ICON_W : ICON_LIQ, ...x });
+    const timeline = [
+      { day: '今天 · 11 月 1 日', items: [
+        item({ time: '15:42', kind: '模拟面试', text: '后端工程师 · 完成第 1 轮「数据库设计」', iMic: true, act: go(4), actLabel: '继续练习' }),
+        item({ time: '15:20', kind: '岗位匹配', text: '4 个岗位 · 最高 39 分（北森云计算 · 后端工程师）', iChart: true, act: go(3), actLabel: '查看结果' }),
+        item({ time: '15:12', kind: '上传简历', text: '01_张晨_后端_高匹配.docx · 解析完成', iDoc: true, act: open('upload'), actLabel: '更换' })
+      ] },
+      { day: '10 月 30 日', items: [
+        item({ time: '20:05', kind: '岗位匹配', text: '2 个岗位 · 最高 35 分（彩讯科技 · AI 应用开发工程师）', iChart: true }),
+        item({ time: '19:58', kind: '上传简历', text: '00_张晨_初版.docx · 解析完成', iDoc: true })
+      ] },
+      { day: '10 月 27 日', items: [
+        item({ time: '21:10', kind: '模拟面试', text: 'AI 应用开发工程师 · 完成 5 轮', iMic: true })
+      ] }
+    ];
+    const barOf = (pct) => 'display: block; height: 100%; border-radius: 999px; width: ' + pct + '%; background: ' + ACC + ';';
+    const sessions = [
+      { title: ivJob.short + ' · ' + ivJob.company, status: finished ? '已完成 ' + total + ' 轮' : '进行中 · 第 ' + s.round + ' / ' + total + ' 轮', bar: barOf(ivPct), hasAct: true, act: go(4), actLabel: finished ? '查看' : '继续' },
+      { title: 'AI 应用开发工程师 · 彩讯科技', status: '已完成 5 轮 · 10 月 27 日', bar: barOf(100), hasAct: false, act: go(4), actLabel: '' }
+    ];
+    const resumes = s.resumes.map((x) => ({
+      ...x, current: x.name === s.resume, other: x.name !== s.resume,
+      use: () => { this.setState({ resume: x.name }); this.say('已切换为 ' + x.name); }
+    }));
+
+    return {
+      title: titles[step - 1], subtitle: subs[step - 1], showTitle: step !== 1,
+      rail, recStyle: railBase + (step === 5 ? CUR : IDLE), recCurrent: step === 5 ? 'page' : 'false', helpStyle: railBase + (s.overlay === 'help' ? CUR : IDLE),
+      is1: step === 1, is2: step === 2, is3: step === 3, is4: step === 4, is5: step === 5,
+      go2: go(2), go3: go(3), go4: go(4), go5: go(5),
+      openSearch: () => this.setState({ overlay: 'search', q: '', pop: null }),
+      openHelp: open('help'), openUpload: open('upload'), openDeadlines: open('deadlines'),
+      closeOverlay, dialogKey: (e) => { if (e.key === 'Escape') closeOverlay(); },
+      focusEl: this.focusEl,
+      popOpen: !!s.pop, closePop: () => this.setState({ pop: null }),
+      noticeOpen: s.pop === 'notice', toggleNotice: togglePop('notice'), meOpen: s.pop === 'me', toggleMe: togglePop('me'),
+      notices, readAll, hasUnread: unread > 0, unreadLabel: unread ? '有 ' + unread + ' 条未读' : '没有未读', unreadText: unread ? unread + ' 条未读' : '已全部读完',
+      meSub: s.prefs.grad + ' · ' + s.prefs.degree + ' · ' + s.prefs.major,
+      prefs, heroZ: prefOpen ? '25' : 'auto', resume: s.resume,
+      lastMatch: top ? results.length + ' 个岗位 · 最高 ' + top.score + ' 分（' + top.company + ' · ' + byId[top.id].short + '）' : '',
+      strip, deadlines, dlAll, dlTotal: dlAll.length, featured,
+      ivShort: ivJob.short, ivProgress: finished ? '已完成 ' + total + ' 轮' : '进行到第 ' + s.round + ' / ' + total + ' 轮', ivPct, ivCta: finished ? '查看反馈' : '继续练习',
+      cats, jq: s.jq, setJq: (e) => this.setState({ jq: e.target.value }), clearJobSearch: () => this.setState({ jq: '', cat: '全部' }),
+      jobs, noJobs: jobs.length === 0, pickedJobs, count: s.picked.length, total: all.length, empty: s.picked.length === 0,
+      startMatch, cantMatch: s.picked.length === 0 || s.matching, matching: s.matching, notMatching: !s.matching,
+      hasResults: results.length > 0, noResults: results.length === 0, resultCount: results.length, ranks, d, suggestions,
+      ivActive: !finished, ivDone: finished, iv, rounds, fb, answer: s.answer, answerLen: s.answer.length, setAnswer,
+      recording: s.recording, notRecording: !s.recording, toggleVoice, voiceStyle: s.recording ? 'background: linear-gradient(180deg, #FFF6F0, #FBE3D6); color: #A3542C;' : '',
+      skip, submit, submitting: s.submitting, notSubmitting: !s.submitting, restart, doneCount, skipCount,
+      timeline, sessions, resumes,
+      ovOpen: !!s.overlay, ovClass: s.overlay === 'search' ? 'ov-top' : '', isSearch: s.overlay === 'search', isHelp: s.overlay === 'help', isUpload: s.overlay === 'upload', isJd: s.overlay === 'jd', isDeadlines: s.overlay === 'deadlines',
+      q: s.q, setQ: (e) => this.setState({ q: e.target.value }), noQ: !qk, hasQ: !!qk, qJobs, qCount: qJobs.length, qEmpty: !!qk && qJobs.length === 0, recent, quick,
+      helpSteps, faqs,
+      upIdle: s.upload === 'idle', upParsing: s.upload === 'parsing', upName: s.upName, upErr: s.upErr, hasUpErr: !!s.upErr, pickFile,
+      jd,
+      toast: s.toast, hasToast: !!s.toast
+    };
+  }
+}
+
+(function () {
+  var step = Number(new URLSearchParams(location.search).get('step')) || 1;
+  DCPrototype.mount(Component, document.getElementById('app'), document.getElementById('dc-template'), { initialStep: Math.min(Math.max(step, 1), 5) });
+})();
+</script>
+</body>
+</html>
