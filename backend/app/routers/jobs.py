@@ -10,7 +10,7 @@ router = APIRouter(responses={status: {"model": ErrorResponse} for status in (40
 
 @router.get("/api/jobs", response_model=JobList)
 async def list_jobs(request: Request, category: Category | None = None, education: Education | None = None,
-                    application_status: ApplicationStatus = "open", page: int = Query(1, ge=1),
+                    application_status: ApplicationStatus | None = None, page: int = Query(1, ge=1),
                     page_size: int = Query(20, ge=1, le=100)):
     return request.app.state.job_repository.list(category, education, application_status, page, page_size)
 
