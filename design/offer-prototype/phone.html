@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Offer · 手机端预览</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Noto+Sans+SC:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;min-height:100vh;box-sizing:border-box;padding:32px 16px;display:flex;flex-direction:column;align-items:center;gap:20px;background:#E3EAEE radial-gradient(40% 50% at 0% 0%,rgba(180,198,240,.85),transparent 70%);font-family:'Inter','Noto Sans SC',sans-serif;color:#1C2433}
+h1{margin:0;font-size:20px;font-weight:600}
+p{margin:0;font-size:13px;color:#5D6880}
+nav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+nav button{height:34px;padding:0 14px;border-radius:999px;border:1px solid #FFFFFF;background:rgba(255,255,255,.7);font:inherit;font-size:13px;color:#1C2433;cursor:pointer}
+nav button[aria-pressed="true"]{background:linear-gradient(180deg,#EEF2FF,#B3C7FF);color:#1B2B57;font-weight:500}
+iframe{width:390px;height:844px;max-width:100%;border:10px solid #FFFFFF;border-radius:44px;background:#E3EAEE;box-shadow:0 40px 80px -40px rgba(40,60,95,.55)}
+</style>
+</head>
+<body>
+<h1>Offer · 手机端预览</h1>
+<p>和网页端是同一份页面，窗口宽度不超过 720px 时自动切换成手机布局</p>
+<nav aria-label="选择页面">
+  <button type="button" data-step="1" aria-pressed="true">首页</button>
+  <button type="button" data-step="2" aria-pressed="false">选择岗位</button>
+  <button type="button" data-step="3" aria-pressed="false">匹配结果</button>
+  <button type="button" data-step="4" aria-pressed="false">模拟面试</button>
+  <button type="button" data-step="5" aria-pressed="false">记录</button>
+</nav>
+<iframe id="phone" title="手机端原型" src="index.html?step=1"></iframe>
+<script>
+document.querySelectorAll('nav button').forEach(function (b) {
+  b.addEventListener('click', function () {
+    document.getElementById('phone').src = 'index.html?step=' + b.dataset.step;
+    document.querySelectorAll('nav button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+  });
+});
+</script>
+</body>
+</html>
