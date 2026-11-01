@@ -11,20 +11,17 @@ import type {
 } from "../types";
 import { createJobMatch, getJobMatchTask, getMatchContext } from "../api/jobs";
 import { useTask } from "../lib/useTask";
-import { levelTone, scoreTone } from "../lib/theme";
+import { levelTone } from "../lib/theme";
 import { DimensionBars } from "./report/DimensionBars";
 import { Highlights } from "./report/Highlights";
 import { Gaps } from "./report/Gaps";
 import { RewriteSuggestions } from "./report/RewriteSuggestions";
 import { InterviewPage } from "./InterviewPage";
-import { StepBar } from "./StepBar";
-import { CountUp } from "./CountUp";
 import {
   AlertIcon,
   ArrowLeftIcon,
   ArrowRightIcon,
   CheckIcon,
-  ChevronDownIcon,
   InfoIcon,
   SpinnerIcon,
 } from "./icons";
@@ -88,7 +85,6 @@ function JobDetail({
   resumeName,
   resumeStatus,
   embeddingStatus,
-  onClose,
 }: {
   item: JobMatchItem;
   job?: Job;
@@ -97,7 +93,6 @@ function JobDetail({
   resumeName: string;
   resumeStatus: ResumeStatus;
   embeddingStatus?: EmbeddingStatus;
-  onClose: () => void;
 }) {
   const [interviewOpen, setInterviewOpen] = useState(false);
   const [interviewRequest, setInterviewRequest] = useState<MatchContext["interview_request"] | null>(null);
@@ -126,17 +121,10 @@ function JobDetail({
   }, [taskId, item.job_id, resumeId]);
 
   return (
-    <div className="fixed inset-0 z-30 overflow-y-auto bg-surface-soft">
-      <div className="mx-auto max-w-4xl px-4 pb-16 pt-6 sm:px-6 sm:pt-8">
+    <div className="offer-result-detail">
+      <div>
         <div className="flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-ink-500 transition-colors hover:bg-white hover:text-ink-900"
-          >
-            <ArrowLeftIcon className="h-4 w-4" />
-            返回岗位列表
-          </button>
+          <span className="offer-eyebrow">岗位详情</span>
           <span className="num rounded-full bg-white px-3 py-1 text-[11px] font-medium text-ink-700 shadow-sm">
             匹配度 {item.score}
           </span>
@@ -679,7 +667,7 @@ export function JobResultPage({
     const list = task?.items ?? [];
     return [...list].sort((a, b) => b.score - a.score);
   }, [task]);
-  const detailJob = detailJobId ? items.find((item) => item.job_id === detailJobId) ?? null : null;
+  const detailJob = (detailJobId ? items.find((item) => item.job_id === detailJobId) : null) ?? items[0] ?? null;
 
   /* ---------- 加载中 ---------- */
   if (!task && polling) {
@@ -768,157 +756,22 @@ export function JobResultPage({
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-4 pb-20 pt-8 sm:px-6">
-      {/* 顶部 */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <p className="text-[11px] text-ink-500">简历</p>
-          <p className="mt-1 truncate text-[15px] font-semibold text-ink-900" title={resumeName}>
-            {resumeName}
-          </p>
-          <p className="num mt-1 text-[11px] text-ink-500">
-            共 {items.length} 个岗位参与匹配，按匹配度排序
-          </p>
-          <div className="mt-3">
-            <StepBar current={3} />
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={onReset}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-surface-line bg-white px-4 py-2 text-sm font-medium text-ink-700 transition-colors hover:border-brand-300 hover:text-brand-700"
-        >
-          <ArrowLeftIcon className="h-4 w-4" />
-          换个岗位再匹配
-        </button>
-      </div>
-
+    <main className="offer-results">
+      <div className="picker-title"><div><span className="offer-eyebrow">YOUR MATCH REPORT</span><h1>匹配结果</h1><p>{resumeName} · {items.length} 个岗位按匹配分排序</p></div><button type="button" className="picker-last" onClick={onReset}>← 重新选择岗位</button></div>
       <EmbeddingNotice status={task?.embedding_status} error={task?.embedding_error} />
-
-      <ProgressBanner
-        task={task}
-        items={items}
-        pollError={task?.status === "failed" ? null : error}
-        polling={polling}
-        restarting={restarting}
-        onRestart={handleRestart}
-        onRefetch={retry}
-      />
-      {restartError ? (
-        <p className="mt-2 text-[12px] text-rose-700">{restartError}</p>
-      ) : null}
-
-      {/* 无匹配结果：任务成功但没有可展示的岗位 */}
-      {items.length === 0 && task?.status === "succeeded" ? (
-        <div className="mt-5 rounded-xl2 border border-surface-line bg-white px-5 py-8 text-center">
-          <p className="text-[13px] font-medium text-ink-900">这次没有匹配出岗位</p>
-          <p className="mx-auto mt-2 max-w-md text-[12px] leading-relaxed text-ink-500">
-            可能是所选岗位已关闭、或简历内容不足以判断。可以回到上一步换个岗位组合再试一次。
-          </p>
-          <button
-            type="button"
-            onClick={onReset}
-            className="mt-4 rounded-xl bg-brand-600 px-4 py-2 text-[12px] font-semibold text-white hover:bg-brand-700"
-          >
-            重新选择岗位
-          </button>
+      <ProgressBanner task={task} items={items} pollError={task?.status === "failed" ? null : error} polling={polling} restarting={restarting} onRestart={handleRestart} onRefetch={retry} />
+      {restartError && <p className="picker-error" role="alert">{restartError}</p>}
+      {items.length === 0 ? <section className="picker-panel result-empty"><h2>正在准备匹配结果</h2><p>结果产生后将自动显示在这里。</p><button type="button" onClick={onReset}>返回选择岗位</button></section> : (
+        <div className="offer-results-layout">
+          <section className="picker-panel result-ranks" aria-label="匹配排序"><div className="picker-panel-head"><h2>匹配排序</h2><span>{items.length} 个岗位</span></div>
+            <div className="result-rank-list">{items.map((item, index) => { const job = jobIndex[item.job_id]; return <button key={item.job_id} type="button" aria-pressed={detailJob?.job_id === item.job_id} className={`result-rank ${detailJob?.job_id === item.job_id ? "active" : ""}`} onClick={() => setDetailJobId(item.job_id)}>
+              <span className="result-order">{index + 1}</span><span className="picker-logo small">{job?.company.slice(0,1) || "岗"}</span><span className="result-rank-text"><strong>{item.title}</strong><small>{job?.company || "岗位"} · {analysisLabel(item)}</small></span><span className="result-score">{item.score}</span>
+            </button>; })}</div>
+            <p className="picker-hint">结果根据简历与岗位内容计算，分析建议仅供参考。</p>
+          </section>
+          {detailJob && <JobDetail key={detailJob.job_id} item={detailJob} job={jobIndex[detailJob.job_id]} taskId={taskId} resumeId={resumeId} resumeName={resumeName} resumeStatus={resumeStatus} embeddingStatus={task?.embedding_status} />}
         </div>
-      ) : null}
-
-      {/* 岗位卡片列表 */}
-      <div className="mt-5 space-y-3">
-        {items.map((item, index) => {
-          const tone = levelTone(item.level);
-          const scoreStyle = scoreTone(item.score);
-          const job = jobIndex[item.job_id];
-
-          return (
-            <button
-              key={item.job_id}
-              type="button"
-              onClick={() => setDetailJobId(item.job_id)}
-              style={{ animationDelay: `${Math.min(index, 10) * 45}ms` }}
-              className="rise-in group block w-full rounded-xl2 border border-surface-line bg-white p-4 text-left shadow-card transition-all hover:border-brand-300 hover:shadow-md sm:p-5"
-            >
-              <div className="flex items-start gap-3">
-                <span className="num mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-surface-soft text-[12px] font-semibold text-ink-500">
-                  {index + 1}
-                </span>
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="truncate text-[15px] font-semibold text-ink-900">
-                      {item.title}
-                    </span>
-                    <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${tone.chip}`}
-                    >
-                      {item.level_label}
-                    </span>
-                    {job ? (
-                      <span className="text-[11px] text-ink-500">
-                        {job.company} · {job.cities.join(" / ")}
-                      </span>
-                    ) : null}
-                  </div>
-
-                  {item.reason ? (
-                    <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-ink-700">
-                      {item.reason}
-                    </p>
-                  ) : null}
-
-                  <div className="mt-2.5 flex flex-wrap items-center gap-1">
-                    {item.matched.slice(0, 4).map((keyword) => (
-                      <Chip key={keyword} text={keyword} tone="hit" />
-                    ))}
-                    {item.missing.slice(0, 3).map((keyword) => (
-                      <Chip key={keyword} text={keyword} tone="miss" />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex shrink-0 flex-col items-end gap-1">
-                  <CountUp
-                    value={item.score}
-                    className={`num text-[22px] font-semibold leading-none ${scoreStyle.text}`}
-                  />
-                  <span
-                    className={`mt-0.5 inline-flex items-center gap-1 text-[10px] ${isAnalyzing(item) ? "text-brand-600" : "text-ink-500"}`}
-                  >
-                    {isAnalyzing(item) ? <SpinnerIcon className="h-2.5 w-2.5 animate-spin" /> : null}
-                    {analysisLabel(item)}
-                  </span>
-                  <ChevronDownIcon className="mt-0.5 h-4 w-4 -rotate-90 text-ink-300 transition-transform group-hover:translate-x-0.5" />
-                </div>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      <p className="mt-6 flex items-start gap-2 text-[11px] leading-relaxed text-ink-500">
-        <InfoIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-        <span>
-          分数怎么来的：先看技能、学历这些关键词对不对得上，再比较简历和岗位要求讲的是不是同一类事。
-          排在前面的岗位会额外做一次 AI 深入分析，说明你哪里合适、哪里还差；
-          标「基础评分」的岗位没有这一步，分数只看关键词和内容相近程度。
-          AI 判断仅供参考，最终还要你自己判断。
-        </span>
-      </p>
-
-      {detailJob ? (
-        <JobDetail
-          item={detailJob}
-          job={jobIndex[detailJob.job_id]}
-          taskId={taskId}
-          resumeId={resumeId}
-          resumeName={resumeName}
-          resumeStatus={resumeStatus}
-          embeddingStatus={task?.embedding_status}
-          onClose={() => setDetailJobId(null)}
-        />
-      ) : null}
+      )}
     </main>
   );
 }
