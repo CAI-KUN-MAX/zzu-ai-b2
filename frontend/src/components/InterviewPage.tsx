@@ -250,10 +250,10 @@ export function InterviewPage({
   return (
     <div
       ref={scrollRef}
-      className={`fixed inset-0 overflow-y-auto bg-surface-soft ${layer >= 40 ? "z-40" : "z-30"}`}
+      className={`offer-interview fixed inset-0 overflow-y-auto ${layer >= 40 ? "z-40" : "z-30"}`}
     >
       {/* overflow-wrap 可继承：问题、回答、反馈里的长链接或长英文串在任意位置换行，手机上不撑破卡片 */}
-      <div className="mx-auto max-w-3xl px-4 pb-16 pt-6 [overflow-wrap:anywhere] sm:px-6 sm:pt-10">
+      <div className="offer-interview-shell mx-auto px-4 pb-16 pt-6 [overflow-wrap:anywhere] sm:px-6 sm:pt-10">
         {/* 顶部条 */}
         <div className="flex items-center justify-between gap-3">
           <button
@@ -274,7 +274,7 @@ export function InterviewPage({
 
         {/* 确认页 */}
         {phase === "confirm" ? (
-          <div className="mt-4 rounded-xl2 border border-surface-line bg-white p-6 shadow-card sm:p-8">
+          <div className="interview-glass mt-4 rounded-xl2 border border-surface-line bg-white p-6 shadow-card sm:p-8">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-medium text-brand-700 ring-1 ring-inset ring-brand-100">
               模拟面试
             </span>
@@ -343,34 +343,9 @@ export function InterviewPage({
 
         {/* 答题页 */}
         {phase === "active" && currentQuestion ? (
-          <div className="mt-4 space-y-4">
-            {/* 历史轮次 */}
-            {rounds.map((record) => (
-              <div
-                key={record.round}
-                className="rounded-xl2 border border-surface-line bg-white p-5 shadow-card"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="num grid h-5 w-5 place-items-center rounded-full bg-ink-900 text-[10px] font-semibold text-white">
-                    {record.round}
-                  </span>
-                  <span className="text-[11px] text-ink-500">已完成</span>
-                  <CheckIcon className="h-3.5 w-3.5 text-emerald-500" />
-                </div>
-                <p className="mt-3 text-[13px] font-medium leading-relaxed text-ink-900">
-                  {record.question.text}
-                </p>
-                <p className="mt-2 whitespace-pre-wrap rounded-xl bg-surface-soft/80 px-3 py-2.5 text-[12px] leading-relaxed text-ink-700">
-                  {record.answer}
-                </p>
-                <div className="mt-4 border-t border-surface-line pt-4">
-                  <FeedbackBlock feedback={record.feedback} />
-                </div>
-              </div>
-            ))}
-
+          <div className="offer-interview-grid mt-4">
             {/* 当前问题 */}
-            <div className="rounded-xl2 border border-brand-200 bg-white p-5 shadow-card sm:p-6">
+            <div className="interview-glass rounded-xl2 border border-brand-200 bg-white p-5 shadow-card sm:p-6">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="num rounded-md bg-brand-600 px-1.5 py-0.5 text-[11px] font-semibold text-white">
                   Q{currentRound}
@@ -539,13 +514,18 @@ export function InterviewPage({
                 </button>
               </div>
             </div>
+            <aside className="interview-side">
+              <section className="interview-glass p-6"><h2>五轮进度</h2><div className="interview-progress">{Array.from({length:maxRounds}, (_, i) => <div key={i}><span className={i + 1 <= currentRound ? "active" : ""}>{i + 1}</span><p>{i + 1 < currentRound ? "已完成" : i + 1 === currentRound ? "正在回答" : "待开始"}</p></div>)}</div></section>
+              <section className="interview-glass p-6"><h2>本轮反馈</h2>{rounds.length ? <><p className="picker-hint">第 {rounds[rounds.length - 1].round} 轮</p><div className="mt-4"><FeedbackBlock feedback={rounds[rounds.length - 1].feedback} /></div></> : <p className="picker-hint">提交回答后，反馈会显示在这里。</p>}</section>
+              {rounds.length > 0 && <details className="interview-glass p-6"><summary>查看已完成的回答</summary>{rounds.map((record) => <div key={record.round} className="interview-history"><strong>第 {record.round} 轮</strong><p>{record.question.text}</p><p>{record.answer}</p><FeedbackBlock feedback={record.feedback} /></div>)}</details>}
+            </aside>
           </div>
         ) : null}
 
         {/* 完成页 */}
         {phase === "completed" ? (
           <div className="mt-4 space-y-4">
-            <div className="rounded-xl2 border border-surface-line bg-white p-6 shadow-card sm:p-8">
+            <div className="interview-glass rounded-xl2 border border-surface-line bg-white p-6 shadow-card sm:p-8">
               <div className="flex items-center gap-3">
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-emerald-50 text-emerald-600">
                   <CheckIcon className="h-5 w-5" />
@@ -583,7 +563,7 @@ export function InterviewPage({
             {rounds.map((record) => (
               <div
                 key={record.round}
-                className="rounded-xl2 border border-surface-line bg-white p-5 shadow-card"
+                className="interview-glass rounded-xl2 border border-surface-line bg-white p-5 shadow-card"
               >
                 <div className="flex items-center gap-2">
                   <span className="num grid h-5 w-5 place-items-center rounded-full bg-ink-900 text-[10px] font-semibold text-white">

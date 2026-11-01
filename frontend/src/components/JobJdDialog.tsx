@@ -36,7 +36,7 @@ export function JobJdDialog({ job, selected, onToggle, onClose }: JobJdDialogPro
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/40 sm:items-center sm:p-6"
+      className="offer-dialog fixed inset-0 z-40 flex items-end justify-center bg-slate-900/40 sm:items-center sm:p-6"
       onClick={onClose}
       role="presentation"
     >
