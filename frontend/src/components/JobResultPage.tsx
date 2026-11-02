@@ -35,6 +35,8 @@ interface JobResultPageProps {
   /** 本次参与匹配的岗位，用于失败后原样重新发起 */
   jobIds: string[];
   onReset: () => void;
+  /** recommend=首页一键推荐，只展示前 8 条；manual=自己勾选的岗位 */
+  mode?: "recommend" | "manual";
   /** 用同一份简历和同一批岗位重新创建任务后回调新的 taskId */
   onRestart: (taskId: string) => void;
 }
@@ -633,6 +635,7 @@ export function JobResultPage({
   jobIds,
   onReset,
   onRestart,
+  mode,
 }: JobResultPageProps) {
   const { data: task, error, transient, polling, retry } = useTask(getJobMatchTask, taskId);
   const [restarting, setRestarting] = useState(false);
@@ -663,10 +666,16 @@ export function JobResultPage({
   // 只记岗位 ID，详情始终读最新一次轮询结果：AI 报告在打开详情之后才到达也能自动显示
   const [detailJobId, setDetailJobId] = useState<string | null>(null);
 
-  const items = useMemo(() => {
+  const allItems = useMemo(() => {
     const list = task?.items ?? [];
     return [...list].sort((a, b) => b.score - a.score);
   }, [task]);
+
+  // 推荐模式：后端对全目录排序，前端只展示最靠前的 8 个
+  const items = useMemo(
+    () => (mode === "recommend" ? allItems.slice(0, 8) : allItems),
+    [allItems, mode]
+  );
   const detailJob = (detailJobId ? items.find((item) => item.job_id === detailJobId) : null) ?? items[0] ?? null;
 
   /* ---------- 加载中 ---------- */
@@ -757,15 +766,37 @@ export function JobResultPage({
 
   return (
     <main className="offer-results">
-      <div className="picker-title"><div><span className="offer-eyebrow">YOUR MATCH REPORT</span><h1>匹配结果</h1><p>{resumeName} · {items.length} 个岗位按匹配分排序</p></div><button type="button" className="picker-last" onClick={onReset}>← 重新选择岗位</button></div>
+      <div className="picker-title">
+        <div>
+          <span className="offer-eyebrow">YOUR MATCH REPORT</span>
+          <h1>{mode === "recommend" ? "为你推荐" : "匹配结果"}</h1>
+          <p>
+            {resumeName} ·{" "}
+            {mode === "recommend"
+              ? `从 ${allItems.length} 个可投岗位里挑出 ${items.length} 个`
+              : `${items.length} 个岗位按匹配分排序`}
+          </p>
+        </div>
+        <button type="button" className="picker-last" onClick={onReset}>← 重新选择岗位</button>
+      </div>
       <EmbeddingNotice status={task?.embedding_status} error={task?.embedding_error} />
       <ProgressBanner task={task} items={items} pollError={task?.status === "failed" ? null : error} polling={polling} restarting={restarting} onRestart={handleRestart} onRefetch={retry} />
       {restartError && <p className="picker-error" role="alert">{restartError}</p>}
-      {items.length === 0 ? <section className="picker-panel result-empty"><h2>正在准备匹配结果</h2><p>结果产生后将自动显示在这里。</p><button type="button" onClick={onReset}>返回选择岗位</button></section> : (
+      {items.length === 0 ? (
+        <section className="picker-panel result-empty">
+          <h2>{task?.status === "succeeded" ? "这次没有可推荐的岗位" : "正在准备结果"}</h2>
+          <p>
+            {task?.status === "succeeded"
+              ? "当前目录里没有匹配得上的岗位，可以自己挑选试试。"
+              : "结果产生后会显示在这里，不用刷新。"}
+          </p>
+          <button type="button" onClick={onReset}>手动选择岗位</button>
+        </section>
+      ) : (
         <div className="offer-results-layout">
           <section className="picker-panel result-ranks" aria-label="匹配排序"><div className="picker-panel-head"><h2>匹配排序</h2><span>{items.length} 个岗位</span></div>
             <div className="result-rank-list">{items.map((item, index) => { const job = jobIndex[item.job_id]; return <button key={item.job_id} type="button" aria-pressed={detailJob?.job_id === item.job_id} className={`result-rank ${detailJob?.job_id === item.job_id ? "active" : ""}`} onClick={() => setDetailJobId(item.job_id)}>
-              <span className="result-order">{index + 1}</span><span className="picker-logo small">{job?.company.slice(0,1) || "岗"}</span><span className="result-rank-text"><strong>{item.title}</strong><small>{job?.company || "岗位"} · {analysisLabel(item)}</small></span><span className="result-score">{item.score}</span>
+              <span className="result-order">{index + 1}</span><span className="picker-logo small">{job?.company.slice(0,1) || "岗"}</span><span className="result-rank-text"><strong>{item.title}</strong><small>{job?.company || "岗位"}{job?.cities?.length ? " · " + job.cities[0] : ""} · {analysisLabel(item)}</small></span><span className="result-score">{item.score}</span>
             </button>; })}</div>
             <p className="picker-hint">结果根据简历与岗位内容计算，分析建议仅供参考。</p>
           </section>
