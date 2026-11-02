@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import type { Job } from "../types";
 import { CheckIcon, XIcon } from "./icons";
 
@@ -9,18 +10,31 @@ interface JobJdDialogProps {
   onClose: () => void;
 }
 
-/** 选岗前查看完整 JD：岗位要求、学历专业、来源与核验时间，可直接在弹窗里勾选 */
+/**
+ * 选岗前查看完整 JD：岗位要求、学历专业、来源与核验时间，可直接在弹窗里勾选。
+ *
+ * 必须挂到 document.body：外层 .offer-shell 带 backdrop-filter，
+ * 会创建新的包含块，导致内部 position:fixed 相对它定位而不是视口，
+ * 表现为弹窗跟着页面滚动跑到屏幕外、顶部被截断。
+ */
 export function JobJdDialog({ job, selected, onToggle, onClose }: JobJdDialogProps) {
-  // Esc 关闭，打开期间锁住底层滚动
+  // Esc 关闭；打开期间锁住底层滚动，并补偿滚动条宽度避免页面横向跳动
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const { body, documentElement } = document;
+    const previousOverflow = body.style.overflow;
+    const previousPaddingRight = body.style.paddingRight;
+    const scrollbarWidth = window.innerWidth - documentElement.clientWidth;
+
+    body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) body.style.paddingRight = `${scrollbarWidth}px`;
     window.addEventListener("keydown", onKey);
+
     return () => {
-      document.body.style.overflow = previous;
+      body.style.overflow = previousOverflow;
+      body.style.paddingRight = previousPaddingRight;
       window.removeEventListener("keydown", onKey);
     };
   }, [onClose]);
@@ -34,9 +48,9 @@ export function JobJdDialog({ job, selected, onToggle, onClose }: JobJdDialogPro
     { label: "发布", value: job.published_at },
   ];
 
-  return (
+  return createPortal(
     <div
-      className="offer-dialog fixed inset-0 z-40 flex items-end justify-center bg-slate-900/40 sm:items-center sm:p-6"
+      className="offer-dialog fixed inset-0 z-[999] flex items-center justify-center bg-slate-900/40 p-4 sm:p-6"
       onClick={onClose}
       role="presentation"
     >
@@ -45,9 +59,10 @@ export function JobJdDialog({ job, selected, onToggle, onClose }: JobJdDialogPro
         aria-modal="true"
         aria-label={`${job.title} 岗位详情`}
         onClick={(event) => event.stopPropagation()}
-        className="flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl [overflow-wrap:anywhere] sm:rounded-2xl"
+        className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl [overflow-wrap:anywhere]"
       >
-        <div className="flex items-start justify-between gap-3 border-b border-surface-line px-5 py-4">
+        {/* 头部：始终可见 */}
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-surface-line px-5 py-4">
           <div className="min-w-0">
             <p className="text-[11px] text-ink-500">{job.category}</p>
             <h2 className="mt-0.5 text-[17px] font-semibold leading-snug text-ink-900">{job.title}</h2>
@@ -62,7 +77,8 @@ export function JobJdDialog({ job, selected, onToggle, onClose }: JobJdDialogPro
           </button>
         </div>
 
-        <div className="overflow-y-auto px-5 py-4">
+        {/* 内容：只让中间这段滚动，长 JD 也不会把头部和按钮顶出去 */}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4">
           <dl className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
             {facts.map((fact) => (
               <div key={fact.label} className="flex gap-3 text-[12px]">
@@ -79,13 +95,19 @@ export function JobJdDialog({ job, selected, onToggle, onClose }: JobJdDialogPro
 
           <p className="mt-3 text-[11px] leading-relaxed text-ink-500">
             核验于 {job.verified_at.slice(0, 10)}，状态只代表核验当时的情况。
-            <a href={job.source_url} target="_blank" rel="noreferrer" className="ml-1 text-brand-600 hover:underline">
+            <a
+              href={job.source_url}
+              target="_blank"
+              rel="noreferrer"
+              className="ml-1 text-brand-600 hover:underline"
+            >
               查看招聘来源
             </a>
           </p>
         </div>
 
-        <div className="flex items-center justify-end gap-2 border-t border-surface-line px-5 py-3">
+        {/* 底部操作：始终可见 */}
+        <div className="flex shrink-0 items-center justify-end gap-2 border-t border-surface-line bg-white/90 px-5 py-3">
           <button
             type="button"
             onClick={onClose}
@@ -105,7 +127,9 @@ export function JobJdDialog({ job, selected, onToggle, onClose }: JobJdDialogPro
                 : "bg-brand-600 text-white hover:bg-brand-700"
             }`}
           >
-            {selected ? "取消选择" : (
+            {selected ? (
+              "取消选择"
+            ) : (
               <>
                 <CheckIcon className="h-4 w-4" />
                 选择这个岗位
@@ -114,6 +138,7 @@ export function JobJdDialog({ job, selected, onToggle, onClose }: JobJdDialogPro
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
