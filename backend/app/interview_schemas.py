@@ -52,6 +52,34 @@ class InterviewAnswerResult(StrictModel):
     next_question: Question | None
 
 
+class InterviewTurn(StrictModel):
+    question: Question
+    answer: str
+    feedback: Feedback
+
+
+class InterviewRecovery(StrictModel):
+    interview_id: str
+    status: Literal["active", "completed"]
+    round: int = Field(ge=1, le=5)
+    max_rounds: Literal[5] = 5
+    question: Question | None
+    turns: list[InterviewTurn]
+
+
+class InterviewReportRound(InterviewTurn):
+    round: int = Field(ge=1, le=5)
+    resume_suggestions: list[ShortText] = Field(max_length=5)
+
+
+class InterviewReport(StrictModel):
+    interview_id: str
+    resume_id: str
+    jd_text: str
+    confirmation_notice: str
+    rounds: list[InterviewReportRound] = Field(max_length=5)
+
+
 # The model must supply verifiable grounding. These internal fields are not
 # part of the frontend contract; public responses retain the agreed shape.
 class QuestionDraft(StrictModel):

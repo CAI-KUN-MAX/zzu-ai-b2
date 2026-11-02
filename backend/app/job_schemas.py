@@ -2,7 +2,7 @@
 from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 
 from app.interview_schemas import InterviewCreate
 from app.schemas import DiagnoseRequest, DiagnoseResponse, DimensionScore
@@ -36,13 +36,6 @@ class Job(Contract):
     application_status: ApplicationStatus
     verification_note: str = Field(min_length=1)
 
-    @model_validator(mode="after")
-    def open_requires_application_url(self):
-        if self.application_status == "open" and self.application_url is None:
-            raise ValueError("open job requires an application URL")
-        return self
-
-
 class JobList(Contract):
     catalogue_version: str
     total: int
@@ -55,6 +48,12 @@ class JobMatchRequest(Contract):
     resume_id: StrictStr
     job_ids: list[StrictStr]
     allow_unverified_for_testing: bool = False
+
+
+class JobRecommendationRequest(Contract):
+    resume_id: StrictStr
+    category: Category | None = None
+    city: StrictStr | None = Field(default=None, min_length=1, max_length=80)
 
 
 class TaskCreated(Contract):

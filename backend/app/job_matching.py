@@ -8,11 +8,12 @@ from datetime import datetime, timezone
 
 from app import matching, job_embedding
 from app.job_repository import test_ready
+from app.job_schemas import JobMatchRequest
 from app.routers.diagnose import MAX_TOTAL_CHARS, MIN_CHARS, SYSTEM_PROMPT
 from app.routers.resumes import fail
 
 logger = logging.getLogger(__name__)
-SCORING_VERSION = "job-ranking-v2"
+SCORING_VERSION = "job-ranking-v4"
 ITEM_TIMEOUT = 90
 TOTAL_TIMEOUT = 165
 
@@ -83,6 +84,18 @@ class JobMatchService:
             self.jobs.add(task)
             task.add_done_callback(self.jobs.discard)
         return {"task_id": identifier}
+
+    async def recommend(self, payload):
+        if not payload.resume_id.strip() or (payload.city is not None and not payload.city.strip()):
+            fail(400, "INVALID_INPUT", "请选择一份简历并填写有效的意向城市")
+        row = readable_resume(self.repository, payload.resume_id)
+        candidates = self.repository.recommendation_candidates(payload.category, payload.city.strip() if payload.city else None)
+        if not candidates:
+            fail(404, "NO_RECOMMENDABLE_JOBS", "没有符合意向的岗位，请调整筛选条件")
+        jobs = [job.model_dump(mode="json") for job in candidates]
+        scored = await asyncio.to_thread(base_scores, dict(id=row["id"], name="", text=row["text"]), jobs)
+        return self.create(JobMatchRequest(resume_id=payload.resume_id,
+                                           job_ids=[item["job_id"] for item in scored[:8]]))
 
     def task(self, identifier):
         task = self.repository.task(identifier)

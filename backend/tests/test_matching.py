@@ -233,6 +233,80 @@ class MatchingTests(unittest.TestCase):
 
 
 class ScoringRulesTests(unittest.TestCase):
+    def test_direct_negation_does_not_count_as_skill_evidence(self):
+        from app.matching import glued_runs, keyword_in_resume
+
+        for term, text in [("聚合酶链式反应", "没有 PCR 经验"),
+                           ("Python", "不熟悉 Python"),
+                           ("Figma", "未使用 Figma，熟悉 Axure"),
+                           ("JavaScript", "没有 TypeScript 经验")]:
+            with self.subTest(term=term, text=text):
+                self.assertFalse(keyword_in_resume(term, text, glued_runs(text)))
+        for term, text in [("Python", "不熟悉 Python，后续使用 Python 完成项目"),
+                           ("Figma", "不仅熟悉 Figma，还使用 Axure")]:
+            with self.subTest(term=term, text=text):
+                self.assertTrue(keyword_in_resume(term, text, glued_runs(text)))
+
+    def test_cross_discipline_skills_and_aliases(self):
+        from app.matching import keyword_in_resume, glued_runs, profile2gram, score_resume
+
+        examples = [
+            ("负责用户研究、用户访谈和可用性测试，使用 Figma、Axure 制作原型。",
+             "完成 user research、user interviews 和 usability testing，使用 Figma 与 Axure。",
+             {"用户研究", "用户访谈", "可用性测试", "Figma", "Axure"}),
+            ("熟悉聚合酶链式反应和高效液相色谱。", "使用 PCR 和 HPLC 进行实验。",
+             {"聚合酶链式反应", "高效液相色谱"}),
+            ("掌握有限元分析和计算机辅助设计。", "项目使用 FEA 和 CAD。",
+             {"有限元分析", "计算机辅助设计"}),
+            ("熟悉结构化查询语言，掌握 Python。", "使用 SQL 和 Python 分析数据。",
+             {"结构化查询语言", "Python"}),
+        ]
+        for jd, resume, expected in examples:
+            with self.subTest(jd=jd):
+                terms = jd_terms(jd)
+                result = score_resume(jd, {"id": "r", "name": "", "text": resume}, terms, profile2gram(jd))
+                self.assertTrue(expected.issubset(result["matched"]), result)
+        self.assertFalse(keyword_in_resume("聚合酶链式反应", "熟悉 PCR123 的配置", []))
+        self.assertFalse(keyword_in_resume("有限元分析", "参与 FEASIBILITY 调研", []))
+        self.assertFalse(keyword_in_resume("用户研究", "负责市场营销", glued_runs("负责市场营销")))
+        self.assertEqual(jd_terms("user research，usability testing"), ["可用性测试", "用户研究"])
+
+    def test_user_research_resume_ranks_relevant_job_above_generic_product_job(self):
+        from app.matching import profile2gram, score_resume
+        resume = {"id": "r", "name": "", "text": "本科，用户研究项目使用 Axure 和 Figma 制作原型，进行用户访谈、可用性测试并整理研究报告。"}
+        ux = "岗位职责：开展用户研究和用户访谈，使用 Figma、Axure 制作交互原型，进行可用性测试。任职要求：本科。"
+        product = "岗位职责：负责 AI 产品需求文档、流程设计与测试验证。任职要求：本科。"
+        score = lambda jd: score_resume(jd, resume, jd_terms(jd), profile2gram(jd))["score"]
+        self.assertGreater(score(ux), score(product))
+
+    def test_manually_labelled_cross_discipline_rankings(self):
+        # Synthetic, manually labelled pairs: each first JD is relevant to the
+        # resume and each second JD shares generic project/process vocabulary.
+        # This is a regression set, not an estimate of real-world accuracy.
+        from app.matching import profile2gram, score_resume
+
+        cases = [
+            ("本科，用户研究项目使用 Axure 和 Figma 制作原型，开展用户访谈、可用性测试并编写项目文档。",
+             "岗位职责：开展用户研究和用户访谈，使用 Figma、Axure 制作原型，进行可用性测试。任职要求：本科。",
+             "岗位职责：负责 AI 产品项目文档、原型、流程设计与测试验证。任职要求：本科。"),
+            ("本科，在项目中使用 PCR、HPLC 开展样品检测，编写测试流程和实验文档。",
+             "岗位职责：进行聚合酶链式反应及高效液相色谱检测，记录实验。任职要求：本科。",
+             "岗位职责：负责产品项目文档、测试流程与验证。任职要求：本科。"),
+            ("本科，项目中使用 CAD 绘图并开展 FEA 有限元分析，编写设计文档。",
+             "岗位职责：开展计算机辅助设计和有限元分析，编写工程文档。任职要求：本科。",
+             "岗位职责：负责产品项目文档、流程设计与测试验证。任职要求：本科。"),
+            ("本科，项目中使用 Python 和 SQL 完成数据分析，编写测试文档。",
+             "岗位职责：使用 Python 和结构化查询语言进行数据分析。任职要求：本科。",
+             "岗位职责：负责产品项目文档、流程设计与测试验证。任职要求：本科。"),
+        ]
+        for resume, relevant, generic in cases:
+            with self.subTest(resume=resume):
+                row = {"id": "r", "name": "", "text": resume}
+                results = [score_resume(jd, row, jd_terms(jd), profile2gram(jd))
+                           for jd in (relevant, generic)]
+                self.assertGreater(results[0]["score"], results[1]["score"], results)
+                self.assertTrue(results[0]["matched"])
+
     def test_education_and_stable_terms(self):
         self.assertEqual(education_score("熟悉Python", "未写学历"), 100)
         self.assertEqual(education_score("本科以上", "未写学历"), 60)

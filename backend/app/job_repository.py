@@ -44,6 +44,12 @@ class JobRepository:
         return dict(catalogue_version=self.version, total=len(items), page=page, page_size=page_size,
                     items=items[(page - 1) * page_size:page * page_size])
 
+    def recommendation_candidates(self, category=None, city=None):
+        return [job for job in self.jobs.values()
+                if (job.application_status == "open" or test_ready(job))
+                and (category is None or job.category == category)
+                and (city is None or city in job.cities)]
+
     def resume(self, identifier):
         return self.store.get("resumes", identifier)
 

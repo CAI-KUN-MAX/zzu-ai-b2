@@ -1,0 +1,15 @@
+{
+  "interview_id": "fixture-interview",
+  "resume_id": "fixture-resume",
+  "jd_text": "负责用户体验研究、原型设计与可用性测试，并根据用户反馈迭代产品方案。",
+  "confirmation_notice": "请结合岗位要求核对每条提示；仅在符合真实经历时用于简历，不要编造事实。",
+  "rounds": [
+    {
+      "round": 1,
+      "question": {"id": "fixture-question", "text": "你如何验证原型？", "focus": "原型验证", "source": "fallback"},
+      "answer": "我通过用户访谈收集对原型的反馈，并记录了发现的问题。",
+      "feedback": {"strengths": ["通过用户访谈收集对原型的反馈。"], "improvements": ["说明如何整理反馈和决定修改优先级。"], "reference_points": ["反馈分类"]},
+      "resume_suggestions": ["说明如何整理反馈和决定修改优先级。"]
+    }
+  ]
+}

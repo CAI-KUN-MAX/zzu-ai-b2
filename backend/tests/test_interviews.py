@@ -9,6 +9,8 @@ from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
+from fastapi.testclient import TestClient as UnprivilegedClient
+
 from app.interview_schemas import InterviewAnswer, InterviewAnswerResult, InterviewSession
 from app.interviews import (FEEDBACK_MAX_TOKENS, InterviewService, SYSTEM_PROMPT, build_messages,
                             evidence_options, parse_output)
@@ -382,6 +384,70 @@ class InterviewTests(unittest.TestCase):
         self.assertEqual(self.model.chat.completions.create.await_count, calls)
         next_result = self.submit(session["interview_id"], result["next_question"]["id"])
         self.assertEqual(next_result.json()["round"], 2)
+
+    def test_recovery_includes_saved_turns_and_expires(self):
+        session = self.create()
+        identifier = session["interview_id"]
+        url = f"/api/interviews/{identifier}"
+        initial = self.http.get(url).json()
+        self.assertEqual(initial["question"], session["question"])
+        self.assertEqual(initial["turns"], [])
+        result = self.submit(identifier, session["question"]["id"]).json()
+        app.state.interviews = InterviewService(app.state.store, app.state.match_jobs.llm_gate)
+        recovered = self.http.get(url).json()
+        self.assertEqual(recovered["question"], result["next_question"])
+        self.assertEqual(recovered["turns"][0]["answer"], ANSWER)
+        self.assertEqual(recovered["turns"][0]["feedback"], result["feedback"])
+        with app.state.store.connect() as db:
+            db.execute("UPDATE interviews SET expires_at=0 WHERE id=?", (identifier,))
+        self.assert_error(self.http.get(url), 410, "INTERVIEW_EXPIRED")
+        self.assert_error(self.http.get("/api/interviews/missing"), 404, "INTERVIEW_NOT_FOUND")
+
+    def test_report_requires_completion_and_replays_saved_evidence(self):
+        session = self.create()
+        identifier = session["interview_id"]
+        url = f"/api/interviews/{identifier}/report"
+        self.assert_error(self.http.get(url), 409, "INTERVIEW_NOT_COMPLETED")
+        question = session["question"]
+        expected = []
+        for _ in range(5):
+            result = self.submit(identifier, question["id"]).json()
+            expected.append((question, result["feedback"]))
+            question = result["next_question"]
+        calls = self.model.chat.completions.create.await_count
+        app.state.interviews = InterviewService(app.state.store, app.state.match_jobs.llm_gate)
+        response = self.http.get(url)
+        self.assertEqual(response.status_code, 200, response.text)
+        report = response.json()
+        self.assertEqual(report["resume_id"], "ready")
+        self.assertEqual(report["jd_text"], JD)
+        self.assertIn("真实经历", report["confirmation_notice"])
+        self.assertEqual(len(report["rounds"]), 5)
+        for index, item in enumerate(report["rounds"]):
+            self.assertEqual(item["round"], index + 1)
+            self.assertEqual(item["question"], expected[index][0])
+            self.assertEqual(item["answer"], ANSWER)
+            self.assertEqual(item["feedback"], expected[index][1])
+            self.assertEqual(item["resume_suggestions"], expected[index][1]["improvements"])
+        self.assertEqual(self.model.chat.completions.create.await_count, calls)
+        with app.state.store.connect() as db:
+            db.execute("UPDATE interviews SET expires_at=0 WHERE id=?", (identifier,))
+        self.assert_error(self.http.get(url), 410, "INTERVIEW_EXPIRED")
+        self.assert_error(self.http.get("/api/interviews/missing/report"), 404, "INTERVIEW_NOT_FOUND")
+
+    def test_recovery_and_report_require_session_ownership(self):
+        session = self.create()
+        identifier = session["interview_id"]
+        stranger = UnprivilegedClient(app)
+        self.assertEqual(stranger.get(f"/api/interviews/{identifier}").status_code, 404)
+        self.assertEqual(stranger.get(f"/api/interviews/{identifier}/report").status_code, 404)
+        question = session["question"]
+        for _ in range(5):
+            result = self.submit(identifier, question["id"]).json()
+            question = result["next_question"]
+        self.assertEqual(self.http.get(f"/api/interviews/{identifier}/report").status_code, 200)
+        self.assertEqual(stranger.get(f"/api/interviews/{identifier}").status_code, 404)
+        self.assertEqual(stranger.get(f"/api/interviews/{identifier}/report").status_code, 404)
 
     def test_context_budget_rejects_without_truncation_or_state_change(self):
         app.state.store.update("resumes", "ready", text=RESUME * 500)

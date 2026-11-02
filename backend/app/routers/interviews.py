@@ -3,7 +3,8 @@ import logging
 
 from fastapi import APIRouter, HTTPException, Request
 
-from app.interview_schemas import InterviewAnswer, InterviewAnswerResult, InterviewCreate, InterviewSession
+from app.interview_schemas import (InterviewAnswer, InterviewAnswerResult, InterviewCreate, InterviewRecovery,
+                                   InterviewReport, InterviewSession)
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -33,11 +34,33 @@ async def create_interview(payload: InterviewCreate, request: Request):
         internal_error(exc, request_id)
 
 
+@router.get("/api/interviews/{interview_id}", response_model=InterviewRecovery)
+async def recover_interview(interview_id: str, request: Request):
+    request_id = uuid.uuid4().hex
+    try:
+        return request.app.state.interviews.recover(interview_id)
+    except HTTPException as exc:
+        rethrow(exc, request_id)
+    except Exception as exc:
+        internal_error(exc, request_id)
+
+
 @router.post("/api/interviews/{interview_id}/answers", response_model=InterviewAnswerResult)
 async def submit_answer(interview_id: str, payload: InterviewAnswer, request: Request):
     request_id = uuid.uuid4().hex
     try:
         return await request.app.state.interviews.answer(interview_id, payload, request_id)
+    except HTTPException as exc:
+        rethrow(exc, request_id)
+    except Exception as exc:
+        internal_error(exc, request_id)
+
+
+@router.get("/api/interviews/{interview_id}/report", response_model=InterviewReport)
+async def interview_report(interview_id: str, request: Request):
+    request_id = uuid.uuid4().hex
+    try:
+        return request.app.state.interviews.report(interview_id)
     except HTTPException as exc:
         rethrow(exc, request_id)
     except Exception as exc:
