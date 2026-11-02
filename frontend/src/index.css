@@ -160,3 +160,10 @@
 .dashboard-card-tags span { padding:3px 8px; border-radius:8px; background:#ffffffa3; color:#657189; font-size:10px; }
 @media(max-width:1080px){ .dashboard-cards { grid-template-columns:1fr 1fr; } }
 @media(max-width:760px){ .dashboard-cards { grid-template-columns:1fr; }.dashboard-stats button { margin-left:0; width:100%; } }
+
+/* 首页主操作：一键推荐 */
+.dashboard-cta { display:flex; align-items:center; justify-content:space-between; width:100%; margin-top:18px; padding:15px 20px; font-size:14px; }
+.dashboard-cta:disabled { opacity:.55; cursor:not-allowed; box-shadow:none; }
+.dashboard-hint { margin-top:10px; color:#7a879b; font-size:12px; line-height:1.7; }
+.dashboard-error { display:flex; align-items:center; gap:10px; margin-top:12px; padding:10px 13px; border:1px solid #f2c8d2; border-radius:13px; background:#fdf1f4; color:#a53b52; font-size:12px; line-height:1.6; }
+.dashboard-error button { margin-left:auto; flex-shrink:0; padding:6px 12px; border-radius:9px; background:#fff; color:#a53b52; font-size:12px; box-shadow:inset 0 0 0 1px #f2c8d2; }

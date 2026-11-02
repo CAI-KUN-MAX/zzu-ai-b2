@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IS_MOCK_MODE } from "./api/http";
-import { listJobs } from "./api/jobs";
+import { createJobMatch, listJobs } from "./api/jobs";
 import { JobMatchPage, type JobMatchDraft } from "./components/JobMatchPage";
 import { JobResultPage } from "./components/JobResultPage";
 import {
   type StoredJobMatch,
   loadDraft,
   loadLastMatch,
+  loadLastResume,
+  type StoredResume,
   saveDraft,
   saveLastMatch,
 } from "./lib/jobMatchStorage";
@@ -37,6 +39,9 @@ export default function App() {
   const [lastMatch, setLastMatch] = useState<MatchRecord | null>(() => loadLastMatch());
   const [view, setView] = useState<View>(() => initialView(lastMatch));
   const [homeJobs, setHomeJobs] = useState<Job[]>([]);
+  const [recentResume, setRecentResume] = useState<StoredResume | null>(() => loadLastResume());
+  const [recommending, setRecommending] = useState(false);
+  const [recommendError, setRecommendError] = useState<string | null>(null);
   const [homeTotal, setHomeTotal] = useState(0);
   const [homeCategories, setHomeCategories] = useState(0);
   // 草稿只在切页时读一次，用 ref 存避免每次勾选都让 App 重渲染
@@ -52,13 +57,22 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
-    // 一次拿满一页，首页统计和推荐卡都用同一份数据
-    listJobs({ page: 1, page_size: 100 }).then((data) => {
+    // 分页拉全目录，首页统计只算「已核验可投」，推荐卡也用同一份数据
+    (async () => {
+      const collected: Job[] = [];
+      let total = 0;
+      for (let page = 1; page <= 4; page += 1) {
+        const data = await listJobs({ page, page_size: 50 });
+        collected.push(...data.items);
+        total = data.total;
+        if (collected.length >= total) break;
+      }
       if (cancelled) return;
-      setHomeJobs(data.items);
-      setHomeTotal(data.total);
-      setHomeCategories(new Set(data.items.map((job) => job.category)).size);
-    }).catch(() => {
+      const openJobs = collected.filter((job) => job.application_status === "open");
+      setHomeJobs(openJobs);
+      setHomeTotal(openJobs.length);
+      setHomeCategories(new Set(openJobs.map((job) => job.category)).size);
+    })().catch(() => {
       if (cancelled) {
         setHomeJobs([]);
         setHomeTotal(0);
@@ -67,6 +81,11 @@ export default function App() {
     });
     return () => { cancelled = true; };
   }, []);
+
+  // 从选岗页传完简历回到首页，要能立刻看到最新那份
+  useEffect(() => {
+    if (view.name === "home") setRecentResume(loadLastResume());
+  }, [view.name]);
 
   // 首页「近期截止」用的当月日历，只标今天，不做节假日
   const calendarDays = useMemo(() => {
@@ -152,6 +171,53 @@ export default function App() {
     });
   }
 
+  /**
+   * 一键推荐：取目录里全部可投岗位交给后端排序，前端只展示前 8。
+   * 分数、排序、匹配理由全部来自后端，前端不生成任何分数。
+   */
+  async function handleRecommend() {
+    if (recommending) return;
+    if (!recentResume) {
+      setRecommendError("还没有可用的简历，请先上传并等解析完成");
+      return;
+    }
+    setRecommendError(null);
+    setRecommending(true);
+    try {
+      // 分页拉全目录：page_size 最大 50，目录已经超过 100 条
+      const collected: Job[] = [];
+      let total = 0;
+      for (let page = 1; page <= 4; page += 1) {
+        const data = await listJobs({ page, page_size: 50 });
+        collected.push(...data.items);
+        total = data.total;
+        if (collected.length >= total) break;
+      }
+      // 只把「已核验可投」的岗位交给后端；unverified 不能当可投推荐
+      const jobs = collected.filter((job) => job.application_status === "open").slice(0, 50);
+      if (jobs.length === 0) {
+        throw new Error("当前没有已核验可投的岗位，可以先手动挑一挑");
+      }
+      const jobIds = jobs.map((job) => job.job_id);
+      const { task_id } = await createJobMatch(recentResume.resumeId, jobIds);
+      const jobIndex = Object.fromEntries(jobs.map((job) => [job.job_id, job])) as Record<string, Job>;
+      openResult({
+        taskId: task_id,
+        resumeId: recentResume.resumeId,
+        resumeName: recentResume.name,
+        resumeStatus: "ready",
+        jobIds,
+        jobIndex,
+        savedAt: Date.now(),
+        mode: "recommend",
+      });
+    } catch (err) {
+      setRecommendError(err instanceof Error ? err.message : "推荐失败，请稍后重试");
+    } finally {
+      setRecommending(false);
+    }
+  }
+
   function handleReset() {
     clearHash();
     setView({ name: "job" });
@@ -184,29 +250,44 @@ export default function App() {
                 <div className="dashboard-resume">
                   <span className="picker-logo">▤</span>
                   <span>
-                    <strong>{lastMatch?.resumeName || "先上传一份简历"}</strong>
+                    <strong>{recentResume?.name || "先上传一份简历"}</strong>
                     <small>
-                      {lastMatch
-                        ? `已解析 · 上次用于 ${lastMatch.jobIds.length} 个岗位`
+                      {recentResume
+                        ? "已解析，可以直接让我按经历推荐岗位"
                         : "支持 PDF、DOCX、PNG 和 JPG"}
                     </small>
                   </span>
                   <button onClick={() => setView({ name: "job" })}>
-                    {lastMatch ? "换一份" : "去上传"} →
+                    {recentResume ? "换一份" : "去上传"} →
                   </button>
                 </div>
 
-                <div className="dashboard-prefs" aria-label="求职偏好">
-                  {["计算机", "本科", "2027 届"].map((label) => (
-                    <button key={label} type="button" onClick={() => setView({ name: "job" })}>
-                      {label} ▾
-                    </button>
-                  ))}
-                </div>
+                {/* 主操作：一键推荐，不需要先选岗位 */}
+                <button
+                  type="button"
+                  className="offer-primary dashboard-cta"
+                  onClick={handleRecommend}
+                  disabled={recommending || !recentResume}
+                >
+                  {recommending ? "正在为你挑选岗位…" : "为我推荐岗位"}
+                  <span>→</span>
+                </button>
+
+                {!recentResume ? (
+                  <p className="dashboard-hint">先上传一份简历，才能按你的经历推荐岗位。</p>
+                ) : null}
+
+                {recommendError ? (
+                  <p className="dashboard-error" role="alert">
+                    <span>{recommendError}</span>
+                    <button type="button" onClick={handleRecommend}>重试</button>
+                  </p>
+                ) : null}
 
                 {lastMatch ? (
                   <button className="dashboard-last" onClick={() => openResult(lastMatch)}>
-                    上次匹配 · {lastMatch.jobIds.length} 个岗位 <span>查看结果 →</span>
+                    上次{lastMatch.mode === "recommend" ? "推荐" : "匹配"} · {lastMatch.jobIds.length} 个岗位
+                    <span>查看结果 →</span>
                   </button>
                 ) : null}
 
@@ -319,6 +400,7 @@ export default function App() {
             resumeStatus={view.resumeStatus}
             jobIndex={view.jobIndex}
             jobIds={view.jobIds}
+            mode={view.mode}
             onReset={handleReset}
             onRestart={(taskId) => openResult({ ...view, taskId, savedAt: Date.now() })}
           />
