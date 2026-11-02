@@ -113,7 +113,7 @@ class JobMatchingTests(unittest.TestCase):
             self.assertIsNone(result["items"][0]["embedding_similarity"])
             self.assertNotEqual(failed, self.create(["a"]))
 
-    def test_testing_pool_requires_explicit_match_opt_in(self):
+    def test_unverified_complete_jobs_are_listed_and_matchable(self):
         jd = "岗位职责：参与分子检测实验、整理数据并优化试验流程，与研发团队核对分析结果，记录样本处理和检测质量问题。任职要求：生物学硕士，掌握分子实验和数据分析方法，能够阅读英文文献并编写报告，具备跨团队沟通能力。"
         candidate = fixture_job("candidate", jd, "生物医药", "硕士", "unverified")
         candidate["application_url"] = None
@@ -121,12 +121,21 @@ class JobMatchingTests(unittest.TestCase):
         listing = self.client.get("/api/jobs/testing-pool").json()
         self.assertEqual(listing["total"], 1)
         self.assertIsNone(listing["items"][0]["application_url"])
+        default_items = self.client.get("/api/jobs").json()["items"]
+        self.assertEqual(next(item for item in default_items if item["job_id"] == "candidate")["application_status"], "unverified")
+        self.assertNotIn("closed", [item["job_id"] for item in default_items])
         request = {"resume_id": "r", "job_ids": ["candidate"]}
-        self.assertEqual(self.client.post("/api/job-matches", json=request).status_code, 409)
-        request["allow_unverified_for_testing"] = True
         response = self.client.post("/api/job-matches", json=request)
         self.assertEqual(response.status_code, 202, response.text)
         self.assertEqual(self.wait(response.json()["task_id"])["status"], "succeeded")
+        request["allow_unverified_for_testing"] = True
+        self.assertEqual(self.client.post("/api/job-matches", json=request).status_code, 202)
+        incomplete = fixture_job("incomplete", "岗位说明不足，需要进一步核对岗位要求、工作职责、专业限制、毕业届别及实际工作城市。", status="unverified")
+        incomplete["application_url"] = None
+        app.state.job_repository.jobs["incomplete"] = Job.model_validate(incomplete)
+        self.assertNotIn("incomplete", [item["job_id"] for item in self.client.get("/api/jobs").json()["items"]])
+        request["job_ids"] = ["incomplete"]
+        self.assertEqual(self.client.post("/api/job-matches", json=request).status_code, 409)
         request["job_ids"] = ["closed"]
         self.assertEqual(self.client.post("/api/job-matches", json=request).status_code, 409)
 
@@ -483,7 +492,7 @@ class JobMatchingTests(unittest.TestCase):
         # Coverage remains explicit: quantity, category, education and concrete
         # major distribution are all checked by the catalogue report.
         self.assertEqual(len(catalogue.jobs), len(set(catalogue.jobs)))
-        report = check_catalogue(root / "catalogue" / "jobs.v1.json", date(2026, 10, 28))
+        report = check_catalogue(root / "catalogue" / "jobs.v1.json", date(2026, 11, 1))
         self.assertTrue(report["testing_target_met"])
         self.assertGreaterEqual(report["testing_pool"], 40)
         self.assertGreaterEqual(report["open"], 40)
