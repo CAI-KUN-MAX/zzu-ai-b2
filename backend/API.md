@@ -97,6 +97,7 @@ curl -X POST http://127.0.0.1:8000/api/resumes/batch \
 
 - 任务状态：`queued → running → succeeded | failed`。进度 0–100，运行中 stage 如 `解析 3/8`。建议每 1–2 秒轮询。
 - 数据库内部简历状态：`parsing → ready | need_review | not_resume | failed`。对外 `items` 仅包含这四种已结束解析的项目，解析中的项目暂不返回；队列和处理进度通过整体 `status/stage/progress` 展示，初期 `items` 可以为空。提取后独立检查身份/联系方式、教育、经历、技能等简历特征，以及通知、合同、论文、招聘 JD、聊天记录和普通文章等反向特征。边界不确定、少于 30 字或 OCR 低置信内容标记 `need_review`；明确不符标记 `not_resume`。
+- 仅有通用技能或工作词汇、缺少身份联系方式及简历栏目特征的文本标记 `need_review`，不能仅凭这些词汇判为 `ready`；此判断不构成身份或材料真实性验证。
 
 - `need_review` 的项目错误码为 `CONTENT_REVIEW_REQUIRED`，仍兼容匹配、岗位匹配和面试流程；`not_resume` 的项目错误码为 `CONTENT_MISMATCH`，读取全文及上述三个创建入口均返回 HTTP 422，且不会创建可继续处理的任务。解析/OCR 错误继续使用 `OCR_FAILED`、`OCR_UNAVAILABLE`、`UNSUPPORTED_FILE` 或 `INGEST_FAILED`。
 - 至少一份可读取时任务为 `succeeded`，仍需逐项检查 `status/error`；全部失败时任务为 `failed`，任务 error 为首份文件错误。
@@ -230,7 +231,11 @@ cd backend; ..\.venv\Scripts\python.exe -m unittest discover -s tests -v; cd ..
 
 ## 模拟面试
 
-新增接口与前端 `feature/interview` 的请求/响应类型一致；该前端分支不在本次后端分支中修改或合并。没有历史列表、会话恢复查询或面试导出接口。
+新增接口与前端 `feature/interview` 的请求/响应类型一致；该前端分支不在本次后端分支中修改或合并。没有历史列表或面试导出接口。
+
+`GET /api/interviews/{interview_id}` 恢复未过期会话，返回 `interview_id`、`status`、当前 `round`、`max_rounds`、`question`（结束后为 null）和 `turns`。每个 turn 包含原 `question`、用户 `answer` 和该轮 `feedback`；这些内容是用户提交和既有反馈，不代表新增评估。会话不存在返回 404 `INTERVIEW_NOT_FOUND`，过期返回 410 `INTERVIEW_EXPIRED`；此接口不延长有效期或调用模型。会话 ID 是访问凭据，应避免泄露。
+
+`GET /api/interviews/{interview_id}/report` 返回已完成面试的总结，包含 `interview_id`、`resume_id`、创建会话时提交的原始 `jd_text` 和按轮次排列的 `rounds`。`confirmation_notice` 提示用户核实适用性和真实经历；接口不记录用户确认。每轮包含 `round`、原始 `question`（含 `focus`）、原始 `answer`、已有的 `feedback` 和 `resume_suggestions`。后者逐条引用该轮反馈的 `improvements`，作为结合该岗位和回答检查简历的候选提示；不保证每条反馈都适用于简历。这些提示不是事实陈述，不自动改写简历，须由用户判断适用性并确认真实经历后再采用。原始回答是可核对的证据，不代表反馈已被人工核实。报告不生成新评价、不计算分数或录用概率、不调用模型；空建议数组是允许的。未完成返回 409 `INTERVIEW_NOT_COMPLETED`，不存在或过期沿用恢复接口的 404/410。报告继承会话 24 小时有效期，未提供长期存档。虚构的单轮结构示例见 `examples/interview_report.json`，实际完成的五轮面试返回五轮。
 
 ### 创建会话
 

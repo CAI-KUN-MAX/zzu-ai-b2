@@ -210,6 +210,11 @@ class IngestApiTests(unittest.TestCase):
         self.assertEqual(boundary.status, "need_review")
         self.assertEqual(boundary.error["code"], "CONTENT_REVIEW_REQUIRED")
 
+        article = "本文介绍如何使用 Python 开发接口，掌握数据库设计和 SQL 技术，并讨论软件专业知识。"
+        item = self.wait(self.upload(docx_bytes(article, table=False), "article.docx"))["items"][0]
+        self.assertEqual(item["status"], "need_review")
+        self.assertEqual(item["error"]["code"], "CONTENT_REVIEW_REQUIRED")
+
     def test_invalid_input_atomic_validation(self):
         for content, status, code in [(b"", 400, "INVALID_INPUT"), (b"old doc", 415, "UNSUPPORTED_FILE"),
                                       (b"x" * (15 * 1024 * 1024 + 1), 413, "FILE_TOO_LARGE")]:

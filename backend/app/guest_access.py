@@ -35,7 +35,7 @@ class GuestAccessMiddleware(BaseHTTPMiddleware):
                 return await call_next(request)
             if isinstance(payload, dict) and isinstance(payload.get("resume_id"), str):
                 identifiers.append(payload["resume_id"])
-        elif request.method == "POST" and path in {"/api/match", "/api/job-matches"}:
+        elif request.method == "POST" and path in {"/api/match", "/api/job-matches", "/api/job-recommendations"}:
             try:
                 payload = await request.json()
             except (ValueError, UnicodeDecodeError):

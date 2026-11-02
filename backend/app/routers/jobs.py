@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query, Request
 
 from app.job_schemas import (ApplicationStatus, Category, Education, Job, JobList,
-                             JobMatchRequest, JobMatchTask, MatchContext, TaskCreated)
+                             JobMatchRequest, JobMatchTask, JobRecommendationRequest, MatchContext, TaskCreated)
 from app.routers.resumes import fail
 from app.schemas import ErrorResponse
 
@@ -32,6 +32,11 @@ async def get_job(job_id: str, request: Request):
 @router.post("/api/job-matches", status_code=202, response_model=TaskCreated)
 async def create_job_match(payload: JobMatchRequest, request: Request):
     return request.app.state.job_matches.create(payload)
+
+
+@router.post("/api/job-recommendations", status_code=202, response_model=TaskCreated)
+async def recommend_jobs(payload: JobRecommendationRequest, request: Request):
+    return await request.app.state.job_matches.recommend(payload)
 
 
 @router.get("/api/job-matches/{task_id}", response_model=JobMatchTask, response_model_exclude_unset=True)

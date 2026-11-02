@@ -93,6 +93,30 @@ class JobMatchingTests(unittest.TestCase):
             self.assertEqual(self.client.get("/api/jobs?" + query).status_code, 422)
         self.assertEqual(self.client.get("/api/jobs/nope").status_code, 404)
 
+    def test_open_job_can_have_source_without_application_url(self):
+        job = fixture_job("source-only")
+        job["application_url"] = None
+        validated = Job.model_validate(job)
+        self.assertIsNone(validated.application_url)
+        job["source_url"] = ""
+        with self.assertRaises(ValueError):
+            Job.model_validate(job)
+
+    def test_recommendations_rank_catalogue_and_honor_intent(self):
+        for index in range(10):
+            job = fixture_job(f"extra-{index}")
+            app.state.job_repository.jobs[job["job_id"]] = Job.model_validate(job)
+        response = self.client.post("/api/job-recommendations", json={"resume_id": "r"})
+        self.assertEqual(response.status_code, 202, response.text)
+        items = self.wait(response.json()["task_id"])["items"]
+        self.assertEqual(len(items), 8)
+        self.assertNotIn("closed", [item["job_id"] for item in items])
+        response = self.client.post("/api/job-recommendations", json={"resume_id": "r", "category": "外语传播", "city": "北京"})
+        self.assertEqual([item["job_id"] for item in self.wait(response.json()["task_id"])["items"]], ["c"])
+        response = self.client.post("/api/job-recommendations", json={"resume_id": "r", "city": "不存在的城市"})
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["error"]["code"], "NO_RECOMMENDABLE_JOBS")
+
     def test_embedding_changes_ranking_and_reports_failure_for_retry(self):
         from app.job_embedding import EmbeddingError
         with patch.dict(os.environ, {"JOB_EMBEDDING_ENABLED": "true"}), \
@@ -492,7 +516,7 @@ class JobMatchingTests(unittest.TestCase):
         # Coverage remains explicit: quantity, category, education and concrete
         # major distribution are all checked by the catalogue report.
         self.assertEqual(len(catalogue.jobs), len(set(catalogue.jobs)))
-        report = check_catalogue(root / "catalogue" / "jobs.v1.json", date(2026, 11, 1))
+        report = check_catalogue(root / "catalogue" / "jobs.v1.json", date(2026, 11, 2))
         self.assertTrue(report["testing_target_met"])
         self.assertGreaterEqual(report["testing_pool"], 40)
         self.assertGreaterEqual(report["open"], 40)
