@@ -34,6 +34,8 @@ interface JobMatchPageProps {
   onDraftChange: (draft: JobMatchDraft) => void;
   lastMatch: LastMatchSummary | null;
   onOpenLastMatch: () => void;
+  /** 从首页搜索框进来时带的关键词 */
+  initialSearch?: string;
 }
 
 /** 主入口：上传一份简历，从岗位目录里勾选多个岗位发起匹配 */
@@ -43,6 +45,7 @@ export function JobMatchPage({
   onDraftChange,
   lastMatch,
   onOpenLastMatch,
+  initialSearch,
 }: JobMatchPageProps) {
   // 从“换个岗位再匹配”返回或刷新页面时，沿用已上传的简历和已选岗位
   const [files, setFiles] = useState<File[]>(draft.files);
@@ -55,7 +58,7 @@ export function JobMatchPage({
   const [jobsLoading, setJobsLoading] = useState(true);
   const [jobsError, setJobsError] = useState<string | null>(null);
   const [category, setCategory] = useState<string>("全部");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch ?? "");
 
   const [selected, setSelected] = useState<string[]>(draft.selected);
   const [submitting, setSubmitting] = useState(false);
