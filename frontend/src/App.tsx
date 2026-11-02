@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IS_MOCK_MODE } from "./api/http";
 import { listJobs } from "./api/jobs";
 import { JobMatchPage, type JobMatchDraft } from "./components/JobMatchPage";
@@ -37,6 +37,8 @@ export default function App() {
   const [lastMatch, setLastMatch] = useState<MatchRecord | null>(() => loadLastMatch());
   const [view, setView] = useState<View>(() => initialView(lastMatch));
   const [homeJobs, setHomeJobs] = useState<Job[]>([]);
+  const [homeTotal, setHomeTotal] = useState(0);
+  const [homeCategories, setHomeCategories] = useState(0);
   // 草稿只在切页时读一次，用 ref 存避免每次勾选都让 App 重渲染
   const draftRef = useRef<JobMatchDraft>({ ...loadDraft(), files: [] });
   // hashchange 回调里要读最新的可恢复记录，不能依赖闭包里的初始值
@@ -50,12 +52,33 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
-    listJobs({ page: 1, page_size: 4 }).then((data) => {
-      if (!cancelled) setHomeJobs(data.items);
+    // 一次拿满一页，首页统计和推荐卡都用同一份数据
+    listJobs({ page: 1, page_size: 100 }).then((data) => {
+      if (cancelled) return;
+      setHomeJobs(data.items);
+      setHomeTotal(data.total);
+      setHomeCategories(new Set(data.items.map((job) => job.category)).size);
     }).catch(() => {
-      if (!cancelled) setHomeJobs([]);
+      if (cancelled) {
+        setHomeJobs([]);
+        setHomeTotal(0);
+        setHomeCategories(0);
+      }
     });
     return () => { cancelled = true; };
+  }, []);
+
+  // 首页「近期截止」用的当月日历，只标今天，不做节假日
+  const calendarDays = useMemo(() => {
+    const now = new Date();
+    const firstWeekday = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const cells: { key: string; day: string; today: boolean }[] = [];
+    for (let i = 0; i < firstWeekday; i += 1) cells.push({ key: `blank-${i}`, day: "", today: false });
+    for (let day = 1; day <= daysInMonth; day += 1) {
+      cells.push({ key: `day-${day}`, day: String(day), today: day === now.getDate() });
+    }
+    return cells;
   }, []);
 
   // 刷新时带着 #result 但已没有可恢复的记录，去掉这个无效 hash
@@ -154,15 +177,119 @@ export default function App() {
           <header className="offer-topbar"><span>简历与岗位匹配</span><span>{IS_MOCK_MODE ? "演示数据" : "你的求职空间"}</span></header>
           {view.name === "home" ? (
             <main className="offer-dashboard">
-              <section className="dashboard-panel dashboard-main"><span className="offer-eyebrow">YOUR CAREER, YOUR WAY</span><h1>今天想投什么岗位？</h1>
-                <div className="dashboard-resume"><span className="picker-logo">▤</span><span><strong>{lastMatch?.resumeName || "先上传一份简历"}</strong><small>{lastMatch ? "继续使用最近一次匹配的简历，或上传新简历" : "支持 PDF、DOCX、PNG 和 JPG"}</small></span><button onClick={() => setView({ name: "job" })}>{lastMatch ? "更换" : "去上传"} →</button></div>
-                <p className="dashboard-copy">选择感兴趣的岗位，看看简历与岗位要求的契合点，也可以针对岗位练习面试。</p>
-                {lastMatch && <button className="dashboard-last" onClick={() => openResult(lastMatch)}>上次匹配 · {lastMatch.jobIds.length} 个岗位 <span>查看结果 →</span></button>}
-                <button className="offer-primary" onClick={() => setView({ name: "job" })}>挑选岗位 <span>→</span></button>
+              <section className="dashboard-panel dashboard-main">
+                <span className="offer-eyebrow">YOUR CAREER, YOUR WAY</span>
+                <h1>今天想投什么岗位？</h1>
+
+                <div className="dashboard-resume">
+                  <span className="picker-logo">▤</span>
+                  <span>
+                    <strong>{lastMatch?.resumeName || "先上传一份简历"}</strong>
+                    <small>
+                      {lastMatch
+                        ? `已解析 · 上次用于 ${lastMatch.jobIds.length} 个岗位`
+                        : "支持 PDF、DOCX、PNG 和 JPG"}
+                    </small>
+                  </span>
+                  <button onClick={() => setView({ name: "job" })}>
+                    {lastMatch ? "换一份" : "去上传"} →
+                  </button>
+                </div>
+
+                <div className="dashboard-prefs" aria-label="求职偏好">
+                  {["计算机", "本科", "2027 届"].map((label) => (
+                    <button key={label} type="button" onClick={() => setView({ name: "job" })}>
+                      {label} ▾
+                    </button>
+                  ))}
+                </div>
+
+                {lastMatch ? (
+                  <button className="dashboard-last" onClick={() => openResult(lastMatch)}>
+                    上次匹配 · {lastMatch.jobIds.length} 个岗位 <span>查看结果 →</span>
+                  </button>
+                ) : null}
+
+                <div className="dashboard-stats">
+                  <span>
+                    岗位库共 <b>{homeTotal || "—"}</b> 个可投岗位，覆盖 <b>{homeCategories || "—"}</b> 类专业
+                  </span>
+                  <button type="button" onClick={() => setView({ name: "job" })}>
+                    挑选岗位 →
+                  </button>
+                </div>
               </section>
-              <section className="dashboard-panel"><span className="offer-eyebrow">YOUR OPPORTUNITIES</span><h2>近期截止</h2><p className="dashboard-copy">目前没有经过确认的截止日期，建议前往招聘来源查看最新信息。</p><button className="dashboard-link" onClick={() => setView({ name: "job" })}>浏览岗位 →</button></section>
-              <section className="dashboard-panel"><div className="dashboard-heading"><h2>岗位目录</h2><button className="dashboard-link" onClick={() => setView({ name: "job" })}>查看全部 →</button></div>{homeJobs.length ? homeJobs.slice(0,3).map((job) => <button key={job.job_id} className="dashboard-job" onClick={() => setView({ name: "job" })}><span className="picker-logo small">{job.company.slice(0,1)}</span><span><strong>{job.title}</strong><small>{job.company} · {job.cities[0]}</small></span><span>→</span></button>) : <p className="dashboard-copy">岗位目录暂时不可用，请稍后查看。</p>}</section>
-              <section className="dashboard-panel"><span className="offer-eyebrow">PRACTICE</span><h2>模拟面试</h2><p className="dashboard-copy">先完成岗位匹配，再针对选中的岗位进行五轮练习。</p><button className="dashboard-link" onClick={() => lastMatch ? openResult(lastMatch) : setView({ name: "job" })}>{lastMatch ? "查看匹配结果 →" : "去选择岗位 →"}</button></section>
+
+              <section className="dashboard-panel">
+                <span className="offer-eyebrow">YOUR OPPORTUNITIES</span>
+                <h2>近期截止</h2>
+                <div className="dashboard-calendar" aria-hidden="true">
+                  {["日", "一", "二", "三", "四", "五", "六"].map((weekday) => (
+                    <span key={weekday} className="wk">{weekday}</span>
+                  ))}
+                  {calendarDays.map((cell) => (
+                    <span key={cell.key} className={cell.today ? "today" : ""}>{cell.day}</span>
+                  ))}
+                </div>
+                <p className="dashboard-copy">
+                  目前没有经过确认的截止日期，建议前往招聘来源查看最新信息。
+                </p>
+                <button className="dashboard-link" onClick={() => setView({ name: "job" })}>
+                  浏览岗位 →
+                </button>
+              </section>
+
+              <section className="dashboard-panel dashboard-wide">
+                <div className="dashboard-heading">
+                  <h2>为你推荐</h2>
+                  <button className="dashboard-link" onClick={() => setView({ name: "job" })}>
+                    查看全部 →
+                  </button>
+                </div>
+                {homeJobs.length ? (
+                  <div className="dashboard-cards">
+                    {homeJobs.slice(0, 3).map((job) => (
+                      <article key={job.job_id} className="dashboard-card">
+                        <div className="picker-company-row">
+                          <span className="picker-logo">{job.company.slice(0, 1)}</span>
+                          <span className="picker-company">
+                            <strong>{job.company}</strong>
+                            <small>{job.cities.join(" / ")}</small>
+                          </span>
+                        </div>
+                        <strong>{job.title}</strong>
+                        <small>{job.jd_text.replace(/\s+/g, " ").slice(0, 52)}…</small>
+                        <div className="dashboard-card-tags">
+                          <span>{job.category}</span>
+                          <span>{job.education}</span>
+                          <span>{job.graduation_year} 届</span>
+                        </div>
+                        <button className="dashboard-link" onClick={() => setView({ name: "job" })}>
+                          查看要求 →
+                        </button>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="dashboard-copy">岗位目录暂时不可用，请稍后查看。</p>
+                )}
+              </section>
+
+              <section className="dashboard-panel">
+                <span className="offer-eyebrow">PRACTICE</span>
+                <h2>今日练习</h2>
+                <p className="dashboard-copy">
+                  {lastMatch
+                    ? "针对上次选中的岗位继续练习五轮模拟面试。"
+                    : "先完成岗位匹配，再针对选中的岗位进行五轮练习。"}
+                </p>
+                <button
+                  className="dashboard-link"
+                  onClick={() => (lastMatch ? openResult(lastMatch) : setView({ name: "job" }))}
+                >
+                  {lastMatch ? "继续练习 →" : "去选择岗位 →"}
+                </button>
+              </section>
             </main>
           ) : view.name === "records" ? (
             <main className="offer-picker"><div className="picker-title"><div><span className="offer-eyebrow">YOUR ACTIVITY</span><h1>记录</h1><p>在当前浏览器继续查看最近一次匹配。</p></div></div><div className="records-grid"><section className="picker-panel"><h2>最近动态</h2>{lastMatch ? <button className="dashboard-job" onClick={() => openResult(lastMatch)}><span className="picker-logo small">▤</span><span><strong>{lastMatch.resumeName}</strong><small>{lastMatch.jobIds.length} 个岗位 · {new Date(lastMatch.savedAt).toLocaleString("zh-CN")}</small></span><span>查看 →</span></button> : <p className="picker-empty">还没有匹配记录，完成匹配后可在这里查看。</p>}</section><section className="picker-panel"><h2>模拟面试记录</h2><p className="picker-hint">当前仅支持在面试过程中查看反馈，暂不提供历史面试记录。</p><h2 className="mt-6">我的简历</h2><p className="picker-hint">{lastMatch ? lastMatch.resumeName : "暂未保存最近匹配的简历。"}</p><button className="dashboard-link" onClick={() => setView({ name: "job" })}>管理本次简历 →</button></section></div></main>
