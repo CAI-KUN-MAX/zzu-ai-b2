@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IS_MOCK_MODE } from "./api/http";
-import { createJobMatch, listJobs } from "./api/jobs";
+import { createJobRecommendation, listJobs } from "./api/jobs";
+import { DOCUMENT_ACCEPT, IMAGE_ACCEPT, getIngestTask, uploadResumes, validateFiles } from "./api/resumes";
 import { JobMatchPage, type JobMatchDraft } from "./components/JobMatchPage";
 import { JobResultPage } from "./components/JobResultPage";
+import { useTask } from "./lib/useTask";
 import {
   type StoredJobMatch,
   loadDraft,
@@ -11,8 +13,9 @@ import {
   type StoredResume,
   saveDraft,
   saveLastMatch,
+  saveLastResume,
 } from "./lib/jobMatchStorage";
-import type { Job, ResumeStatus } from "./types";
+import type { IngestTask, Job, ResumeStatus } from "./types";
 
 /**
  * 主导航收敛为「岗位匹配」一条链路：上传简历 → 选岗位 → 排序结果 → 详情（诊断 + 面试）。
@@ -42,6 +45,11 @@ export default function App() {
   const [recentResume, setRecentResume] = useState<StoredResume | null>(() => loadLastResume());
   const [recommending, setRecommending] = useState(false);
   const [recommendError, setRecommendError] = useState<string | null>(null);
+  const uploadInputRef = useRef<HTMLInputElement>(null);
+  const [homeUploading, setHomeUploading] = useState(false);
+  const [homeUploadError, setHomeUploadError] = useState<string | null>(null);
+  const [homeUploadTask, setHomeUploadTask] = useState<string | null>(null);
+  const { data: homeIngest, error: homePollError, polling: homePolling, retry: retryHomeIngest } = useTask<IngestTask>(getIngestTask, homeUploadTask);
   const [homeTotal, setHomeTotal] = useState(0);
   const [homeCategories, setHomeCategories] = useState(0);
   // 草稿只在切页时读一次，用 ref 存避免每次勾选都让 App 重渲染
@@ -50,6 +58,37 @@ export default function App() {
   const lastMatchRef = useRef<MatchRecord | null>(lastMatch);
   lastMatchRef.current = lastMatch;
 
+  useEffect(() => {
+    if (!homeUploadTask || homeIngest?.status !== "succeeded") return;
+    const resume = homeIngest.items[0];
+    if (!resume || (resume.status !== "ready" && resume.status !== "need_review")) {
+      setHomeUploadError(resume?.error?.message || "简历解析未完成，请检查文件后重试");
+      return;
+    }
+    const saved: StoredResume = { resumeId: resume.resume_id, name: resume.name, status: resume.status, savedAt: Date.now() };
+    saveLastResume(saved);
+    setRecentResume(saved);
+    draftRef.current = { ...draftRef.current, resumeTaskId: homeUploadTask, files: [] };
+    saveDraft({ resumeTaskId: homeUploadTask, selected: draftRef.current.selected });
+  }, [homeIngest, homeUploadTask]);
+
+  async function handleHomeFile(file: File | undefined) {
+    if (!file || homeUploading || homePolling) return;
+    const validation = validateFiles([file]);
+    setHomeUploadError(validation.errors[0] ?? null);
+    if (!validation.ok.length) return;
+    setHomeUploadTask(null);
+    setHomeUploading(true);
+    try {
+      const { task_id } = await uploadResumes(validation.ok);
+      setHomeUploadTask(task_id);
+    } catch (err) {
+      setHomeUploadError(err instanceof Error ? err.message : "上传失败，请重试");
+    } finally {
+      setHomeUploading(false);
+    }
+  }
+
   // 切换页面时回到顶部
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -57,7 +96,7 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
-    // 分页拉全目录，首页统计只算「已核验可投」，推荐卡也用同一份数据
+    // 首页统计和岗位速览使用目录中状态为开放的岗位。
     (async () => {
       const collected: Job[] = [];
       let total = 0;
@@ -73,7 +112,7 @@ export default function App() {
       setHomeTotal(openJobs.length);
       setHomeCategories(new Set(openJobs.map((job) => job.category)).size);
     })().catch(() => {
-      if (cancelled) {
+      if (!cancelled) {
         setHomeJobs([]);
         setHomeTotal(0);
         setHomeCategories(0);
@@ -172,7 +211,7 @@ export default function App() {
   }
 
   /**
-   * 一键推荐：取目录里全部可投岗位交给后端排序，前端只展示前 8。
+   * 一键推荐：由后端从目录中筛选并排序。
    * 分数、排序、匹配理由全部来自后端，前端不生成任何分数。
    */
   async function handleRecommend() {
@@ -184,30 +223,14 @@ export default function App() {
     setRecommendError(null);
     setRecommending(true);
     try {
-      // 分页拉全目录：page_size 最大 50，目录已经超过 100 条
-      const collected: Job[] = [];
-      let total = 0;
-      for (let page = 1; page <= 4; page += 1) {
-        const data = await listJobs({ page, page_size: 50 });
-        collected.push(...data.items);
-        total = data.total;
-        if (collected.length >= total) break;
-      }
-      // 只把「已核验可投」的岗位交给后端；unverified 不能当可投推荐
-      const jobs = collected.filter((job) => job.application_status === "open").slice(0, 50);
-      if (jobs.length === 0) {
-        throw new Error("当前没有已核验可投的岗位，可以先手动挑一挑");
-      }
-      const jobIds = jobs.map((job) => job.job_id);
-      const { task_id } = await createJobMatch(recentResume.resumeId, jobIds);
-      const jobIndex = Object.fromEntries(jobs.map((job) => [job.job_id, job])) as Record<string, Job>;
+      const { task_id } = await createJobRecommendation(recentResume.resumeId);
       openResult({
         taskId: task_id,
         resumeId: recentResume.resumeId,
         resumeName: recentResume.name,
-        resumeStatus: "ready",
-        jobIds,
-        jobIndex,
+        resumeStatus: recentResume.status ?? "need_review",
+        jobIds: [],
+        jobIndex: {},
         savedAt: Date.now(),
         mode: "recommend",
       });
@@ -257,17 +280,20 @@ export default function App() {
                         : "支持 PDF、DOCX、PNG 和 JPG"}
                     </small>
                   </span>
-                  <button onClick={() => setView({ name: "job" })}>
+                  <button type="button" disabled={homeUploading || homePolling} onClick={() => uploadInputRef.current?.click()}>
                     {recentResume ? "换一份" : "去上传"} →
                   </button>
+                  <input ref={uploadInputRef} type="file" hidden accept={`${DOCUMENT_ACCEPT},${IMAGE_ACCEPT}`} onChange={(event) => { void handleHomeFile(event.target.files?.[0]); event.target.value = ""; }} />
                 </div>
+                {homeUploading || homePolling ? <p className="dashboard-hint" role="status">正在上传并解析简历，请稍候…</p> : null}
+                {homeUploadError || homePollError ? <p className="dashboard-error" role="alert">{homeUploadError || homePollError}{homePollError && homeUploadTask ? <button type="button" onClick={retryHomeIngest}>重新获取</button> : null}</p> : null}
 
                 {/* 主操作：一键推荐，不需要先选岗位 */}
                 <button
                   type="button"
                   className="offer-primary dashboard-cta"
                   onClick={handleRecommend}
-                  disabled={recommending || !recentResume}
+                  disabled={recommending || !recentResume || homeUploading || homePolling}
                 >
                   {recommending ? "正在为你挑选岗位…" : "为我推荐岗位"}
                   <span>→</span>
@@ -286,14 +312,14 @@ export default function App() {
 
                 {lastMatch ? (
                   <button className="dashboard-last" onClick={() => openResult(lastMatch)}>
-                    上次{lastMatch.mode === "recommend" ? "推荐" : "匹配"} · {lastMatch.jobIds.length} 个岗位
+                    上次{lastMatch.mode === "recommend" ? "推荐" : `匹配 · ${lastMatch.jobIds.length} 个岗位`}
                     <span>查看结果 →</span>
                   </button>
                 ) : null}
 
                 <div className="dashboard-stats">
                   <span>
-                    岗位库共 <b>{homeTotal || "—"}</b> 个可投岗位，覆盖 <b>{homeCategories || "—"}</b> 类专业
+                    岗位库共 <b>{homeTotal || "—"}</b> 个开放状态岗位，覆盖 <b>{homeCategories || "—"}</b> 类专业
                   </span>
                   <button type="button" onClick={() => setView({ name: "job" })}>
                     挑选岗位 →
@@ -322,7 +348,7 @@ export default function App() {
 
               <section className="dashboard-panel dashboard-wide">
                 <div className="dashboard-heading">
-                  <h2>为你推荐</h2>
+                  <h2>岗位速览</h2>
                   <button className="dashboard-link" onClick={() => setView({ name: "job" })}>
                     查看全部 →
                   </button>

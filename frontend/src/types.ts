@@ -218,6 +218,24 @@ export interface InterviewSession {
   question: InterviewQuestion | null;
 }
 
+export interface InterviewTurn {
+  question: InterviewQuestion;
+  answer: string;
+  feedback: InterviewFeedback;
+}
+
+export interface InterviewRecovery extends InterviewSession {
+  turns: InterviewTurn[];
+}
+
+export interface InterviewReport {
+  interview_id: string;
+  resume_id: string;
+  jd_text: string;
+  confirmation_notice: string;
+  rounds: (InterviewTurn & { round: number; resume_suggestions: string[] })[];
+}
+
 /** POST /api/interviews/{id}/answers 响应（HTTP 200），round 为刚完成的轮次 */
 export interface InterviewAnswerResult {
   interview_id: string;
