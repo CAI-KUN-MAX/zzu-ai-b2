@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   InterviewFeedback,
   InterviewQuestion,
+  InterviewReport,
   ResumeStatus,
 } from "../types";
 import {
@@ -9,10 +10,12 @@ import {
   ANSWER_MIN,
   answerLength,
   createInterview,
+  getInterviewReport,
   isSessionExpired,
+  recoverInterview,
   submitAnswer,
 } from "../api/interviews";
-import { ApiError } from "../api/http";
+import { ApiError, IS_MOCK_MODE } from "../api/http";
 import { useSpeechRecognition } from "../lib/useSpeechRecognition";
 import { AlertIcon, ArrowLeftIcon, CheckIcon, InfoIcon, MicIcon, SpinnerIcon, StopIcon } from "./icons";
 
@@ -86,6 +89,21 @@ function FeedbackBlock({ feedback }: { feedback: InterviewFeedback }) {
 
 /** 创建会话前先按当前契约展示，拿到响应后一律以接口的 max_rounds 为准 */
 const DEFAULT_MAX_ROUNDS = 5;
+const SESSION_KEY = "offer-interview-session";
+
+function savedSession(resumeId: string, jdText: string): string | null {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(SESSION_KEY) ?? "null");
+    return saved?.resumeId === resumeId && saved?.jdText === jdText && typeof saved.id === "string" ? saved.id : null;
+  } catch { return null; }
+}
+
+function saveSession(value: { id: string; resumeId: string; jdText: string } | null) {
+  try {
+    if (value) sessionStorage.setItem(SESSION_KEY, JSON.stringify(value));
+    else sessionStorage.removeItem(SESSION_KEY);
+  } catch { /* Storage may be unavailable; the current session still works. */ }
+}
 
 export function InterviewPage({
   resumeId,
@@ -126,6 +144,46 @@ export function InterviewPage({
   // 服务端已记下这题的回答（响应丢失后用户又改了答案）或面试已结束：给出重新开始的出口，
   // 但不禁用提交——把答案改回原文仍能拿到原来的反馈
   const [conflict, setConflict] = useState(false);
+  const [report, setReport] = useState<InterviewReport | null>(null);
+  const [confirmedSuggestions, setConfirmedSuggestions] = useState<Record<string, boolean>>({});
+  const [reportError, setReportError] = useState<string | null>(null);
+  const [reportAttempt, setReportAttempt] = useState(0);
+
+  // The session ID is a credential: keep it in this tab only, not in the URL.
+  // Reopening the same job after refresh restores its server-side progress.
+  useEffect(() => {
+    if (IS_MOCK_MODE) return;
+    const id = savedSession(resumeId, jdText);
+    if (!id) return;
+    let cancelled = false;
+    setBusy(true);
+    recoverInterview(id).then((session) => {
+      if (cancelled) return;
+      setSessionId(id);
+      setCurrentQuestion(session.question);
+      setCurrentRound(session.round);
+      setMaxRounds(session.max_rounds);
+      setRounds(session.turns.map((turn, index) => ({ ...turn, round: index + 1 })));
+      setPhase(session.status);
+    }).catch((err: unknown) => {
+      if (cancelled) return;
+      if (isSessionExpired(err)) saveSession(null);
+      setError(isSessionExpired(err) ? "面试会话已失效，请重新开始。" : "恢复面试失败，请重新打开此岗位重试。" );
+    }).finally(() => { if (!cancelled) setBusy(false); });
+    return () => { cancelled = true; };
+  }, [resumeId, jdText]);
+
+  useEffect(() => {
+    if (phase !== "completed" || !sessionId || IS_MOCK_MODE) return;
+    let cancelled = false;
+    setReportError(null);
+    getInterviewReport(sessionId).then((value) => {
+      if (!cancelled) setReport(value);
+    }).catch((err: unknown) => {
+      if (!cancelled) setReportError(err instanceof ApiError ? err.message : "报告加载失败，请重试。");
+    });
+    return () => { cancelled = true; };
+  }, [phase, sessionId, reportAttempt]);
 
   // 覆盖层铺满视口时锁住底层页面滚动，避免出现双滚动条
   useEffect(() => {
@@ -172,6 +230,7 @@ export function InterviewPage({
     setError(null);
     try {
       const session = await createInterview(resumeId, jdText);
+      if (!IS_MOCK_MODE) saveSession({ id: session.interview_id, resumeId, jdText });
       setSessionId(session.interview_id);
       setCurrentQuestion(session.question);
       setCurrentRound(session.round);
@@ -236,6 +295,10 @@ export function InterviewPage({
   }
 
   function handleRestart() {
+    saveSession(null);
+    setReport(null);
+    setConfirmedSuggestions({});
+    setReportError(null);
     setPhase("confirm");
     setSessionId(null);
     setCurrentQuestion(null);
@@ -542,6 +605,23 @@ export function InterviewPage({
                 全部 {rounds.length} 轮反馈都在下面。建议先把「可以补充」里的点挑两条写进回答，再重新练一遍同样的题。
               </p>
 
+              {!IS_MOCK_MODE && reportError ? (
+                <p role="alert" className="mt-3 text-sm text-rose-700">
+                  {reportError} <button type="button" className="underline" onClick={() => setReportAttempt((n) => n + 1)}>重新加载报告</button>
+                </p>
+              ) : null}
+              {!IS_MOCK_MODE && !report && !reportError ? <p className="mt-3 text-sm text-ink-500">正在加载面试报告…</p> : null}
+              {report ? (
+                <div className="mt-4 rounded-xl bg-surface-soft/80 px-4 py-3 text-[12px] leading-relaxed text-ink-700">
+                  <p>{report.confirmation_notice}</p>
+                  <p className="mt-1">勾选仅保留在当前页面，刷新或离开后清除；不会保存确认结果，也不会自动修改简历。</p>
+                  <details className="mt-2">
+                    <summary className="cursor-pointer font-medium">查看本次面试的岗位要求</summary>
+                    <p className="mt-2 whitespace-pre-wrap">{report.jd_text}</p>
+                  </details>
+                </div>
+              ) : null}
+
               <div className="mt-5 flex flex-col gap-2 sm:flex-row">
                 <button
                   type="button"
@@ -582,6 +662,18 @@ export function InterviewPage({
                 <div className="mt-4 border-t border-surface-line pt-4">
                   <FeedbackBlock feedback={record.feedback} />
                 </div>
+                {report?.rounds.find((item) => item.round === record.round)?.resume_suggestions.length ? (
+                  <div className="mt-4 border-t border-surface-line pt-4">
+                    <p className="text-[11px] font-medium text-brand-700">简历核对提示</p>
+                    <p className="mt-1 text-[11px] text-ink-500">这些提示来自本轮面试反馈，未必适用于简历；请先判断与岗位的相关性并确认真实经历，再决定是否采用。</p>
+                    <ul className="mt-2 space-y-2 text-[13px] text-ink-700">
+                      {report.rounds.find((item) => item.round === record.round)?.resume_suggestions.map((tip, index) => {
+                        const key = `${record.round}-${index}`;
+                        return <li key={key}><label className="flex items-start gap-2"><input type="checkbox" className="mt-1" checked={!!confirmedSuggestions[key]} onChange={(event) => setConfirmedSuggestions((previous) => ({ ...previous, [key]: event.target.checked }))} /><span>{tip}<span className="mt-1 block text-[11px] text-ink-500">我已核对这条提示适用于该岗位，且符合我的真实经历</span></span></label></li>;
+                      })}
+                    </ul>
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>

@@ -27,6 +27,7 @@ export interface StoredDraft {
 export interface StoredResume {
   resumeId: string;
   name: string;
+  status?: "ready" | "need_review";
   savedAt: number;
 }
 
@@ -99,7 +100,7 @@ export function parseStoredJobMatch(value: unknown): StoredJobMatch | null {
   if (!isNonEmptyString(item.resumeId)) return null;
   if (typeof item.resumeName !== "string") return null;
   if (!RESUME_STATUSES.includes(item.resumeStatus as ResumeStatus)) return null;
-  if (!Array.isArray(item.jobIds) || item.jobIds.length === 0) return null;
+  if (!Array.isArray(item.jobIds) || (item.jobIds.length === 0 && item.mode !== "recommend")) return null;
   if (!item.jobIds.every((id) => isNonEmptyString(id))) return null;
   if (typeof item.savedAt !== "number" || !Number.isFinite(item.savedAt)) return null;
 
@@ -178,6 +179,7 @@ export function loadLastResume(): StoredResume | null {
   return {
     resumeId: item.resumeId,
     name: item.name,
+    status: item.status === "ready" || item.status === "need_review" ? item.status : undefined,
     savedAt: typeof item.savedAt === "number" ? item.savedAt : Date.now(),
   };
 }

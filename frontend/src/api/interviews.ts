@@ -1,6 +1,8 @@
 import type {
   InterviewAnswerResult,
   InterviewQuestion,
+  InterviewRecovery,
+  InterviewReport,
   InterviewSession,
 } from "../types";
 import interviewMock from "../mock/interview.json";
@@ -25,6 +27,14 @@ const MOCK = interviewMock as MockData;
 const mockRound = new Map<string, number>();
 /** mock 下已返回过的结果，保证同一题重试返回同一份反馈 */
 const mockAnswered = new Map<string, Map<string, InterviewAnswerResult>>();
+
+export async function recoverInterview(id: string): Promise<InterviewRecovery> {
+  return request<InterviewRecovery>(`/api/interviews/${encodeURIComponent(id)}`);
+}
+
+export async function getInterviewReport(id: string): Promise<InterviewReport> {
+  return request<InterviewReport>(`/api/interviews/${encodeURIComponent(id)}/report`);
+}
 
 function mockQuestion(index: number): InterviewQuestion | null {
   return MOCK.questions[index] ?? null;
