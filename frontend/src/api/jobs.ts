@@ -176,6 +176,25 @@ export async function createJobMatch(
   });
 }
 
+export async function createJobRecommendation(resumeId: string): Promise<{ task_id: string }> {
+  if (IS_MOCK_MODE) throw new Error("演示模式暂不支持岗位推荐");
+  return request<{ task_id: string }>("/api/job-recommendations", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ resume_id: resumeId }),
+    timeoutMessage: "创建推荐任务超时，请稍后重试",
+  });
+}
+
+export async function getJob(jobId: string): Promise<Job> {
+  if (IS_MOCK_MODE) {
+    const job = MOCK_JOBS.find((item) => item.job_id === jobId);
+    if (!job) throw new Error("岗位不存在");
+    return job;
+  }
+  return request<Job>(`/api/jobs/${encodeURIComponent(jobId)}`);
+}
+
 /** GET /api/job-matches/{task_id} */
 export async function getJobMatchTask(
   taskId: string,

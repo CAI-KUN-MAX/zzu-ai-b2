@@ -9,7 +9,7 @@ import type {
   MatchContext,
   ResumeStatus,
 } from "../types";
-import { createJobMatch, getJobMatchTask, getMatchContext } from "../api/jobs";
+import { createJobMatch, createJobRecommendation, getJob, getJobMatchTask, getMatchContext } from "../api/jobs";
 import { useTask } from "../lib/useTask";
 import { levelTone } from "../lib/theme";
 import { DimensionBars } from "./report/DimensionBars";
@@ -211,7 +211,7 @@ function JobDetail({
                 }`}
               >
                 {job.application_status === "open"
-                  ? "已核验可投"
+                  ? "目录状态：开放"
                   : job.application_status === "closed"
                     ? "已关闭"
                     : "待核验"}
@@ -264,7 +264,7 @@ function JobDetail({
 
             <details open className="mt-4 rounded-xl border border-surface-line">
               <summary className="cursor-pointer select-none px-3.5 py-2.5 text-[12px] font-medium text-ink-700">
-                完整 JD
+                目录中的岗位要求
               </summary>
               <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap border-t border-surface-line px-3.5 py-3 text-[12px] leading-relaxed text-ink-700 [overflow-wrap:anywhere]">
                 {job.jd_text}
@@ -301,7 +301,7 @@ function JobDetail({
               )}
             </div>
           </section>
-        ) : null}
+        ) : <p className="mt-5 text-sm text-ink-500">岗位目录详情暂不可用，请返回目录核对岗位来源。</p>}
 
         {/* 基础评分构成：所有岗位都有，与 AI 诊断的四个维度不是一回事 */}
         {item.subscores.length > 0 ? (
@@ -640,13 +640,30 @@ export function JobResultPage({
   const { data: task, error, transient, polling, retry } = useTask(getJobMatchTask, taskId);
   const [restarting, setRestarting] = useState(false);
   const [restartError, setRestartError] = useState<string | null>(null);
+  const [loadedJobs, setLoadedJobs] = useState<Record<string, Job>>({});
   const restartInFlight = useRef(false);
+
+  const missingIds = (task?.items ?? []).map((item) => item.job_id).filter((id) => !jobIndex[id]).join(",");
+  useEffect(() => {
+    if (!missingIds) return;
+    let cancelled = false;
+    Promise.allSettled(missingIds.split(",").map((id) => getJob(id))).then((results) => {
+      if (cancelled) return;
+      setLoadedJobs((previous) => {
+        const next = { ...previous };
+        for (const result of results) if (result.status === "fulfilled") next[result.value.job_id] = result.value;
+        return next;
+      });
+    });
+    return () => { cancelled = true; };
+  }, [missingIds]);
+  const displayedJobs = { ...loadedJobs, ...jobIndex };
 
   /** 整批失败或任务已不存在时，不回首页、不重传简历，直接用原参数再建一个任务 */
   async function handleRestart() {
     if (restartInFlight.current) return;
     const ids = jobIds.length > 0 ? jobIds : (task?.items ?? []).map((item) => item.job_id);
-    if (ids.length === 0) {
+    if (ids.length === 0 && mode !== "recommend") {
       onReset();
       return;
     }
@@ -654,7 +671,9 @@ export function JobResultPage({
     setRestarting(true);
     setRestartError(null);
     try {
-      const { task_id } = await createJobMatch(resumeId, ids);
+      const { task_id } = mode === "recommend"
+        ? await createJobRecommendation(resumeId)
+        : await createJobMatch(resumeId, ids);
       onRestart(task_id);
     } catch (err) {
       setRestartError(err instanceof Error ? err.message : "重新发起失败，请稍后再试");
@@ -773,7 +792,7 @@ export function JobResultPage({
           <p>
             {resumeName} ·{" "}
             {mode === "recommend"
-              ? `从 ${allItems.length} 个可投岗位里挑出 ${items.length} 个`
+              ? `为你推荐 ${items.length} 个岗位，请以招聘来源核对状态`
               : `${items.length} 个岗位按匹配分排序`}
           </p>
         </div>
@@ -795,12 +814,12 @@ export function JobResultPage({
       ) : (
         <div className="offer-results-layout">
           <section className="picker-panel result-ranks" aria-label="匹配排序"><div className="picker-panel-head"><h2>匹配排序</h2><span>{items.length} 个岗位</span></div>
-            <div className="result-rank-list">{items.map((item, index) => { const job = jobIndex[item.job_id]; return <button key={item.job_id} type="button" aria-pressed={detailJob?.job_id === item.job_id} className={`result-rank ${detailJob?.job_id === item.job_id ? "active" : ""}`} onClick={() => setDetailJobId(item.job_id)}>
+            <div className="result-rank-list">{items.map((item, index) => { const job = displayedJobs[item.job_id]; return <button key={item.job_id} type="button" aria-pressed={detailJob?.job_id === item.job_id} className={`result-rank ${detailJob?.job_id === item.job_id ? "active" : ""}`} onClick={() => setDetailJobId(item.job_id)}>
               <span className="result-order">{index + 1}</span><span className="picker-logo small">{job?.company.slice(0,1) || "岗"}</span><span className="result-rank-text"><strong>{item.title}</strong><small>{job?.company || "岗位"}{job?.cities?.length ? " · " + job.cities[0] : ""} · {analysisLabel(item)}</small></span><span className="result-score">{item.score}</span>
             </button>; })}</div>
             <p className="picker-hint">结果根据简历与岗位内容计算，分析建议仅供参考。</p>
           </section>
-          {detailJob && <JobDetail key={detailJob.job_id} item={detailJob} job={jobIndex[detailJob.job_id]} taskId={taskId} resumeId={resumeId} resumeName={resumeName} resumeStatus={resumeStatus} embeddingStatus={task?.embedding_status} />}
+          {detailJob && <JobDetail key={detailJob.job_id} item={detailJob} job={displayedJobs[detailJob.job_id]} taskId={taskId} resumeId={resumeId} resumeName={resumeName} resumeStatus={resumeStatus} embeddingStatus={task?.embedding_status} />}
         </div>
       )}
     </main>

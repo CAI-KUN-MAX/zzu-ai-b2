@@ -80,16 +80,16 @@ export function JobMatchPage({
   const resume = ingest?.items[0] ?? null;
   // 只有一份简历：拿到解析结果（非 failed）就可以发起匹配
   // 失败和「不是简历」都不能继续，前者可能是格式问题，后者内容不对
-  const parsed = !!resume && resume.status !== "failed" && resume.status !== "not_resume";
+  const parsed = !!resume && (resume.status === "ready" || resume.status === "need_review");
   // 只有后端明确返回失败才算解析失败；轮询网络错误或等待超时不能证明解析失败
   const resumeFailed = resume?.status === "failed" || ingest?.status === "failed";
 
   // 解析成功就记下来，首页「为我推荐岗位」不选岗也拿得到简历
   useEffect(() => {
     if (parsed && resume) {
-      saveLastResume({ resumeId: resume.resume_id, name: resume.name, savedAt: Date.now() });
+      saveLastResume({ resumeId: resume.resume_id, name: resume.name, status: resume.status === "ready" ? "ready" : "need_review", savedAt: Date.now() });
     }
-  }, [parsed, resume?.resume_id, resume?.name]);
+  }, [parsed, resume?.resume_id, resume?.name, resume?.status]);
   const pollUnavailable = !!resumeTaskId && !!pollError && pollTransient && !resumeFailed;
   const hasResume = files.length > 0 || !!resumeTaskId;
   // setState 是异步的，同一时刻连点两次都会读到旧的 submitting；用 ref 做同步闸门，只发一次请求
