@@ -14,15 +14,15 @@
 
 `GET /api/jobs?category=计算机&education=本科&application_status=open&page=1&page_size=20`
 
-参数均可选；默认 `application_status=open`，page=1、page_size=20（1–100）。education 按岗位最低学历精确筛选，不表示个人资格判定。category 为十个专业大类，详见 OpenAPI。返回 `{catalogue_version,total,page,page_size,items}`；items 为完整岗位，包含 job_id、title、company、cities、category、education、education_requirement、majors、graduation_year、jd_text、source_url、published_at（YYYY-MM-DD）、publication_type（original/repost）、application_url（未核实入口时为 null）、verified_at、application_status（open/closed/unverified）、verification_note。状态只代表 verified_at 时点的核验；没有自动保鲜承诺。
+参数均可选；不传 `application_status` 时返回 open 和满足测试池完整性门槛的 unverified 岗位，排除 closed；显式传入状态时按状态精确筛选。page=1、page_size=20（1–100）。education 按岗位最低学历精确筛选，不表示个人资格判定。category 为十个专业大类，详见 OpenAPI。返回 `{catalogue_version,total,page,page_size,items}`；items 为完整岗位，包含 job_id、title、company、cities、category、education、education_requirement、majors、graduation_year、jd_text、source_url、published_at（YYYY-MM-DD）、publication_type（original/repost）、application_url（可能为临时平台首页，不能代表可投）、verified_at、application_status（open/closed/unverified）、verification_note。状态只代表 verified_at 时点的核验；没有自动保鲜承诺。
 
-`GET /api/jobs/{job_id}` 返回单条完整岗位；不存在为 404 JOB_NOT_FOUND。来源日期不明的记录不进入此目录。默认只展示已核验可投岗位；`application_status=unverified` 可显式查看真实来源的候选岗位，其中部分历史记录仍只有摘要，不计入测试就绪集。待核验岗位没有明确投递入口时 `application_url=null`，前端不得把 `source_url` 当作投递地址。
+`GET /api/jobs/{job_id}` 返回单条完整岗位；不存在为 404 JOB_NOT_FOUND。国家平台明确显示更新时间、但未给出首次发布日期时，按照用户授权将更新时间填入日期字段并在核验备注说明。`application_status=unverified` 可显式查看真实来源的候选岗位，其中部分历史记录仍只有摘要，不计入测试就绪集。部分未核验岗位的 `application_url` 暂填国家平台首页，首页不是已核实的岗位投递入口，也不表示岗位当前可投；不能把 `source_url` 当作投递地址；现有前端不显示状态，用户已知悉此限制。
 
-`GET /api/jobs/testing-pool?category=生物医药&page=1&page_size=20` 返回用于多专业匹配测试的真实岗位，筛选标准为来源岗位可追溯、JD 至少 80 字且同时具备岗位职责和任职要求。接口与普通目录采用同一 `JobList` 响应及分页、专业、最低学历筛选；其中 `application_status=unverified` 的记录只用于测试，不能呈现为可投。
+`GET /api/jobs/testing-pool?category=生物医药&page=1&page_size=20` 返回满足完整性门槛的岗位，筛选标准为 JD 至少 80 字且同时具备岗位职责和任职要求。接口与普通目录采用同一 `JobList` 响应及分页、专业、最低学历筛选；`unverified` 不代表已确认可投。
 
 ## 创建、轮询与重试
 
-`POST /api/job-matches`：`{"resume_id":"原简历ID","job_ids":["岗位ID1","岗位ID2"]}`。返回 202 `{"task_id":"任务ID"}`。仅接受 ready/need_review 且非空简历；`not_resume` 返回 HTTP 422 / `CONTENT_MISMATCH`。岗位 ID 原始列表 1–50 项，重复合并。整批验证后创建任务，禁止额外字段。默认仅允许 open 岗位。联调测试可显式传 `"allow_unverified_for_testing":true` 匹配 JD 至少 80 字的 unverified 岗位；此选项只放宽匹配测试，不改变岗位状态，不代表可投，也不允许 closed 岗位。
+`POST /api/job-matches`：`{"resume_id":"原简历ID","job_ids":["岗位ID1","岗位ID2"]}`。返回 202 `{"task_id":"任务ID"}`。仅接受 ready/need_review 且非空简历；`not_resume` 返回 HTTP 422 / `CONTENT_MISMATCH`。岗位 ID 原始列表 1–50 项，重复合并。整批验证后创建任务，禁止额外字段。允许 open 和满足测试池完整性门槛的 unverified 岗位；不允许 closed 岗位。兼容保留 `allow_unverified_for_testing` 字段，已不影响上述规则。匹配不改变岗位状态，也不代表当前可投。
 
 `GET /api/job-matches/{task_id}` 返回 `{status,stage,progress,analysis_completed,analysis_total,analysis_started_at,error,error_code,items}`。建议每 1–2 秒轮询；基础分完成后 items 全量返回。`analysis_total` 是实际选入逐岗深度分析的岗位数，`analysis_completed` 只计其中 `succeeded` 或已结束的 `degraded`；未选中的 `not_selected`/`ai_disabled` 不计入。`analysis_started_at` 是开始逐岗分析的 UTC ISO 8601 时间，开始前为 null；前端可据此计算已等待时间。items 字段及可直接使用的示例见 `examples/job_matches.json`。结果分数降序、同分 job_id 升序；AI 后重新排序。progress 不表示预计剩余时间。
 
@@ -46,7 +46,7 @@ analysis_status：pending/running 表示尚未结束（degraded=true、degraded_
 |---|---|---|
 |400|INVALID_INPUT / TOO_MANY_JOBS|空 ID、空岗位列表 / 原始列表超过 50|
 |404|RESUME_NOT_FOUND / JOB_NOT_FOUND / TASK_NOT_FOUND|简历、岗位、任务或任务中的岗位不存在；任务类型不符|
-|409|RESUME_NOT_READY / RESUME_CHANGED / JOB_NOT_OPEN|简历解析失败或未完成 / 原简历内容变化需重建匹配 / 岗位非 open 且不满足显式测试条件|
+|409|RESUME_NOT_READY / RESUME_CHANGED / JOB_NOT_OPEN|简历解析失败或未完成 / 原简历内容变化需重建匹配 / 岗位关闭或未核验且不满足完整性门槛|
 |422|VALIDATION_ERROR|类型、额外字段、查询参数非法|
 
 内部失败通过轮询返回 failed、JOB_MATCH_FAILED；基础评分尚未完成就耗尽整批预算时为 failed、JOB_MATCH_TIMEOUT；重启返回 failed、TASK_INTERRUPTED。错误不包含原文或模型内部异常。完整请求、排队、运行、成功、部分/全部降级、上下文与错误示例位于独立 JSON，示例数据均为虚构联调夹具，不能计入真实岗位数量。

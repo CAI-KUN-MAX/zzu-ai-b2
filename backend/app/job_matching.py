@@ -65,12 +65,8 @@ class JobMatchService:
             job = self.repository.jobs.get(identifier)
             if job is None:
                 fail(404, "JOB_NOT_FOUND", "岗位不存在")
-            if job.application_status != "open" and not (
-                payload.allow_unverified_for_testing
-                and job.application_status == "unverified"
-                and test_ready(job)
-            ):
-                fail(409, "JOB_NOT_OPEN", "岗位已关闭或尚未核验投递状态")
+            if job.application_status != "open" and not (job.application_status == "unverified" and test_ready(job)):
+                fail(409, "JOB_NOT_OPEN", "岗位已关闭或岗位信息不完整")
             jobs.append(job.model_dump(mode="json"))
         # Snapshots are deliberately stored, unlike the older HR-facing match task.
         snapshot = dict(resume_id=row["id"], resume_text=row["text"], jobs=jobs,

@@ -26,11 +26,12 @@ class JobRepository:
         if len(self.jobs) != len(jobs):
             raise ValueError("duplicate catalogue job_id")
 
-    def list(self, category=None, education=None, application_status="open", page=1, page_size=20):
+    def list(self, category=None, education=None, application_status=None, page=1, page_size=20):
         items = sorted((job for job in self.jobs.values()
                         if (category is None or job.category == category)
                         and (education is None or job.education == education)
-                        and (application_status is None or job.application_status == application_status)),
+                        and ((job.application_status == "open" or test_ready(job)) if application_status is None
+                             else job.application_status == application_status)),
                        key=lambda job: job.job_id)
         return dict(catalogue_version=self.version, total=len(items), page=page, page_size=page_size,
                     items=items[(page - 1) * page_size:page * page_size])
