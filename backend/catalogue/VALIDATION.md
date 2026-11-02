@@ -1,5 +1,62 @@
 # 岗位来源核验与数量缺口
 
+## 2026-11-02 删除正文不足的岗位
+
+按用户要求，从目录移除 `sieyuan-2027-mechanical-rd`、`liugong-2027-mechanical`、`cscec5-2027-civil`、`cscec3-2027-finance`、`cscec4-2027-legal`、`cscec3-2027-admin`、`chinaecec-2027-env`、`chinaecec-2027-water` 和 `crccbridge-2027-green`。这些岗位的职责或条件未能从来源完整核对；移除并不表示岗位已关闭。剩余目录的 open 状态依用户确认，不代表系统逐条独立验证可投。
+
+## 2026-11-02 最新 dev 整合及补充
+
+按用户确认保留最新 dev 对中地国际三岗的删除；其他目录记录与既有用户确认及来源备注合并。下列岗位职责和条件根据各高校页面转述；结构合格不代表独立确认可投，具体原文以链接为准。
+
+- `wondfo-2027-structure`：核对[高校岗位原页](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZmKk7ayspzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)的职责与资格，依据可见文本补充摘要；状态和投递地址未变。
+- `zhengyu-2027-project`：核对[高校岗位原页](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y92K0NSmyobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)的职责与资格，依据可见文本补充摘要；状态和投递地址未变。
+- `bright-2027-material`：核对[高校岗位原页](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKzra-ynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)的职责与资格，依据可见文本补充摘要；状态和投递地址未变。
+- `jiangfan-2027-binder`：核对[高校岗位原页](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZmK0dS2smHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)的职责与资格，依据可见文本补充摘要；状态和投递地址未变。
+- `mairuidi-2027-pharmacology`：核对[高校岗位原页](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5aKu9S6snbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)的职责与资格，依据可见文本补充摘要；状态和投递地址未变。
+- `yuandong-2027-clinical`：核对[高校岗位原页](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKzra6yWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)的职责与资格，依据可见文本补充摘要；状态和投递地址未变。
+- `cray-2027-toxicology`：核对[高校岗位原页](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZmKutSms4bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)的职责与资格，依据可见文本补充摘要；状态和投递地址未变。
+- `baida-2027-info`：核对[高校岗位原页](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKzrayyWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)的职责与资格，依据可见文本补充摘要；状态和投递地址未变。
+- `travelone-2027-accounting`：核对[高校岗位原页](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKzrbOypzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)的职责与资格，依据可见文本补充摘要；状态和投递地址未变。
+- `cn15-2027-accounting`：核对[高校岗位原页](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKlLa2yWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)的职责与资格，依据可见文本补充摘要；状态和投递地址未变。
+- `satellite-2027-legal`：核对[高校岗位原页](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y92Ku9Sqsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)的职责与资格，依据可见文本补充摘要；状态和投递地址未变。
+- `crbc-2027-translator`：核对[高校岗位原页](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKu9TSsobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)的职责与资格，依据可见文本补充摘要；状态和投递地址未变。
+
+## 2026-11-02 JD 结构补充
+
+- 对 bii、keymed、taikang、orient 两岗、lvao 的已有职责与条件统一标题；以各条 `source_url` 的高校原页核对岗位及条件，未据此重核投递状态。
+- 依据各条 `source_url` 的四川大学岗位页，补充 lead 算法、cloudcad 算法、cn15mcc 翻译、senci 研发、cscec4dev 两条现场工程记录、zhangyi UX、haiyi UI 实习、saic 研发储备、satellite 公用工程的职责与条件摘要；摘要不等于完整原文，应以来源为准。两条现场工程记录引用同一岗位页，尚未独立证实海外分岗。
+- 本次未更改用户确认的状态、原备注与投递地址；来源可访问或结构合格不证明当前可投。四川大学双选会来源部分返回 403、部分来源获取超时或职责在图片/PDF 中，待继续核查；截至本次检查仍有 21 条未达到结构门槛。
+
+各条核对记录（链接为目录现有来源；核查不等同独立确认可投）：
+
+- `bii-2027-software`：[来源](https://job.ncepu.edu.cn/zpgg/89922b24888442c69d403bd06cc46c81.htm)；原页列技术开发职责和专业，原记录补统一条件标题；页面另标记过期，状态未复核。
+- `keymed-2027-aidd-biology`：[来源](https://career.nankai.edu.cn/correcruit/content/id/118200.html)；原页研发岗位表列职责、博士和专业要求；统一标题。
+- `taikang-2027-equity-research`：[来源](https://career.nankai.edu.cn/correcruit/content/id/118486.html)；原页分别列职责和任职资格；统一标题。
+- `orient-2027-legal`：[来源](https://career.hebut.edu.cn/home/correcruit/content/id/67117.html)；原页列学历、专业和法务职责；统一标题。
+- `orient-2027-design`：[来源](https://career.hebut.edu.cn/home/correcruit/content/id/67115.html)；原页列学历、专业、设计职责及技能；统一标题。
+- `lvao-2026-agronomist`：[来源](https://henau.goworkla.cn/module/position_details/id-474182/nid-8086)；原页列农艺师职责和岗位要求；统一标题。
+- `cn15mcc-2027-translator`：[来源](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKlLayypzddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)；原页列海外翻译职责、学历和外语条件；据此补摘要。
+- `lead-2027-algorithm`：[来源](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5WKk7bWsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)；原页列物流算法、工程化职责及硕士和编程要求；据此补摘要。
+- `cloudcad-2027-algorithm`：[来源](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKz7bOsobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)；原页列齿科算法职责、专业及编程要求；据此补摘要。
+- `senci-2027-rd`：[来源](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y96K0dS2ynbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)；原页列研发职责、方向及学历专业条件；据此补摘要。
+- `cscec4dev-2027-site`：[来源](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9yKlLbSsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)；原页列现场职责及任职条件；据此补摘要。
+- `cscec4dev-2027-overseas`：[来源](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y9yKlLbSsnbddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)；引用同一现场工程师原页并补相同摘要；海外分岗未单独证实。
+- `zhangyi-2027-ux`：[来源](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y92KutTOs3bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)；原页列用户研究、设计职责及作品集要求；据此补摘要。
+- `haiyi-2027-ui`：[来源](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y96KubbWs4bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)；原页明确实习，列UI职责和作品集要求；据此补摘要。
+- `saic-2027-industrial-design`：[来源](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh5eZiKz7bOs4bddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)；原页列研发储备方向及学历、英语条件；据此补摘要。
+- `satellite-2027-utilities`：[来源](https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y92Ku9SuyWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E)；原页列水处理或锅炉职责及学历专业、倒班要求；据此补摘要。
+
+## 2026-11-02 用户确认状态
+
+用户表示已验证全部待核验岗位，并要求将其状态改为 open；本次依据用户确认更新 121 条，未对这 121 条重新独立核验。未知投递入口保持空值，来源地址不自动视为投递入口。原核验说明予以保留，包括存在过期或矛盾证据的记录；用户确认与此前独立复核的冲突尚未逐条解决。open 岗位的完整 JD 验收规则未更改，实际结果以验收脚本为准。
+
+## 2026-11-02 局部复核
+
+- 中地国际焊接、土建和法语三岗：此前作为申请入口的[三峡大学公告](https://ctgu.91wllm.cn/campus/view/id/1001059)标记 2026-10-31 过期，且当前列表未列焊接岗位。三条降为 unverified，清空失效的申请地址；不能据此断言企业其他渠道已关闭。
+- 华安天津法务岗：原南开来源显示信息过期，原替代[天津工业大学页面](https://jobs.tiangong.edu.cn/correcruit/content/id/55520.html)标题为实习生、页面学历为硕士在学而正文为本科及以上，无法确认与原岗一致。降为 unverified，申请地址置空。
+- 中兴新云六岗：[企业校招页面](https://www.ztccloud.com.cn/careers/campus-jobs.html)列明六岗、网申截止 2026-12-31，所链接[公开网申表](https://www.wenjuan.com/s/UZBZJvhceK/)列出六岗。未提交申请，不保证最终提交成功；其余历史 open 记录尚未逐条复核。
+- 复核后脚本统计 158 条、open 37、unverified 121；结构通过但 target_met=false。37 是目录现有标记数，不等于本轮确认的可投数量。
+
 ## 2026-10-28 补充核验
 
 目录版本更新为 `2026-10-28.v3`。本轮没有拆分岗位，而是逐条复核已有记录，为 30 条记录补充当前投递通道并更新 `verified_at`、`application_status` 和核验说明。严格验收结果：`records=80`、`open=41`、`unverified=39`、`target_met=true`；十个类别均至少 4 条可投岗位，硕士/博士与本科岗位配额均达标。这里的 40 是最低规模，不是唯一目标：验收脚本同时要求十个专业大类都有真实可投记录，并输出每类去除“不限”后的具体专业集合；每个大类至少覆盖两个具体专业，否则 `major_coverage_met=false`，整体验收不通过。经管财会类另补入天健 2027 财务审计岗位，明确覆盖会计、审计、国际会计、计算机审计和信息管理系统，不再用“专业不限”替代财会专业覆盖。

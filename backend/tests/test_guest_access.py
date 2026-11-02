@@ -37,6 +37,10 @@ class GuestAccessTests(unittest.TestCase):
                 for path in (f"/api/resumes/{resume_id}/text", f"/api/tasks/{task_id}"):
                     self.assertEqual(stranger.get(path).status_code, 404)
                 self.assertEqual(stranger.post("/api/interviews", json={"resume_id": resume_id, "jd_text": "岗位要求" * 20}).status_code, 404)
+                self.assertEqual(stranger.post("/api/job-recommendations", json={"resume_id": resume_id}).status_code, 404)
+                recommendation = owner.post("/api/job-recommendations", json={"resume_id": resume_id})
+                self.assertEqual(recommendation.status_code, 202)
+                self.assertEqual(stranger.get("/api/job-matches/" + recommendation.json()["task_id"]).status_code, 404)
                 duplicate = stranger.post("/api/resumes/batch", files={"files": ("copy.docx", content)})
                 self.assertEqual(duplicate.status_code, 202)
                 self.assertEqual(stranger.get(f"/api/resumes/{resume_id}/text").status_code, 200)

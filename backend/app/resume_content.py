@@ -30,6 +30,12 @@ NEGATIVE_FEATURES = {
     "article": (r"(?:记者|本报讯|文章来源|责任编辑|阅读原文|新闻报道)",),
 }
 
+RESUME_STRUCTURE = re.compile(
+    r"姓名|联系方式|联系电话|手机|邮箱|个人信息|求职意向|"
+    r"教育经历|教育背景|工作经历|实习经历|项目经历|校园经历|实践经历|任职经历|项目成果|"
+    r"专业技能|技能证书|毕业院校|\b1[3-9]\d{9}\b|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}", re.I
+)
+
 
 def _hits(text, patterns):
     return sum(any(re.search(pattern, text, re.I | re.M) for pattern in group) for group in patterns.values())
@@ -58,6 +64,6 @@ def classify_resume(text: str, *, low_conf: int = 0) -> Classification:
 
     # Two independent resume sections are enough for ordinary concise resumes;
     # OCR uncertainty and all borderline cases remain reviewable, not rejected.
-    if low_conf or len(compact) < 30 or positives < 2 or negatives:
+    if low_conf or len(compact) < 30 or positives < 2 or negatives or not RESUME_STRUCTURE.search(compact):
         return Classification("need_review", CONTENT_REVIEW_REQUIRED)
     return Classification("ready")

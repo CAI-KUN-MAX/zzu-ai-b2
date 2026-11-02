@@ -15,6 +15,8 @@ export interface StoredJobMatch {
   /** 只存参与匹配的岗位，避免把整份目录写进本地 */
   jobIndex: Record<string, Job>;
   savedAt: number;
+  /** recommend=首页一键推荐（只展示前 8），manual=自己勾选岗位 */
+  mode?: "recommend" | "manual";
 }
 
 export interface StoredDraft {
@@ -22,7 +24,14 @@ export interface StoredDraft {
   selected: string[];
 }
 
+export interface StoredResume {
+  resumeId: string;
+  name: string;
+  savedAt: number;
+}
+
 const LAST_KEY = "zzu.jobMatch.last";
+const RESUME_KEY = "zzu.jobMatch.resume";
 const DRAFT_KEY = "zzu.jobMatch.draft";
 const STORAGE_VERSION = 1;
 /** 后端任务记录不会无限保留，超过一天的记录不再提示恢复 */
@@ -121,6 +130,7 @@ export function parseStoredJobMatch(value: unknown): StoredJobMatch | null {
     jobIds,
     jobIndex,
     savedAt,
+    mode: item.mode === "recommend" ? "recommend" : item.mode === "manual" ? "manual" : undefined,
   };
 }
 
@@ -156,4 +166,22 @@ export function saveDraft(value: StoredDraft) {
 
 export function clearLastMatch() {
   write(LAST_KEY, null);
+}
+
+/** 最近一次解析成功的简历：首页「为我推荐岗位」要靠它发请求，不选岗也需要 */
+export function loadLastResume(): StoredResume | null {
+  const { value } = readRaw(RESUME_KEY);
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const item = value as Record<string, unknown>;
+  if (!isNonEmptyString(item.resumeId)) return null;
+  if (typeof item.name !== "string") return null;
+  return {
+    resumeId: item.resumeId,
+    name: item.name,
+    savedAt: typeof item.savedAt === "number" ? item.savedAt : Date.now(),
+  };
+}
+
+export function saveLastResume(value: StoredResume | null) {
+  write(RESUME_KEY, value);
 }

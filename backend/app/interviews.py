@@ -521,6 +521,28 @@ class InterviewService:
             fail(410, "INTERVIEW_EXPIRED", "面试会话已超过 24 小时，请重新开始")
         return dict(row)
 
+    def recover(self, identifier):
+        state = json.loads(self.get(identifier)["state"])
+        return dict(interview_id=identifier, status=state["status"], round=state["round"],
+                    max_rounds=MAX_ROUNDS,
+                    question=state["question"] if state["status"] == "active" else None,
+                    turns=[dict(question=turn["question"], answer=turn["answer"],
+                                feedback=turn["response"]["feedback"]) for turn in state["turns"]])
+
+    def report(self, identifier):
+        row = self.get(identifier)
+        state = json.loads(row["state"])
+        if state["status"] != "completed":
+            fail(409, "INTERVIEW_NOT_COMPLETED", "面试尚未完成，请完成全部题目后查看总结")
+        rounds = []
+        for index, turn in enumerate(state["turns"], start=1):
+            feedback = turn["response"]["feedback"]
+            rounds.append(dict(round=index, question=turn["question"], answer=turn["answer"],
+                               feedback=feedback, resume_suggestions=feedback["improvements"]))
+        return dict(interview_id=identifier, resume_id=row["resume_id"], jd_text=row["jd_text"],
+                    confirmation_notice="请结合岗位要求核对每条提示；仅在符合真实经历时用于简历，不要编造事实。",
+                    rounds=rounds)
+
     async def answer(self, identifier, payload, request_id):
         answer = check_text(payload.answer_text, 20, 3000, "回答")
         question_id = check_text(payload.question_id, 1, 128, "问题 ID")

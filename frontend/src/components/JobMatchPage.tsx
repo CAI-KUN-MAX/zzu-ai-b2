@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { IngestTask, Job, ResumeStatus } from "../types";
 import { STATUS_LABEL, getIngestTask, uploadResumes } from "../api/resumes";
 import { createJobMatch, listJobs } from "../api/jobs";
+import { saveLastResume } from "../lib/jobMatchStorage";
 import { useTask } from "../lib/useTask";
 import { DropZone } from "./DropZone";
 import { JobJdDialog } from "./JobJdDialog";
@@ -82,6 +83,13 @@ export function JobMatchPage({
   const parsed = !!resume && resume.status !== "failed" && resume.status !== "not_resume";
   // 只有后端明确返回失败才算解析失败；轮询网络错误或等待超时不能证明解析失败
   const resumeFailed = resume?.status === "failed" || ingest?.status === "failed";
+
+  // 解析成功就记下来，首页「为我推荐岗位」不选岗也拿得到简历
+  useEffect(() => {
+    if (parsed && resume) {
+      saveLastResume({ resumeId: resume.resume_id, name: resume.name, savedAt: Date.now() });
+    }
+  }, [parsed, resume?.resume_id, resume?.name]);
   const pollUnavailable = !!resumeTaskId && !!pollError && pollTransient && !resumeFailed;
   const hasResume = files.length > 0 || !!resumeTaskId;
   // setState 是异步的，同一时刻连点两次都会读到旧的 submitting；用 ref 做同步闸门，只发一次请求

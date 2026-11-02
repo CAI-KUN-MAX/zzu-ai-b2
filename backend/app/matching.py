@@ -16,7 +16,7 @@ from fastapi import HTTPException
 
 from app.ingestion import now
 from app.routers.diagnose import (
-    CLAUSE_SEPARATOR, EDUCATION_REQUIREMENT, SYSTEM_PROMPT,
+    CLAUSE_SEPARATOR, EDUCATION_REQUIREMENT, SYSTEM_PROMPT, TERM_IMPLICATIONS,
     keyword_in_text, requirement_keywords,
 )
 from app.schemas import DiagnoseRequest, DiagnoseResponse
@@ -39,6 +39,29 @@ SCREENING_STOP_TERMS = {
     "专业", "学历", "本科", "硕士", "博士", "大专", "专科", "研究生", "学士",
 }
 
+# Explicit equivalents only. The visible canonical term remains tied to the JD;
+# matching a term does not establish proficiency or an actual accomplishment.
+SKILL_ALIASES = {
+    "用户研究": ("用户研究", "user research"),
+    "用户访谈": ("用户访谈", "user interview", "user interviews"),
+    "可用性测试": ("可用性测试", "usability testing", "usability test"),
+    "用户体验设计": ("用户体验设计", "user experience design", "ux design"),
+    "聚合酶链式反应": ("聚合酶链式反应", "pcr"),
+    "高效液相色谱": ("高效液相色谱", "hplc"),
+    "有限元分析": ("有限元分析", "finite element analysis", "fea"),
+    "计算机辅助设计": ("计算机辅助设计", "computer aided design", "cad"),
+    "结构化查询语言": ("结构化查询语言", "sql"),
+}
+
+
+def contains_alias(text, alias):
+    return re.search(rf"(?<![A-Za-z0-9]){re.escape(alias)}(?![A-Za-z0-9])", text, re.I) is not None
+
+
+def skill_aliases_in(text):
+    return {canonical for canonical, aliases in SKILL_ALIASES.items()
+            if any(contains_alias(text, alias) for alias in aliases)}
+
 
 def is_screening_term(term):
     if term in SCREENING_STOP_TERMS:
@@ -50,7 +73,17 @@ def jd_terms(text):
     counts = Counter()
     spelling = {}
     for clause in CLAUSE_SEPARATOR.split(text):
-        terms = filter(is_screening_term, requirement_keywords(clause))
+        skills = skill_aliases_in(clause)
+        aliases = {alias.casefold() for skill in skills for alias in SKILL_ALIASES[skill]}
+        # Prevent the components of an English multiword alias becoming extra,
+        # unrelated requirements (e.g. "user" and "research").
+        remainder = clause
+        for alias in sorted((item for item in aliases if " " in item), key=len, reverse=True):
+            remainder = re.sub(rf"(?<![A-Za-z0-9]){re.escape(alias)}(?![A-Za-z0-9])", " ", remainder, flags=re.I)
+        terms = {term for term in requirement_keywords(remainder) if is_screening_term(term)
+                 and term.casefold() not in aliases
+                 and not any(term in alias or alias in term for alias in aliases if not alias.isascii())}
+        terms.update(skills)
         for term in sorted(terms, key=lambda value: (value.casefold(), value)):
             key = term.casefold()
             counts[key] += 1
@@ -104,10 +137,21 @@ def glued_runs(text):
 
 
 def keyword_in_resume(term, text, runs):
-    if keyword_in_text(term, text):
+    candidates = set(SKILL_ALIASES.get(term, (term,)))
+    candidates.update(TERM_IMPLICATIONS.get(term.lower(), set()))
+    # Suppress only simple direct negatives. Preserve later affirmative mentions;
+    # complex grammar and the separate character-similarity score remain uncertain.
+    positive_text = text
+    for candidate in sorted(candidates, key=len, reverse=True):
+        pattern = (rf"(?<!不)(?:没有|缺少|缺乏|不熟悉|不掌握|不会|未使用|未接触|未掌握|未学习|无)"
+                   rf"\s*(?:使用|学习|接触)?\s*(?<![A-Za-z0-9]){re.escape(candidate)}(?![A-Za-z0-9])")
+        positive_text = re.sub(pattern, " ", positive_text, flags=re.I)
+    if term in SKILL_ALIASES:
+        return any(contains_alias(positive_text, alias) for alias in SKILL_ALIASES[term])
+    if keyword_in_text(term, positive_text):
         return True
     # 粘连串里按原大小写精确查找，至少 3 个字符，减少误命中
-    return len(term) >= 3 and term.isascii() and any(term in run for run in runs)
+    return len(term) >= 3 and term.isascii() and any(term in run for run in glued_runs(positive_text))
 
 
 def score_resume(jd, row, terms, jd_profile, required_education=None):
