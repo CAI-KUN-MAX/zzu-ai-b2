@@ -14,9 +14,9 @@
 
 `GET /api/jobs?category=计算机&education=本科&application_status=open&page=1&page_size=20`
 
-参数均可选；不传 `application_status` 时返回 open 和满足测试池完整性门槛的 unverified 岗位，排除 closed；显式传入状态时按状态精确筛选。page=1、page_size=20（1–100）。education 按岗位最低学历精确筛选，不表示个人资格判定。category 为十个专业大类，详见 OpenAPI。返回 `{catalogue_version,total,page,page_size,items}`；items 为完整岗位，包含 job_id、title、company、cities、category、education、education_requirement、majors、graduation_year、jd_text、source_url、published_at（YYYY-MM-DD）、publication_type（original/repost）、application_url（未核实入口时为 null）、verified_at、application_status（open/closed/unverified）、verification_note。状态只代表 verified_at 时点的核验；没有自动保鲜承诺。
+参数均可选；不传 `application_status` 时返回 open 和满足测试池完整性门槛的 unverified 岗位，排除 closed；显式传入状态时按状态精确筛选。page=1、page_size=20（1–100）。education 按岗位最低学历精确筛选，不表示个人资格判定。category 为十个专业大类，详见 OpenAPI。返回 `{catalogue_version,total,page,page_size,items}`；items 为完整岗位，包含 job_id、title、company、cities、category、education、education_requirement、majors、graduation_year、jd_text、source_url、published_at（YYYY-MM-DD）、publication_type（original/repost）、application_url（可能为临时平台首页，不能代表可投）、verified_at、application_status（open/closed/unverified）、verification_note。状态只代表 verified_at 时点的核验；没有自动保鲜承诺。
 
-`GET /api/jobs/{job_id}` 返回单条完整岗位；不存在为 404 JOB_NOT_FOUND。国家平台明确显示更新时间、但未给出首次发布日期时，按照用户授权将更新时间填入日期字段并在核验备注说明。`application_status=unverified` 可显式查看真实来源的候选岗位，其中部分历史记录仍只有摘要，不计入测试就绪集。待核验岗位没有明确投递入口时 `application_url=null`，不能把 `source_url` 当作投递地址；现有前端不显示状态，用户已知悉此限制。
+`GET /api/jobs/{job_id}` 返回单条完整岗位；不存在为 404 JOB_NOT_FOUND。国家平台明确显示更新时间、但未给出首次发布日期时，按照用户授权将更新时间填入日期字段并在核验备注说明。`application_status=unverified` 可显式查看真实来源的候选岗位，其中部分历史记录仍只有摘要，不计入测试就绪集。部分未核验岗位的 `application_url` 暂填国家平台首页，首页不是已核实的岗位投递入口，也不表示岗位当前可投；不能把 `source_url` 当作投递地址；现有前端不显示状态，用户已知悉此限制。
 
 `GET /api/jobs/testing-pool?category=生物医药&page=1&page_size=20` 返回满足完整性门槛的岗位，筛选标准为 JD 至少 80 字且同时具备岗位职责和任职要求。接口与普通目录采用同一 `JobList` 响应及分页、专业、最低学历筛选；`unverified` 不代表已确认可投。
 
