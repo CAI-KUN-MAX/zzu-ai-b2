@@ -138,3 +138,25 @@
     }
   }
 }
+
+/* 首页：求职偏好、岗位库统计、日历、推荐卡片 */
+.dashboard-prefs { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+.dashboard-prefs button { padding:7px 12px; border:1px solid #fff; border-radius:999px; background:#ffffff9e; color:#5b6880; font-size:12px; transition:color .15s,box-shadow .15s; }
+.dashboard-prefs button:hover { color:#3b5297; box-shadow:0 6px 14px -10px #3b5297; }
+.dashboard-stats { display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin-top:20px; padding:13px 16px; border:1px solid #ffffffcc; border-radius:16px; background:#ffffff80; color:#68748a; font-size:12px; }
+.dashboard-stats b { color:#28344a; font-weight:600; }
+.dashboard-stats button { margin-left:auto; flex-shrink:0; padding:9px 15px; border-radius:12px; background:linear-gradient(135deg,#7c95ea,#6f7ed3); color:#fff; font-size:12px; font-weight:600; box-shadow:0 8px 16px #7289d440; }
+.dashboard-calendar { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-top:16px; }
+.dashboard-calendar span { display:grid; place-items:center; height:26px; border-radius:9px; color:#7a879b; font-size:11px; }
+.dashboard-calendar span.wk { color:#a8b2c1; font-size:10px; }
+.dashboard-calendar span.today { background:linear-gradient(135deg,#dfe7ff,#c3d2ff); color:#33437a; font-weight:600; box-shadow:0 4px 10px #7d92d440; }
+.dashboard-wide { grid-column:1/-1; }
+.dashboard-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-top:6px; }
+.dashboard-card { display:flex; flex-direction:column; gap:9px; padding:16px; border:1px solid #fff; border-radius:18px; background:linear-gradient(160deg,#ffffffb8,#f1f5ff82); box-shadow:inset 0 1px 1px #fff,0 18px 30px -26px #283c5a80; text-align:left; transition:transform .18s,box-shadow .18s; }
+.dashboard-card:hover { transform:translateY(-2px); box-shadow:inset 0 1px 1px #fff,0 24px 38px -26px #283c5a99; }
+.dashboard-card>strong { font-size:14px; font-weight:500; line-height:1.45; }
+.dashboard-card>small { color:#718097; font-size:11px; line-height:1.65; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.dashboard-card-tags { display:flex; flex-wrap:wrap; gap:5px; margin-top:auto; }
+.dashboard-card-tags span { padding:3px 8px; border-radius:8px; background:#ffffffa3; color:#657189; font-size:10px; }
+@media(max-width:1080px){ .dashboard-cards { grid-template-columns:1fr 1fr; } }
+@media(max-width:760px){ .dashboard-cards { grid-template-columns:1fr; }.dashboard-stats button { margin-left:0; width:100%; } }
