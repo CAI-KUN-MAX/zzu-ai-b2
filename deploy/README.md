@@ -163,4 +163,3 @@ sudo cp ~/nginx-backup-<日期>.conf /etc/nginx/conf.d/resume-diagnose.conf && s
 ```bash
 uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
-
