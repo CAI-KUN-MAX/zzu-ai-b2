@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { IngestTask, Job, ResumeStatus } from "../types";
+import type { IngestTask, Job, JobMatchTask, ResumeStatus } from "../types";
 import { STATUS_LABEL, getIngestTask, uploadResumes } from "../api/resumes";
-import { createJobMatch, listJobs } from "../api/jobs";
+import { createJobMatch, createJobRecommendation, getJobMatchTask, listJobs } from "../api/jobs";
 import { saveLastResume } from "../lib/jobMatchStorage";
 import { useTask } from "../lib/useTask";
 import { DropZone } from "./DropZone";
@@ -39,7 +39,45 @@ interface JobMatchPageProps {
   initialSearch?: string;
 }
 
-/** 主入口：上传一份简历，从岗位目录里勾选多个岗位发起匹配 */
+const ALL = "全部";
+/** 全部岗位每次多显示这么多张，不一次堆满页面 */
+const LIST_PAGE_SIZE = 12;
+/** 推荐先露出几张，其余点开再看 */
+const REC_PREVIEW = 4;
+/** 同一份简历切页回来不重复发请求；刷新后后端也会复用同一个任务 */
+const recommendationTasks = new Map<string, string>();
+
+function cityLabel(cities: string[]) {
+  return cities.length > 2 ? `${cities[0]} 等 ${cities.length} 城` : cities.join(" / ");
+}
+
+interface PickerCardProps {
+  job: Job;
+  active: boolean;
+  /** 后端给出的推荐理由，只在推荐区显示 */
+  reason?: string | null;
+  onToggle: () => void;
+  onDetail: () => void;
+}
+
+function PickerCard({ job, active, reason, onToggle, onDetail }: PickerCardProps) {
+  return (
+    <article className={`picker-card ${active ? "selected" : ""}`}>
+      <button className="picker-card-select" type="button" aria-pressed={active} onClick={onToggle}>
+        <span className="picker-logo small" aria-hidden="true">{job.company.slice(0, 1)}</span>
+        <span className="picker-card-text">
+          <span className="picker-job-title">{job.title}</span>
+          <small>{job.company} · {cityLabel(job.cities)} · {job.education}</small>
+          {reason ? <small className="picker-card-reason">{reason}</small> : null}
+        </span>
+        <span className="picker-check" aria-hidden="true">{active ? "✓" : ""}</span>
+      </button>
+      <button className="picker-card-detail" type="button" onClick={onDetail} aria-label={`查看 ${job.title} 的岗位详情`}>详情</button>
+    </article>
+  );
+}
+
+/** 主入口：上传一份简历，优先从系统推荐里选，也可以自己搜索、筛选岗位目录 */
 export function JobMatchPage({
   onStartMatch,
   draft,
@@ -58,8 +96,17 @@ export function JobMatchPage({
   const [jobTotal, setJobTotal] = useState(0);
   const [jobsLoading, setJobsLoading] = useState(true);
   const [jobsError, setJobsError] = useState<string | null>(null);
-  const [category, setCategory] = useState<string>("全部");
+  const [category, setCategory] = useState<string>(ALL);
+  const [education, setEducation] = useState<string>(ALL);
+  const [city, setCity] = useState<string>(ALL);
   const [search, setSearch] = useState(initialSearch ?? "");
+  const [shownCount, setShownCount] = useState(LIST_PAGE_SIZE);
+  const [listExpanded, setListExpanded] = useState(false);
+  const [recExpanded, setRecExpanded] = useState(false);
+  const [recTaskId, setRecTaskId] = useState<string | null>(null);
+  const [recError, setRecError] = useState<string | null>(null);
+  const [recAttempt, setRecAttempt] = useState(0);
+  const resumePanelRef = useRef<HTMLElement>(null);
 
   const [selected, setSelected] = useState<string[]>(draft.selected);
   const [submitting, setSubmitting] = useState(false);
@@ -92,6 +139,37 @@ export function JobMatchPage({
   }, [parsed, resume?.resume_id, resume?.name, resume?.status]);
   const pollUnavailable = !!resumeTaskId && !!pollError && pollTransient && !resumeFailed;
   const hasResume = files.length > 0 || !!resumeTaskId;
+  const recResumeId = parsed && resume ? resume.resume_id : null;
+
+  /* 简历可用后自动要一份推荐：推荐是默认入口，失败也不影响自己搜索和选择 */
+  useEffect(() => {
+    setRecError(null);
+    setRecExpanded(false);
+    if (!recResumeId) {
+      setRecTaskId(null);
+      return;
+    }
+    const known = recommendationTasks.get(recResumeId);
+    if (known) {
+      setRecTaskId(known);
+      return;
+    }
+    setRecTaskId(null);
+    let cancelled = false;
+    createJobRecommendation(recResumeId)
+      .then(({ task_id }) => {
+        recommendationTasks.set(recResumeId, task_id);
+        if (!cancelled) setRecTaskId(task_id);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) setRecError(err instanceof Error ? err.message : "推荐暂时不可用");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [recResumeId, recAttempt]);
+
+  const { data: recTask, error: recPollError, retry: retryRecPoll } = useTask<JobMatchTask>(getJobMatchTask, recTaskId);
   // setState 是异步的，同一时刻连点两次都会读到旧的 submitting；用 ref 做同步闸门，只发一次请求
   const inFlight = useRef(false);
 
@@ -142,11 +220,34 @@ export function JobMatchPage({
     return map;
   }, [jobs]);
 
+  const educationOptions = useMemo(() => Array.from(new Set(jobs.map((job) => job.education))), [jobs]);
+  const cityOptions = useMemo(() => {
+    const count = new Map<string, number>();
+    jobs.forEach((job) => job.cities.forEach((item) => count.set(item, (count.get(item) ?? 0) + 1)));
+    return Array.from(count.keys()).sort((a, b) => (count.get(b) ?? 0) - (count.get(a) ?? 0));
+  }, [jobs]);
+
+  const filtering = search.trim() !== "" || category !== ALL || education !== ALL || city !== ALL;
+
   const visibleJobs = useMemo(
-    () => jobs.filter((job) => (category === "全部" || job.category === category) &&
+    () => jobs.filter((job) => (category === ALL || job.category === category) &&
+      (education === ALL || job.education === education) &&
+      (city === ALL || job.cities.includes(city)) &&
       [job.title, job.company, job.category, ...job.cities].join(" ").toLowerCase().includes(search.trim().toLowerCase())),
-    [jobs, category, search]
+    [jobs, category, education, city, search]
   );
+
+  // 换了筛选条件就回到第一批
+  useEffect(() => {
+    setShownCount(LIST_PAGE_SIZE);
+  }, [category, education, city, search]);
+
+  function clearFilters() {
+    setCategory(ALL);
+    setEducation(ALL);
+    setCity(ALL);
+    setSearch("");
+  }
 
   const jobIndex = useMemo(
     () => Object.fromEntries(jobs.map((job) => [job.job_id, job])) as Record<string, Job>,
@@ -154,6 +255,34 @@ export function JobMatchPage({
   );
 
   const canSubmit = parsed && selected.length > 0 && !submitting && !uploading;
+
+  // 顺序和理由都来自后端推荐任务，前端不计算
+  const recItems = useMemo(
+    () => (recTask?.items ?? []).filter((item) => jobIndex[item.job_id]),
+    [recTask, jobIndex]
+  );
+  const recFailed = !!recError || (!!recPollError && !recTask?.items.length);
+  const recLoading = !!recResumeId && !recFailed && recItems.length === 0 && recTask?.status !== "succeeded";
+  const recEmpty = !!recResumeId && !recFailed && !recLoading && recItems.length === 0;
+  const recIds = useMemo(() => new Set(recItems.map((item) => item.job_id)), [recItems]);
+  const shownRecItems = recExpanded ? recItems : recItems.slice(0, REC_PREVIEW);
+  // 不筛选时，已经在推荐区出现的岗位不重复列出
+  const listJobsToShow = useMemo(
+    () => (filtering ? visibleJobs : visibleJobs.filter((job) => !recIds.has(job.job_id))),
+    [filtering, visibleJobs, recIds]
+  );
+  // 有推荐时全部岗位先收起，用户想自己找时再展开
+  const listCollapsed = !filtering && recItems.length > 0 && !listExpanded;
+
+  function retryRecommendation() {
+    if (recResumeId) recommendationTasks.delete(recResumeId);
+    retryRecPoll();
+    setRecAttempt((n) => n + 1);
+  }
+
+  function scrollToResume() {
+    resumePanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   async function handleFileChange(next: File[]) {
     setFiles(next);
@@ -200,6 +329,8 @@ export function JobMatchPage({
     }
   }
 
+  const submitHint = !hasResume ? "请先上传一份简历" : !uploading && !resumeTaskId ? "简历上传未成功，请重新上传" : resumeFailed ? "简历解析失败，请换一份简历" : pollUnavailable ? "暂时无法获取解析结果，请重试" : !parsed ? "简历解析中，完成后即可匹配" : selected.length === 0 ? "请至少选择一个岗位" : `已选择 ${selected.length} 个岗位`;
+
   return (
     <main className="offer-picker">
       <div className="picker-title"><div><span className="offer-eyebrow">FIND YOUR MATCH</span><h1>选择岗位</h1><p>挑选感兴趣的岗位，用简历发现更适合你的方向。</p></div>
@@ -207,26 +338,68 @@ export function JobMatchPage({
       </div>
       <div className="picker-layout">
         <div className="picker-main">
+          {!filtering && (
+            <section className="picker-recommend" aria-label="为你推荐">
+              <div className="picker-section-head">
+                <h2>为你推荐{recItems.length ? <span>{recItems.length}</span> : null}</h2>
+                <small>根据你的简历挑选，不合适也可以在下方自己找</small>
+              </div>
+              {!recResumeId ? (
+                <div className="picker-rec-note">
+                  <p>{hasResume ? "简历解析完成后，这里会优先显示适合你的岗位。" : "上传简历后，这里会优先显示适合你的岗位。"}</p>
+                  {!hasResume && <button type="button" onClick={scrollToResume}>去上传 →</button>}
+                </div>
+              ) : recFailed ? (
+                <div className="picker-rec-note" role="alert">
+                  <p>{recError || recPollError || "推荐暂时不可用"}。你仍然可以在下方搜索和选择岗位。</p>
+                  <button type="button" onClick={retryRecommendation}>重试</button>
+                </div>
+              ) : recLoading || jobsLoading ? (
+                <p className="picker-message" aria-busy="true">正在按你的简历挑选岗位…</p>
+              ) : recEmpty ? (
+                <p className="picker-message">暂时没有合适的推荐，可以在下方搜索或筛选岗位。</p>
+              ) : (
+                <>
+                  <div className="picker-grid">
+                    {shownRecItems.map((item) => {
+                      const job = jobIndex[item.job_id];
+                      return <PickerCard key={item.job_id} job={job} active={selected.includes(job.job_id)} reason={item.reason} onToggle={() => toggleJob(job.job_id)} onDetail={() => setJdJob(job)} />;
+                    })}
+                  </div>
+                  {recItems.length > REC_PREVIEW && (
+                    <button type="button" className="picker-more" aria-expanded={recExpanded} onClick={() => setRecExpanded((open) => !open)}>
+                      {recExpanded ? "收起" : `再看 ${recItems.length - REC_PREVIEW} 个推荐`}
+                    </button>
+                  )}
+                </>
+              )}
+            </section>
+          )}
           <div className="picker-toolbar">
-            <div className="picker-categories" role="group" aria-label="岗位分类">
-              {categories.map((item) => <button type="button" key={item} aria-pressed={item === category} onClick={() => setCategory(item)} className={item === category ? "active" : ""}>{item}<span>{item === "全部" ? jobTotal : categoryCount.get(item) ?? 0}</span></button>)}
+            <label className="picker-search"><span className="sr-only">搜索岗位名称或企业名称</span><input type="search" placeholder="搜索岗位或企业名称" value={search} onChange={(e) => setSearch(e.target.value)} /><span aria-hidden="true">⌕</span></label>
+            <label className="picker-select"><span className="sr-only">学历</span><select value={education} onChange={(e) => setEducation(e.target.value)}><option value={ALL}>全部学历</option>{educationOptions.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
+            <label className="picker-select"><span className="sr-only">城市</span><select value={city} onChange={(e) => setCity(e.target.value)}><option value={ALL}>全部城市</option>{cityOptions.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
+            <div className="picker-categories" role="group" aria-label="专业类别">
+              {categories.map((item) => <button type="button" key={item} aria-pressed={item === category} onClick={() => setCategory(item)} className={item === category ? "active" : ""}>{item}<span>{item === ALL ? jobTotal : categoryCount.get(item) ?? 0}</span></button>)}
             </div>
-            <label className="picker-search"><span className="sr-only">搜索岗位</span><input type="search" placeholder="搜索岗位或公司" value={search} onChange={(e) => setSearch(e.target.value)} /><span aria-hidden="true">⌕</span></label>
           </div>
-          {jobsLoading ? <p className="picker-message" aria-busy="true">正在加载岗位…</p> : jobsError ? <p className="picker-message" role="alert">{jobsError}</p> : visibleJobs.length === 0 ? <p className="picker-message">没有找到符合条件的岗位，请尝试其他分类或关键词。</p> : (
-            <div className="picker-grid">
-              {visibleJobs.map((job) => {
-                const active = selected.includes(job.job_id);
-                return <article className={`picker-card ${active ? "selected" : ""}`} key={job.job_id}>
-                  <button className="picker-card-select" type="button" aria-pressed={active} onClick={() => toggleJob(job.job_id)}>
-                    <span className="picker-company-row"><span className="picker-logo">{job.company.slice(0, 1)}</span><span className="picker-company"><strong>{job.company}</strong><small>{job.cities.join(" / ")}</small></span><span className="picker-check" aria-hidden="true">{active ? "✓" : ""}</span></span>
-                    <span className="picker-job-title">{job.title}</span>
-                    <span className="picker-tags"><span>{job.category}</span><span>{job.education}</span></span>
-                  </button>
-                  <div className="picker-card-footer"><button type="button" onClick={() => setJdJob(job)} aria-label={`查看 ${job.title} 的岗位要求`}>查看 JD →</button><span>{active ? "已选择" : "点击选择"}</span></div>
-                </article>;
-              })}
-            </div>
+          {jobsLoading ? (!recResumeId && <p className="picker-message" aria-busy="true">正在加载岗位…</p>) : jobsError ? <p className="picker-message" role="alert">{jobsError}</p> : listCollapsed ? (
+            <button type="button" className="picker-more" onClick={() => setListExpanded(true)}>浏览其他岗位（{listJobsToShow.length} 个）</button>
+          ) : listJobsToShow.length === 0 ? (
+            <div className="picker-message"><p>没有找到符合条件的岗位，请尝试其他分类或关键词。</p>{filtering && <button type="button" className="picker-clear" onClick={clearFilters}>清除筛选</button>}</div>
+          ) : (
+            <section className="picker-list" aria-label={filtering ? "筛选结果" : "全部岗位"}>
+              <div className="picker-section-head">
+                <h2>{filtering ? "筛选结果" : recItems.length ? "其他岗位" : "全部岗位"}<span>{listJobsToShow.length}</span></h2>
+                {filtering && <button type="button" className="picker-clear" onClick={clearFilters}>清除筛选</button>}
+              </div>
+              <div className="picker-grid">
+                {listJobsToShow.slice(0, shownCount).map((job) => <PickerCard key={job.job_id} job={job} active={selected.includes(job.job_id)} onToggle={() => toggleJob(job.job_id)} onDetail={() => setJdJob(job)} />)}
+              </div>
+              {listJobsToShow.length > shownCount && (
+                <button type="button" className="picker-more" onClick={() => setShownCount((n) => n + LIST_PAGE_SIZE)}>加载更多（还有 {listJobsToShow.length - shownCount} 个）</button>
+              )}
+            </section>
           )}
         </div>
         <div className="picker-aside">
@@ -237,10 +410,10 @@ export function JobMatchPage({
             </div>}
             <p className="picker-hint">系统会逐岗计算匹配分；AI 分析可用时提供诊断建议。</p>
             <button className="picker-submit" type="button" onClick={handleSubmit} disabled={!canSubmit}>{submitting ? "正在发起匹配…" : "开始匹配 →"}</button>
-            <p className="picker-hint" aria-live="polite">{!hasResume ? "请先上传一份简历" : !uploading && !resumeTaskId ? "简历上传未成功，请重新上传" : resumeFailed ? "简历解析失败，请换一份简历" : pollUnavailable ? "暂时无法获取解析结果，请重试" : !parsed ? "简历解析中，完成后即可匹配" : selected.length === 0 ? "请至少选择一个岗位" : `已选择 ${selected.length} 个岗位`}</p>
+            <p className="picker-hint" aria-live="polite">{submitHint}</p>
             {error && <p className="picker-error" role="alert">{error}</p>}
           </section>
-          <section className="picker-panel picker-resume" aria-label="用于匹配的简历">
+          <section className="picker-panel picker-resume" aria-label="用于匹配的简历" ref={resumePanelRef}>
             <div className="picker-panel-head"><h2>用于匹配的简历</h2></div>
             {resume ? <div className="picker-resume-detail"><span className="picker-logo small">▤</span><span><strong>{resume.name}</strong><small>{resume.chars.toLocaleString("zh-CN")} 字 · {STATUS_LABEL[resume.status]}</small></span></div> : <p className="picker-hint">{uploading || resumeTaskId ? "正在解析简历…" : "上传简历后即可开始匹配。"}</p>}
             {resume?.status === "need_review" && <p className="picker-error">识别质量偏低，请核对原文，匹配结果可能有偏差。</p>}
@@ -252,6 +425,13 @@ export function JobMatchPage({
           </section>
         </div>
       </div>
+      {/* 手机上岗位和提交按钮隔得远：选了岗位后常驻底部，不用翻到页尾 */}
+      {selected.length > 0 && (
+        <div className="picker-sticky">
+          <span><strong>已选 {selected.length} 个岗位</strong><small>{canSubmit ? "可以开始匹配了" : submitHint}</small></span>
+          <button type="button" onClick={handleSubmit} disabled={!canSubmit}>{submitting ? "发起中…" : "开始匹配 →"}</button>
+        </div>
+      )}
       {jdJob && <JobJdDialog job={jdJob} selected={selected.includes(jdJob.job_id)} onToggle={() => toggleJob(jdJob.job_id)} onClose={() => setJdJob(null)} />}
     </main>
   );

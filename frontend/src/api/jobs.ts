@@ -177,7 +177,14 @@ export async function createJobMatch(
 }
 
 export async function createJobRecommendation(resumeId: string): Promise<{ task_id: string }> {
-  if (IS_MOCK_MODE) throw new Error("演示模式暂不支持岗位推荐");
+  if (IS_MOCK_MODE) {
+    await wait(600);
+    const taskId = `mock-rec-${Date.now()}`;
+    mockSelected.set(taskId, MOCK_JOBS.map((job) => job.job_id));
+    mockResumeOf.set(taskId, resumeId);
+    mockPoll.set(taskId, 0);
+    return { task_id: taskId };
+  }
   return request<{ task_id: string }>("/api/job-recommendations", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
