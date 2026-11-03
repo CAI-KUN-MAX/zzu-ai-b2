@@ -6,6 +6,7 @@ import { JobCarousel } from "./components/JobCarousel";
 import { JobJdDialog } from "./components/JobJdDialog";
 import { JobMatchPage, type JobMatchDraft } from "./components/JobMatchPage";
 import { JobResultPage } from "./components/JobResultPage";
+import { OfferMark } from "./components/icons";
 import { useTask } from "./lib/useTask";
 import {
   type StoredJobMatch,
@@ -274,7 +275,7 @@ export default function App() {
       <div className="offer-shell">
         <aside className="offer-sidebar">
           <button className="offer-brand" type="button" onClick={() => { clearHash(); setView({ name: "home" }); }} aria-label="Offer 首页">
-            <span className="offer-logo">✳</span><span>Offer<small>你的求职搭子</small></span>
+            <span className="offer-logo"><OfferMark /></span><span>Offer<small>你的求职搭子</small></span>
           </button>
           <nav className="offer-nav" aria-label="主导航">
             <button className={view.name === "home" ? "active" : ""} onClick={() => { clearHash(); setView({ name: "home" }); }}><span>⌂</span>首页</button>

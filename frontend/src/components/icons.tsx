@@ -2,6 +2,19 @@ interface IconProps {
   className?: string;
 }
 
+/** Offer 的标志：留了缺口的 O，缺口处一颗星 */
+export function OfferMark({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 32 32" fill="none" className={className} aria-hidden="true">
+      <path d="M23.4 16.3 A8.4 8.4 0 1 1 17.2 8.9" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+      <path
+        d="M25 3 C25.4 6 26.9 7.6 30 8 C26.9 8.4 25.4 10 25 13 C24.6 10 23.1 8.4 20 8 C23.1 7.6 24.6 6 25 3Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export function LogoIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
