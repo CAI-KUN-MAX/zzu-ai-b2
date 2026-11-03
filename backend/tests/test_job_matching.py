@@ -250,6 +250,50 @@ class JobMatchingTests(unittest.TestCase):
         self.assertEqual((first["analysis_completed"], first["analysis_total"]), (3, 3))
         self.assertEqual(datetime.fromisoformat(first["analysis_started_at"]).tzinfo, timezone.utc)
 
+    def test_evidence_is_returned_and_report_reconciled_after_cache(self):
+        resume = "技能：Java、MySQL\n项目经历\n使用 Java 和 Spring Boot 开发订单服务。"
+        jd = "岗位职责：开发后端系统。任职要求：熟悉 Java、Spring Boot、MySQL、Docker 并参与系统开发。"
+        app.state.store.update("resumes", "r", text=resume)
+        app.state.job_repository.jobs["evidence"] = Job.model_validate(fixture_job("evidence", jd))
+        async def fake(_resume, _jd):
+            from app.schemas import Gap, Highlight
+            report = MOCK_RESPONSES["medium"].model_copy(deep=True)
+            report.meta.mode = "llm"
+            report.highlights = [Highlight(title="Java实践", evidence="使用 Java 和 Spring Boot 开发订单服务", source="resume")]
+            report.gaps = [Gap(title="缺乏 Java", jd_requirement=jd, resume_evidence=None,
+                               suggestion="学习 Java", rewrite_suggestion="补充【真实经历】", severity="high")]
+            return report
+        with patch.dict(os.environ, {"MATCH_LLM_TOP_K": "8"}), patch("app.matching.run_diagnose", side_effect=fake) as model:
+            first = self.wait(self.create(["evidence"]))["items"][0]
+            # A different job set creates another task but reuses the cached pair.
+            second = next(item for item in self.wait(self.create(["evidence", "a"]))["items"] if item["job_id"] == "evidence")
+            self.assertEqual(model.await_count, 2)
+        for item in (first, second):
+            states = {entry["skill_name"]: entry["evidence_status"] for entry in item["skill_assessments"]}
+            self.assertEqual(states, {"Java": "demonstrated", "Spring Boot": "demonstrated",
+                                      "MySQL": "mentioned_only", "Docker": "not_found"})
+            self.assertFalse(any("Java" in gap["title"] for gap in item["report"]["gaps"]))
+            self.assertTrue(any("Docker" in gap["title"] for gap in item["report"]["gaps"]))
+            self.assertEqual(item["score"], round(.35 * item["stage1_score"] + .65 * item["report"]["overall_score"]))
+
+    def test_unresolved_conflict_degrades_without_changing_base_score(self):
+        from app.schemas import Gap
+        resume = "项目经历\n使用 Java 开发订单服务，负责接口实现和团队协作。"
+        jd = "岗位职责：开发后端服务。任职要求：熟悉 Java，具有良好团队沟通协作能力。"
+        app.state.store.update("resumes", "r", text=resume)
+        app.state.job_repository.jobs["conflict"] = Job.model_validate(fixture_job("conflict", jd))
+        async def fake(_resume, _jd):
+            report = MOCK_RESPONSES["medium"].model_copy(deep=True)
+            report.meta.mode = "llm"
+            report.gaps = [Gap(title="沟通经验", jd_requirement=jd, resume_evidence=None,
+                               suggestion="缺乏 Java 经验", rewrite_suggestion="补充【真实经历】", severity="high")]
+            return report
+        with patch.dict(os.environ, {"MATCH_LLM_TOP_K": "8"}), patch("app.matching.run_diagnose", side_effect=fake):
+            item = self.wait(self.create(["conflict"]))["items"][0]
+        self.assertEqual(item["degraded_reason"], "model_failed")
+        self.assertNotIn("report", item)
+        self.assertEqual(item["score"], item["stage1_score"])
+
     def test_partial_failure_and_mock_are_degraded(self):
         async def fake(resume, jd):
             if "新闻" in jd:
