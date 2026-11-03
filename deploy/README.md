@@ -2,6 +2,8 @@
 
 2026-10-26：`nginx.conf` 为新建岗位匹配任务 `/api/job-matches` 增加独立的高成本限流入口（与诊断、旧匹配和面试共用额度）；岗位查询和任务轮询仍走只读额度。该配置需在部署环境 `nginx -t` 后启用，本地编辑不代表已上线。
 
+`/api/job-recommendations` 同样使用高成本请求限流；面试恢复 GET 走 `/api/` 只读规则。配置上线前需在部署环境执行 `nginx -t`。
+
 ## 1. 首次申请公网 IP 的 HTTPS 证书
 
 Let's Encrypt 已支持公网 IPv4/IPv6 证书。IP 证书有效期约 6 天，必须依赖自动续期；Certbot 需 5.4 或更高版本。
@@ -161,3 +163,4 @@ sudo cp ~/nginx-backup-<日期>.conf /etc/nginx/conf.d/resume-diagnose.conf && s
 ```bash
 uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
+
