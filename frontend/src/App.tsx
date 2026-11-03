@@ -59,6 +59,11 @@ function clearHash() {
 export default function App() {
   const [lastMatch, setLastMatch] = useState<MatchRecord | null>(() => loadLastMatch());
   const [view, setView] = useState<View>(() => initialView(lastMatch));
+  const [interviewOpen, setInterviewOpen] = useState(false);
+  // 从侧栏或浏览器后退离开结果页，面试也算结束；回来时先看到结果
+  useEffect(() => {
+    if (view.name !== "jobResult") setInterviewOpen(false);
+  }, [view.name]);
   const [homeJobs, setHomeJobs] = useState<Job[]>([]);
   const [recentResume, setRecentResume] = useState<StoredResume | null>(() => loadLastResume());
   const [recommending, setRecommending] = useState(false);
@@ -198,6 +203,7 @@ export default function App() {
   }
 
   function openResult(match: MatchRecord) {
+    setInterviewOpen(false);
     setLastMatch(match);
     lastMatchRef.current = match;
     saveLastMatch(match);
@@ -273,8 +279,8 @@ export default function App() {
           <nav className="offer-nav" aria-label="主导航">
             <button className={view.name === "home" ? "active" : ""} onClick={() => { clearHash(); setView({ name: "home" }); }}><span>⌂</span>首页</button>
             <button className={view.name === "job" ? "active" : ""} onClick={() => { clearHash(); setView({ name: "job" }); }}><span>▦</span>选择岗位</button>
-            <button className={view.name === "jobResult" ? "active" : ""} onClick={() => lastMatch && openResult(lastMatch)} disabled={!lastMatch}><span>◉</span>匹配结果</button>
-            <button onClick={() => lastMatch && openResult(lastMatch)} disabled={!lastMatch} title={lastMatch ? "先选择结果中的岗位开始面试" : "完成匹配后开始面试"}><span>♬</span>模拟面试</button>
+            <button className={view.name === "jobResult" && !interviewOpen ? "active" : ""} onClick={() => lastMatch && openResult(lastMatch)} disabled={!lastMatch}><span>◉</span>匹配结果</button>
+            <button className={view.name === "jobResult" && interviewOpen ? "active" : ""} onClick={() => lastMatch && !(view.name === "jobResult" && interviewOpen) && openResult(lastMatch)} disabled={!lastMatch} title={lastMatch ? "先选择结果中的岗位开始面试" : "完成匹配后开始面试"}><span>♬</span>模拟面试</button>
             <button className={view.name === "records" ? "active" : ""} onClick={() => { clearHash(); setView({ name: "records" }); }}><span>▤</span>记录</button>
           </nav>
           <div className="offer-sidebar-note">从一份简历开始，<br />找到适合你的下一步。</div>
@@ -406,6 +412,8 @@ export default function App() {
             mode={view.mode}
             onReset={handleReset}
             onRestart={(taskId) => openResult({ ...view, taskId, savedAt: Date.now() })}
+            interviewOpen={interviewOpen}
+            onInterviewOpenChange={setInterviewOpen}
           />
         )}
         </div>
