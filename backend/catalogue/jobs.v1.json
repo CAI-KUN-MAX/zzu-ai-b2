@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-02.v2",
+  "version": "2026-11-03.v1",
   "items": [
     {
       "job_id": "ncss-foxconn-nanning-2027-project",
@@ -3781,6 +3781,1446 @@
       "verified_at": "2026-11-02T17:00:00+08:00",
       "application_status": "open",
       "verification_note": "用户于2026-11-02确认可投，系统未独立复核；原记录：核对高校招聘正文；页面提供招聘邮箱，未核实该岗位当前接收投递或截止时间。"
+    },
+    {
+      "job_id": "ncss-lingbao-2027-safety",
+      "title": "生产管培生（安全环保方向）",
+      "company": "灵宝黄金集团股份有限公司",
+      "cities": [
+        "河南"
+      ],
+      "category": "农林环境",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "安全工程技术"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：协助日常安全巡检和隐患整改跟踪，参与新员工三级安全教育及特种作业证件管理，协助编制应急预案和组织演练，并开展废水、废气、固废监测与台账管理。任职要求：本科及以上，安全工程技术专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/YTHdhLScGVZYUpsWtjCZmP/detail.html",
+      "published_at": "2026-10-09",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-lingbao-2027-geology",
+      "title": "生产管培生（地质方向）",
+      "company": "灵宝黄金集团股份有限公司",
+      "cities": [
+        "河南"
+      ],
+      "category": "土木建筑",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "地质工程"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：协助矿区地质编录、岩芯描述、采样及图件更新，参与储量动态管理和品位核实，配合水文与工程地质调查，学习地质建模软件并参与三维模型维护。任职要求：本科及以上，地质工程专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/TydYhQovzrLfY6mgqaE8u6/detail.html",
+      "published_at": "2026-10-09",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-lingbao-2027-mineral",
+      "title": "生产管培生（选矿方向）",
+      "company": "灵宝黄金集团股份有限公司",
+      "cities": [
+        "河南"
+      ],
+      "category": "化工材料",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "矿物加工工程"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：协助原矿、精矿和尾矿的取样制备与送检，参与选矿流程考察并记录磨矿细度、药剂用量，协助监控选矿自动化系统，参与小型试验和报告整理。任职要求：本科及以上，矿物加工工程专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/U43AsXCUu59hucS8iHwmYr/detail.html",
+      "published_at": "2026-10-09",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-lingbao-2027-it",
+      "title": "生产管培生（生产信息化方向）",
+      "company": "灵宝黄金集团股份有限公司",
+      "cities": [
+        "河南"
+      ],
+      "category": "计算机",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "计算机类"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：到矿山和选厂调研业务需求，参与MES、LIMS、设备和能源管理等系统的建设推广，完成数据梳理、接口开发和系统集成，处理工业时序数据，并负责从试点到上线过程中的问题定位与联调。任职要求：本科及以上，计算机类专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/VNCA3B9XPQ5TZr3uMpDvXe/detail.html",
+      "published_at": "2026-10-09",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-lingbao-2027-lab",
+      "title": "生产管培生（化验方向）",
+      "company": "灵宝黄金集团股份有限公司",
+      "cities": [
+        "河南"
+      ],
+      "category": "化工材料",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "应用化学"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：协助矿石和精矿样品的化学分析，参与化验方法验证优化，学习原子吸收、ICP等仪器，负责试剂配制和危化品台账，协助实验室质量控制与比对试验。任职要求：本科及以上，应用化学专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/6N9vfKfHRP7vFaXq3Ys6ya/detail.html",
+      "published_at": "2026-10-09",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-lingbao-2027-mechanical",
+      "title": "生产管培生（机电方向）",
+      "company": "灵宝黄金集团股份有限公司",
+      "cities": [
+        "河南"
+      ],
+      "category": "电子机械",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "机械设计制造及自动化"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：协助矿山提升、排水等机电设备的巡检记录，参与故障诊断和检修计划，学习点检维护标准，编制备件计划，并参与新设备安装调试和技术档案建立。任职要求：本科及以上，机械设计制造及自动化专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/2RVsrjn1p3CARVBEu8mGpT/detail.html",
+      "published_at": "2026-10-09",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-lingbao-2027-mining-assoc",
+      "title": "生产管培生（采矿方向·专科）",
+      "company": "灵宝黄金集团股份有限公司",
+      "cities": [
+        "河南"
+      ],
+      "category": "土木建筑",
+      "education": "专科",
+      "education_requirement": "专科及以上",
+      "majors": [
+        "采矿工程"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：协助编制采掘作业规程和安全技术措施，深入一线记录矿岩稳定性数据，参与爆破设计优化、损失率和贫化率分析，学习数字化采矿软件并参与采掘计划编制。任职要求：专科及以上，采矿工程专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/NouzkBXE5UDHD3TGzJ3uAp/detail.html",
+      "published_at": "2026-10-09",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-senyuan-2027-charging",
+      "title": "充电桩硬件/软件工程师",
+      "company": "河南森源电气股份有限公司",
+      "cities": [
+        "河南"
+      ],
+      "category": "电子机械",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "自动化",
+        "计算机科学与技术",
+        "控制科学与工程"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：硬件方向负责充电桩研发测试、器件选型、方案评估及成本和质量控制；软件方向负责充电桩软件设计开发测试、技术文档、新技术预研和测试问题分析。任职要求：本科及以上，自动化、计算机科学与技术、控制科学与工程等专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/7nbcrEirbWna96z529GSf5/detail.html",
+      "published_at": "2026-10-08",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-senyuan-2027-design",
+      "title": "电气/机械/模具设计工程师",
+      "company": "河南森源电气股份有限公司",
+      "cities": [
+        "河南"
+      ],
+      "category": "电子机械",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "自动化",
+        "电气工程及其自动化",
+        "控制科学与工程"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：电气方向完成方案规划、器件选型和EPLAN/AutoCAD出图；机械方向完成结构方案、三维建模、工程图和BOM，评估机加工、钣金、注塑等工艺，并跟进样机评审和设计变更。任职要求：本科及以上，自动化、电气工程及其自动化等相关专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/W8kXZ7A8BpA4y9oVGTsAV4/detail.html",
+      "published_at": "2026-10-08",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-senyuan-2027-hr",
+      "title": "人资专员",
+      "company": "河南森源电气股份有限公司",
+      "cities": [
+        "河南"
+      ],
+      "category": "经管财会",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "人力资源管理"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：配合技术、生产和职能岗位招聘，办理入转调离和劳动合同，组织新员工及安全生产培训，协助落实绩效和用工制度，统计人力数据并输出月报，开展一线员工关怀。任职要求：本科及以上，人力资源管理专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/8hr68GUZudXYvjK9C89Uij/detail.html",
+      "published_at": "2026-10-08",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-senyuan-2027-supply",
+      "title": "供应链管理师",
+      "company": "河南森源电气股份有限公司",
+      "cities": [
+        "河南"
+      ],
+      "category": "经管财会",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "物流管理"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：制定完善招标管理制度并监督采购招标，负责供应商引进、准入、评估和分级管理，汇总分析月度采购与资金情况，并建立行业采购价格数据库。任职要求：本科及以上，物流管理专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/AwwuLeQDUXkU15k72PDtQS/detail.html",
+      "published_at": "2026-10-08",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-xjzn-2027-structure",
+      "title": "结构设计工程师",
+      "company": "许昌智能继电器股份有限公司",
+      "cities": [
+        "河南"
+      ],
+      "category": "电子机械",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "机械设计制造及其自动化"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：负责产品结构方案、三维建模和工程图纸，编制维护设计BOM并跟进变更，提供柜体结构技术咨询并结合生产制定优化方案。任职要求：本科及以上，机械设计制造及其自动化专业；熟练使用CREO、SW、CAD，具备图纸转化和检验标准制定能力。",
+      "source_url": "https://www.ncss.cn/student/jobs/DwRK8NLPzWgt46tw35rRcn/detail.html",
+      "published_at": "2026-09-29",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-xjzn-2027-power",
+      "title": "电力装备产品设计师",
+      "company": "许昌智能继电器股份有限公司",
+      "cities": [
+        "河南"
+      ],
+      "category": "电子机械",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "电气工程及其自动化",
+        "机械设计制造及其自动化"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：制定高低压成套设备一次方案和元器件选型，绘制系统图、布置图并输出BOM，进行短路和温升校核，支持投标，处理生产技术问题并配合现场调试。任职要求：本科及以上，电气等相关专业，具备主动学习和思考能力。",
+      "source_url": "https://www.ncss.cn/student/jobs/KhYABZ1x2wkG5FhPuRrgi8/detail.html",
+      "published_at": "2026-09-29",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-xjzn-2027-legal",
+      "title": "法务专员/助理",
+      "company": "许昌智能继电器股份有限公司",
+      "cities": [
+        "河南"
+      ],
+      "category": "文法教育",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "未注明"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：通过律师函、诉讼仲裁和强制执行等方式推动应收账款回收，建设合同标准文本，审查重大合同的合规与商业风险，开展法律培训和风险预警。任职要求：本科及以上；详情未单列专业和其他条件，以来源页为准。",
+      "source_url": "https://www.ncss.cn/student/jobs/E18J31DdbivJLzKXxk8E12/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-cnegc-2027-geotech",
+      "title": "基建/岩土工程",
+      "company": "中核勘察设计研究有限公司",
+      "cities": [
+        "河南"
+      ],
+      "category": "土木建筑",
+      "education": "硕士",
+      "education_requirement": "2027届应届硕士及以上",
+      "majors": [
+        "岩土工程",
+        "土木工程",
+        "地质工程",
+        "水利水电工程",
+        "结构工程",
+        "测绘"
+      ],
+      "graduation_year": "2027",
+      "jd_text": "岗位职责：完成工程现场勘察、物探、施工和测绘作业，整理校核数据，协助编制勘察中间资料和成果报告，负责设备维护、资料归档和项目技术总结。任职要求：2027届应届硕士及以上，岩土、土木、地质、水利水电、结构、测绘等相关专业，中共党员优先。",
+      "source_url": "https://www.ncss.cn/student/jobs/FgU7GLJwWgcEy7kJX6AijZ/detail.html",
+      "published_at": "2026-10-09",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-yuzhixing-2027-marketing",
+      "title": "营销工程师",
+      "company": "河南豫之星作物保护有限公司",
+      "cities": [
+        "河南"
+      ],
+      "category": "农林环境",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "植物保护",
+        "园艺",
+        "农学"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：管理农药产品示范田并收集数据，解答客户产品问题，负责区域销售计划及客户开发维护，向农户和零售客户讲解产品政策。任职要求：本科及以上，植保、园艺、农学等专业；熟悉作物病虫害甄别和田间管理，沟通能力好，能适应经常出差。",
+      "source_url": "https://www.ncss.cn/student/jobs/3KFs68wBii3HKdo1LLXWaL/detail.html",
+      "published_at": "2026-09-22",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-swirecoke-2027-mt",
+      "title": "2027管理培训生（市场销售）",
+      "company": "郑州太古可口可乐饮料有限公司",
+      "cities": [
+        "郑州"
+      ],
+      "category": "经管财会",
+      "education": "本科",
+      "education_requirement": "985/211本科及以上应届或毕业不超过一年",
+      "majors": [
+        "不限"
+      ],
+      "graduation_year": "2027",
+      "jd_text": "岗位职责：参加三年定向轮岗以全面学习饮料核心业务，接受系列培训与高管导师辅导，参与组织和策划公司大型项目活动，培养成为公司管理者。任职要求：985/211高校本科及以上应届或毕业不超过一年；英语六级且口语流利，学习力、沟通和问题解决能力好，能接受业务区域内调动。",
+      "source_url": "https://www.ncss.cn/student/jobs/4PJRi8oFHtUGK4Hxm85Hfa/detail.html",
+      "published_at": "2026-09-28",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；详情写明简历投递截止2027-05-31、通过邮箱投递，未核实是否仍在接收；日期为平台显示的更新时间，首次发布日期未注明。"
+    },
+    {
+      "job_id": "ncss-teweilong-2027-rd",
+      "title": "复合调味品研发管培生",
+      "company": "上海特味龙科技集团有限公司",
+      "cities": [
+        "郑州"
+      ],
+      "category": "化工材料",
+      "education": "本科",
+      "education_requirement": "统招本科及以上",
+      "majors": [
+        "食品科学与工程"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：协助研发工程师完成实验辅助、进度跟踪、原辅料采购和样品数据管理，进行数据汇总分析及跨部门沟通协调。任职要求：统招本科及以上，食品科学与工程专业优先；能接受实验室环境，办公软件熟练，有长期从事研发的意愿，郑州高新区附近优先。",
+      "source_url": "https://www.ncss.cn/student/jobs/A8caSWUmgDQAygpqNAVHZR/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-dongwei-2027-patent",
+      "title": "专利工程师",
+      "company": "河南东微电子材料有限公司",
+      "cities": [
+        "郑州"
+      ],
+      "category": "文法教育",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "未注明"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：撰写专利交底书和专利申请文件并答复审查意见，协助知识产权相关资质和奖项申报，建立维护商标、专利、著作权数据库及法律文件档案。任职要求：本科及以上；详情未单列专业和其他条件，以来源页为准。",
+      "source_url": "https://www.ncss.cn/student/jobs/3J5KjczWPhkeqkwSqE86Z3/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-shaolinbus-2027-door",
+      "title": "开闭件设计工程师（乘客门、司机门、舱门方向）",
+      "company": "河南少林客车股份有限公司",
+      "cities": [
+        "郑州"
+      ],
+      "category": "电子机械",
+      "education": "本科",
+      "education_requirement": "平台列本科机械类、硕士机械制造及其自动化",
+      "majors": [
+        "机械类",
+        "机械工程",
+        "机械制造及其自动化"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：根据开发任务书和总布置要求做结构可行性分析，完成3D/2D设计并保证图纸和BOM准确，处理车身订单，输出RFQ、DVP等零部件开发文件，推进产品对标和企业标准修订。任职要求：机械类、机械工程本科或机械制造及其自动化硕士。",
+      "source_url": "https://www.ncss.cn/student/jobs/Hi6CP5PwGBUmrXmon6DVKu/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-shaolinbus-2027-body",
+      "title": "车身设计工程师（车身六大片骨架总成）",
+      "company": "河南少林客车股份有限公司",
+      "cities": [
+        "郑州"
+      ],
+      "category": "电子机械",
+      "education": "本科",
+      "education_requirement": "平台列本科机械类",
+      "majors": [
+        "机械类"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：做车身骨架总成的结构可行性分析，完成3D/2D设计并保证图纸和BOM准确，处理车身订单和标准技术资料，输出RFQ、DVP等文件，推进产品对标和企业标准修订。任职要求：机械类本科。",
+      "source_url": "https://www.ncss.cn/student/jobs/Hx5D7jPUevCPLqrEAy2fRK/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-minghe-2027-transmission",
+      "title": "传输网运行维护工程师",
+      "company": "河南明和通信技术有限公司",
+      "cities": [
+        "郑州"
+      ],
+      "category": "计算机",
+      "education": "专科",
+      "education_requirement": "专科及以上",
+      "majors": [
+        "计算机科学与技术",
+        "软件工程",
+        "网络工程",
+        "通信工程",
+        "电子信息工程",
+        "物联网工程"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：参与5G、NFV/SDN等新技术测试落地，负责传输线路维护和日常作业，处理传输网故障，组织软件升级、网络割接，分析网络运行情况并制定应急通信预案。任职要求：专科及以上，计算机、软件、网络、通信、电子信息、物联网等IT/DT/CT类专业背景。",
+      "source_url": "https://www.ncss.cn/student/jobs/96rHxbz8P3ysxMTFyfoq1U/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-tongda-2027-refractory",
+      "title": "研发技术员",
+      "company": "巩义通达中原耐火技术有限公司",
+      "cities": [
+        "郑州"
+      ],
+      "category": "化工材料",
+      "education": "硕士",
+      "education_requirement": "平台列硕士及以上，正文写本科以上",
+      "majors": [
+        "材料科学与工程",
+        "无机非金属材料工程"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：负责产品、工艺和技术项目的研发试验与验证，参与新产品开发和工艺优化，整理技术资料、试验记录和报告，跟踪项目进度并反馈风险。任职要求：平台列硕士及以上、材料科学与工程专业，正文写本科以上、无机非金属材料工程专业；有创新意识和责任心。",
+      "source_url": "https://www.ncss.cn/student/jobs/Qd7k4NBZFQSqxfCJMg5B77/detail.html",
+      "published_at": "2026-10-30",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；平台字段列硕士及以上，正文写本科以上，二者不一致，以来源页为准；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-huitong-2027-mt",
+      "title": "河南智选车管培生",
+      "company": "深圳慧通商务有限公司",
+      "cities": [
+        "郑州"
+      ],
+      "category": "经管财会",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "不限专业"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：负责门店客户接待、车型讲解、试驾和订单转化，掌握销售标准流程并完成轮岗考核，协助区域和门店用户活动的筹备、执行与复盘，定期复盘工作思路。任职要求：本科及以上，专业不限；详情未单列其他条件，以来源页为准。",
+      "source_url": "https://www.ncss.cn/student/jobs/F2KSxdDHQLjVNgmm35Zqqt/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-jingjiahua-2027-mt",
+      "title": "管培生",
+      "company": "河南省京佳华教育科技有限公司",
+      "cities": [
+        "郑州"
+      ],
+      "category": "文法教育",
+      "education": "本科",
+      "education_requirement": "本科及以上应届或毕业1至2年内",
+      "majors": [
+        "不限"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：培养期在课程顾问、市场运营、教学教务和综合管理方向轮岗，参与学员咨询、活动策划、课程排期和数据复盘，完成阶段述职后定岗。任职要求：应届或毕业1至2年内，本科及以上，专业不限，教育、管理、市场营销优先；认同教育行业，沟通和抗压能力好。",
+      "source_url": "https://www.ncss.cn/student/jobs/Bqn2iWvUF5zYX54we9ZQ3s/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-gezhouba-2027-translator",
+      "title": "翻译岗",
+      "company": "中国葛洲坝集团建设工程有限公司",
+      "cities": [
+        "全国"
+      ],
+      "category": "外语传播",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "缅甸语",
+        "老挝语",
+        "越南语"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：承担海外项目中外文资料笔译、现场外事口译，翻译校对合同、图纸、施工规范和函件，对接外籍人员和商务洽谈，整理涉外资料并协助对外宣传。任职要求：本科及以上，缅甸语、老挝语、越南语专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/WnbxeE55xjWc5utHLohC9T/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-xinma-2027-russian",
+      "title": "俄语翻译",
+      "company": "山东新马制药装备有限公司",
+      "cities": [
+        "山东"
+      ],
+      "category": "外语传播",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "俄语"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：负责中俄双语互译及商务接待、展会和内部会议的交替传译，对译文润色校对，更新维护俄文术语库并保证资料风格统一，兼任销售助理。任职要求：本科及以上，俄语专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/Uwj3fA9QZzhbdueJm6MCxP/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-xiaojiling-2027-french",
+      "title": "法语翻译",
+      "company": "小机灵（广州）技术服务有限责任公司",
+      "cities": [
+        "广东"
+      ],
+      "category": "外语传播",
+      "education": "本科",
+      "education_requirement": "本科及以上，应届可投",
+      "majors": [
+        "法语"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：负责独立站、社媒和各类资料的中法互译，承担商务谈判和会议口译，校对润色稿件并统一术语，为相关部门提供对外沟通语言支持。任职要求：本科及以上，法语听说读写流利，应届可投；持翻译资格证者优先，熟练使用办公软件。",
+      "source_url": "https://www.ncss.cn/student/jobs/EJfVkf4e2DxsAbP1bL7Fcb/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-quyixian-2027-english-editor",
+      "title": "英语编辑",
+      "company": "北京曲一线图书策划有限公司",
+      "cities": [
+        "北京"
+      ],
+      "category": "外语传播",
+      "education": "本科",
+      "education_requirement": "统招本科及以上",
+      "majors": [
+        "英语",
+        "英语（师范）"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：负责高中教辅图书的校对、编辑和审稿，分析真题和竞品，研究中高考教学规律和考纲，落实图书策划理念并根据读者反馈改进品质，服务作者创作。任职要求：统招本科及以上，英语相关专业，学科知识扎实；有教育或编辑经验、师范院校毕业者优先。",
+      "source_url": "https://www.ncss.cn/student/jobs/3xNCBSxAUMUj12zea9uJQ4/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-nbd-2027-reporter",
+      "title": "财经新闻记者",
+      "company": "成都传媒产业集团有限公司（成都每经传媒有限公司）",
+      "cities": [
+        "北京",
+        "上海",
+        "深圳",
+        "广州",
+        "苏州",
+        "杭州",
+        "香港"
+      ],
+      "category": "外语传播",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "不限专业"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：关注宏观经济、金融、证券、上市公司等领域，挖掘线索并策划选题，通过访谈和资料查阅核实信息，撰写消息、评论和深度报道，独立制作图文、短视频和音频内容。任职要求：本科及以上，专业不限；掌握基础拍摄、录音和剪辑技能。",
+      "source_url": "https://www.ncss.cn/student/jobs/5bxYnz2HkuENAsVBh7352b/detail.html",
+      "published_at": "2026-10-31",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-cpcmp-2027-editor",
+      "title": "编辑记者",
+      "company": "《中国出版传媒商报》社有限公司",
+      "cities": [
+        "北京"
+      ],
+      "category": "外语传播",
+      "education": "硕士",
+      "education_requirement": "硕士及以上",
+      "majors": [
+        "新闻传播学",
+        "新闻与传播",
+        "出版"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：组织新闻资源并进行选题策划，及时准确完成新闻采写、编辑剪辑、新媒体制作及其他媒体事务。任职要求：硕士及以上，新闻传播、出版相关专业；熟悉新闻传播规律，熟练使用摄影摄像器材和新媒体应用，善于沟通协调，能上夜班。",
+      "source_url": "https://www.ncss.cn/student/jobs/RPgCMdJLuz5dqw7cRgYZ4A/detail.html",
+      "published_at": "2026-10-14",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-shitong-2027-brand",
+      "title": "品牌传播专员（文案策划方向）",
+      "company": "浙江势通机器人科技有限公司",
+      "cities": [
+        "浙江"
+      ],
+      "category": "外语传播",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "不限专业"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：负责公众号、视频号、小红书推文和新闻通稿、品牌故事等内容策划撰写，跟踪医疗健康行业和竞品传播动态，策划数字传播活动并复盘，维护媒体渠道，监测传播数据。任职要求：本科及以上，专业不限；详情未单列其他条件，以来源页为准。",
+      "source_url": "https://www.ncss.cn/student/jobs/Nki8e9qfBYABvCVQ5g1A5M/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-zhongda-2027-legal",
+      "title": "法务专员/助理",
+      "company": "中达联合控股集团股份有限公司",
+      "cities": [
+        "浙江"
+      ],
+      "category": "文法教育",
+      "education": "本科",
+      "education_requirement": "本科以上",
+      "majors": [
+        "法学类"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：审核、整理和跟踪公司合同事项，管理诉讼案件进展，协助法务经理办理诉讼和法律事务。任职要求：本科以上，法学或法律相关专业；工作认真主动，熟悉办公软件，条理和逻辑性强，有一定写作和表达能力，能长期稳定工作。",
+      "source_url": "https://www.ncss.cn/student/jobs/4CkWbwZuwtLju4Tu7iTiP5/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-baiyun-2027-compliance",
+      "title": "法务合规管培生",
+      "company": "白云电气集团有限公司",
+      "cities": [
+        "广东"
+      ],
+      "category": "文法教育",
+      "education": "本科",
+      "education_requirement": "统招本科及以上",
+      "majors": [
+        "法学"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：协助合同起草审核和归档，参与合规体系建设和风险评估，跟踪法规政策变化并提供基础法律意见，整理纠纷案件资料，协助法治宣传和合规培训。任职要求：统招本科及以上，法学相关专业，通过法考者优先；熟悉民法典、公司法，文书写作能力好。",
+      "source_url": "https://www.ncss.cn/student/jobs/NrF5jpnYDP5LUE3iXz8Yfj/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-growatt-2027-legal",
+      "title": "法务专员",
+      "company": "深圳古瑞瓦特新能源有限公司",
+      "cities": [
+        "广东"
+      ],
+      "category": "文法教育",
+      "education": "本科",
+      "education_requirement": "法学本科及以上应届",
+      "majors": [
+        "法学",
+        "知识产权"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：协助起草审核合同和法律文件，配合处理经济和劳动纠纷，参与合规咨询、风险评估和法律培训，整理法律档案与法规动态，协助应收账款催讨和台账维护。任职要求：法学本科及以上应届生，英语良好，通过司法考试者优先；有律所或企业法务实习者优先。",
+      "source_url": "https://www.ncss.cn/student/jobs/4hxngLuuumrgYekZsYqfQR/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-dgih-2027-compliance",
+      "title": "文旅公司法务合规岗",
+      "company": "东莞实业投资控股集团有限公司",
+      "cities": [
+        "广东"
+      ],
+      "category": "文法教育",
+      "education": "本科",
+      "education_requirement": "2027届本科或硕士",
+      "majors": [
+        "法学",
+        "法律（法学）"
+      ],
+      "graduation_year": "2027",
+      "jd_text": "岗位职责：协助起草审核修订合同和法律文书，整理诉讼仲裁证据材料及档案，参与合规自查和法律风险排查，协助撰写基础法律意见。任职要求：2027届本科或硕士，法学相关专业，专业知识扎实，有实习经历优先；沟通表达和逻辑清晰，文笔好，办公软件熟练。",
+      "source_url": "https://www.ncss.cn/student/jobs/6UjducF6xyWXiJpe86h5Tf/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-yunyun-2027-paralegal",
+      "title": "律师助理",
+      "company": "广东云云律师事务所",
+      "cities": [
+        "广东"
+      ],
+      "category": "文法教育",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "法学",
+        "知识产权"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：推进立案、调解、保全和执行等诉讼工作，与全国基层法院沟通并记录要求，统计法院和原告数据支持策略优化，跨部门协作并持续优化流程。任职要求：本科及以上，法律或司法类专业，不要求通过法考；沟通协调、信息收集和逻辑思维能力好，学习意愿强。",
+      "source_url": "https://www.ncss.cn/student/jobs/TJDF51Tx25bYHYqocoCjxF/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-xuepeng-2027-chinese",
+      "title": "中学语文教师",
+      "company": "重庆雪鹏信息科技有限公司",
+      "cities": [
+        "重庆"
+      ],
+      "category": "文法教育",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "中国语言文学类"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：按教学部计划高质量完成课堂教学并活跃课堂气氛，协助升级教学计划，与学生沟通并因材施教。任职要求：本科及以上，中国语言文学类或相近专业，持相应学科教师资格证；热爱教育事业，品行端正，无违纪处分及违法记录，身心健康。",
+      "source_url": "https://www.ncss.cn/student/jobs/9ywXapsqUXdf1DViJTJ5YG/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-mahua-2027-graphic",
+      "title": "平面设计",
+      "company": "北京开心麻花娱乐文化传媒股份有限公司",
+      "cities": [
+        "北京"
+      ],
+      "category": "艺术设计",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "未注明"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：设计海报、传单等宣传物料，参与线上线下活动的视觉策划和呈现，与团队协作将创意转化为视觉作品。任职要求：本科及以上；熟练掌握PS、AI等Adobe软件和AI工具，对色彩和构图敏感，能驾驭多种风格，热爱喜剧。",
+      "source_url": "https://www.ncss.cn/student/jobs/3rTxJZmpJrsQUzgMoYpH5J/detail.html",
+      "published_at": "2026-11-02",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-sixi-2027-visual",
+      "title": "视觉设计专员",
+      "company": "四禧（南京）美术馆有限公司",
+      "cities": [
+        "江苏"
+      ],
+      "category": "艺术设计",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "艺术类"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：负责美术馆VI管理和品牌视觉规划，完成展览、公教活动和艺术项目的视觉设计及海报展册物料，配合设计落地，满足社交媒体视觉需求并产出活动图片和视频。任职要求：本科及以上，艺术类专业，熟悉印刷材料及工艺。",
+      "source_url": "https://www.ncss.cn/student/jobs/EKpv3twydg9HjAZgvvn8iP/detail.html",
+      "published_at": "2026-10-26",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-netease-2027-visual-intern",
+      "title": "运营视觉设计实习生",
+      "company": "网易(杭州)网络有限公司",
+      "cities": [
+        "北京"
+      ],
+      "category": "艺术设计",
+      "education": "本科",
+      "education_requirement": "本科或研究生在读",
+      "majors": [
+        "美术",
+        "设计"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：参与产品运营活动设计，从创意到执行对接运营和开发，辅助品牌和用户运营的H5、banner及客户端情感化设计，跟进项目落地上线。任职要求：美术、设计相关专业本科或研究生在读，每周出勤4天以上，实习不少于4个月；手绘扎实，需附代表作品。",
+      "source_url": "https://www.ncss.cn/student/jobs/3dVis99pkYa8eDJQC9x9Uc/detail.html",
+      "published_at": "2026-10-30",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-chuidawang-2027-design",
+      "title": "设计管培生（视觉设计/工业设计/插画/CMF等）",
+      "company": "浙江炊大王炊具有限公司",
+      "cities": [
+        "浙江"
+      ],
+      "category": "艺术设计",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "设计相关专业"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：按方向负责电商视觉、产品造型与功能、包装海报插画或产品配色设计，并轮岗各设计岗位、文案策划和短视频模块。任职要求：本科及以上，设计相关专业；软件和美术基础扎实，有营销策划意识，创意丰富。",
+      "source_url": "https://www.ncss.cn/student/jobs/LgkW3Q37mpwPgAwkyt9R7y/detail.html",
+      "published_at": "2026-11-02",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-sdport-2027-interior",
+      "title": "设计员-室内设计",
+      "company": "山东省港口集团有限公司",
+      "cities": [
+        "日照"
+      ],
+      "category": "艺术设计",
+      "education": "本科",
+      "education_requirement": "大学本科及以上",
+      "majors": [
+        "环境设计",
+        "建筑学"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：负责项目室内设计方案及施工图设计，做好业务沟通、技术交底和图纸会审等工作，招聘单位为港湾建设集团权属单位。任职要求：大学本科及以上，环境设计、建筑学等相关专业；工作地点为日照市，随工程项目施工地点变动。",
+      "source_url": "https://www.ncss.cn/student/jobs/Uhk3aF69SzjG5FsoXg3NTZ/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-caiyu-2027-animator",
+      "title": "动捕动画师",
+      "company": "上海彩宇文化传播有限公司",
+      "cities": [
+        "上海"
+      ],
+      "category": "艺术设计",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "设计学类",
+        "美术学类"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：负责动捕数据清理和动画数据修复，按排期交付内容。任职要求：本科及以上，设计学或美术学类；熟练使用Motionbuilder或Maya，熟悉人体运动和动画规律，学习和协作能力好，热爱游戏；有游戏项目实习或外包经历者优先。",
+      "source_url": "https://www.ncss.cn/student/jobs/SA1qsd4oxtQy1WnjG6F31U/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-risun-2027-agronomist",
+      "title": "见习农艺师",
+      "company": "新洋丰力赛诺农业科技有限公司",
+      "cities": [
+        "全国"
+      ],
+      "category": "农林环境",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "农学",
+        "农药学",
+        "植物保护",
+        "农艺与种业"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：对业务人员和经销商进行技术培训宣讲，建设示范田和观摩会，为种植大户提供生产指导，制作产品宣传视频，编制技术资料，开展土样分析并制定施肥方案。任职要求：本科及以上，农学、农药学、植物保护、农艺与种业等专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/CZb4ZBAwB5XGzc6WUUS1Ki/detail.html",
+      "published_at": "2026-10-21",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-xinshili-2027-agronomist",
+      "title": "农艺师",
+      "company": "山东新势立生物科技有限公司",
+      "cities": [
+        "山东"
+      ],
+      "category": "农林环境",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "植物保护",
+        "农学"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：开展新化合物和现有产品的生测试验，建立试验操作规程，验证产品效果，调查竞品市场，参与示范园建设和观摩推广，编制产品和技术宣传资料。任职要求：本科及以上，植保、农学等相关专业；沟通协调和团队意识好，可接受出差。",
+      "source_url": "https://www.ncss.cn/student/jobs/4FtoaLZsVrNihT8gNFKWxH/detail.html",
+      "published_at": "2026-10-26",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-originwater-2027-market",
+      "title": "水处理市场开发岗",
+      "company": "北京碧水源科技股份有限公司",
+      "cities": [
+        "北京"
+      ],
+      "category": "农林环境",
+      "education": "硕士",
+      "education_requirement": "硕士及以上",
+      "majors": [
+        "环境工程",
+        "给排水",
+        "市场营销"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：开拓市政供水污水、工业废水和水环境治理市场，跟进客户对接、方案宣讲、招投标和合同签订，维护政府和工业客户，输出区域市场分析。任职要求：硕士及以上，环境工程、给排水、市场营销等专业优先；熟悉水处理技术路线和招投标，能适应出差。",
+      "source_url": "https://www.ncss.cn/student/jobs/Lq2Kfce3bK3wLwN4jG6zDE/detail.html",
+      "published_at": "2026-11-02",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-lvzi-2027-eia",
+      "title": "环评工程师",
+      "company": "上海绿姿环保科技有限公司",
+      "cities": [
+        "上海"
+      ],
+      "category": "农林环境",
+      "education": "本科",
+      "education_requirement": "本科及以上",
+      "majors": [
+        "环境科学",
+        "环境工程",
+        "化学",
+        "化学工程"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：根据环评导则编制环境影响评价文件并完成项目批复，负责文件归档和费用催讨，与客户、环保部门及相关单位沟通协调。任职要求：本科及以上，环境科学、环境工程、化学或化学工程等专业；有较强写作和沟通能力，了解办公及CAD、PS等软件。",
+      "source_url": "https://www.ncss.cn/student/jobs/Lc9UBbrejdLHxcGSebdU6q/detail.html",
+      "published_at": "2026-10-26",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-magicray-2027-postdoc",
+      "title": "博士后（运动控制方向）",
+      "company": "深圳明锐理想科技股份有限公司",
+      "cities": [
+        "深圳"
+      ],
+      "category": "电子机械",
+      "education": "博士",
+      "education_requirement": "博士学位，毕业不超过三年",
+      "majors": [
+        "控制科学与工程",
+        "机械电子工程",
+        "自动化",
+        "智能机器人"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：研究高性能运动控制系统，包括轨迹规划、力控和位置速度控制，优化机电一体化设计和控制参数，并研究基于视觉伺服的运动控制。任职要求：具有博士学位且毕业不超过三年，年龄原则上不超过35岁，运动控制、控制科学、机械电子、机器人、自动化等专业，科研能力强。",
+      "source_url": "https://www.ncss.cn/student/jobs/SLeEVcKES9xuTH2RCX1dWh/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-nippon-2027-researcher",
+      "title": "博士研究员（高端人才储备）",
+      "company": "立邦涂料(中国)有限公司",
+      "cities": [
+        "上海"
+      ],
+      "category": "化工材料",
+      "education": "博士",
+      "education_requirement": "博士及以上",
+      "majors": [
+        "材料类"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：主导新涂料体系平台的立项研发，筛选树脂、色浆和助剂并优化配方，跟踪汽车涂料和原材料技术趋势，负责产品改善和新品开发流程，参与专利申请并提供原料开发技术支持。任职要求：博士及以上，材料类专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/Qfnk33eUxxTtWzg3DYEE6s/detail.html",
+      "published_at": "2026-10-19",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-crystalpharm-2027-formulation",
+      "title": "制剂高级研究员（CDMO事业部）",
+      "company": "苏州晶云药物科技股份有限公司",
+      "cities": [
+        "江苏"
+      ],
+      "category": "生物医药",
+      "education": "博士",
+      "education_requirement": "博士及以上",
+      "majors": [
+        "未注明"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：作为项目负责人制定执行制剂技术方案并对接国内外客户，指导小试处方工艺开发、工艺放大和GMP生产，撰写研发报告和申报资料，参与前沿技术拓展和新员工带教。任职要求：博士及以上；详情未单列专业和其他条件，以来源页为准。",
+      "source_url": "https://www.ncss.cn/student/jobs/VsHSi36VSKeC5nN3f7f2gV/detail.html",
+      "published_at": "2026-11-02",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-yuexiu-2027-postdoc",
+      "title": "算法工程师（博士后）",
+      "company": "广州越秀数智科技有限公司",
+      "cities": [
+        "广州"
+      ],
+      "category": "计算机",
+      "education": "博士",
+      "education_requirement": "应届博士或取得博士学位不超过3年",
+      "majors": [
+        "计算机科学与技术",
+        "数据科学与大数据技术",
+        "人工智能",
+        "管理科学与工程"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：研究面向业务一线的智能任务管理，研发任务拆解、人员匹配、动态调度和任务预警算法模型并集成原型系统，在集团业务板块试点落地，发表论文并申请专利。任职要求：应届博士或取得博士学位不超过3年，有大数据分析和算法研究经验，计算机、数据科学、人工智能等专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/BVNchaPn7eCqHy1ntgikt7/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-bluemoon-2027-civil-law",
+      "title": "法务管培生-民商事法",
+      "company": "蓝月亮(中国)有限公司",
+      "cities": [
+        "广州"
+      ],
+      "category": "文法教育",
+      "education": "博士",
+      "education_requirement": "2025年9月至2027年12月获得博士学位",
+      "majors": [
+        "民商法学"
+      ],
+      "graduation_year": "2025年9月—2027年12月获得博士学位",
+      "jd_text": "岗位职责：围绕公司民商事法律问题开展体系化研究，构建合同风险识别和预警框架，推动合规治理机制，跟踪立法与司法动态并输出研判方案。任职要求：2025年9月至2027年12月获得民商法学等方向博士学位；熟悉民法典，独立研究、法律检索和文字表达能力强。",
+      "source_url": "https://www.ncss.cn/student/jobs/SGkW9SSaAu8tCHR5yMdM7L/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-nantong-2027-production-assoc",
+      "title": "生产管培生（大专）",
+      "company": "湖南南铜集团有限公司",
+      "cities": [
+        "湖南"
+      ],
+      "category": "电子机械",
+      "education": "专科",
+      "education_requirement": "专科及以上",
+      "majors": [
+        "机械设计制造及自动化",
+        "智能制造工程技术",
+        "数控技术",
+        "机电设备类"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：协助推进车间6S管理和问题整改，跟进生产制度和作业规范的落地，跟踪生产会议决议，熟悉产品结构、工艺和设备，协助班组日常管理并作为班长梯队储备培养。任职要求：专科及以上，机械设计制造、智能制造、数控、机电等专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/BeWGMewLVknvee2RgEzbo5/detail.html",
+      "published_at": "2026-10-30",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-sinotai-2027-qc-assoc",
+      "title": "品质技术员",
+      "company": "信泰光学（深圳）有限公司",
+      "cities": [
+        "广东"
+      ],
+      "category": "电子机械",
+      "education": "专科",
+      "education_requirement": "大专应届",
+      "majors": [
+        "机械设计制造类"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：按检验标准检验镜片半成品和成品的外观及尺寸，使用卡尺、千分尺、二次元等量具检测并记录数据，标识、隔离和反馈异常品，学习制程品质管控。任职要求：大专应届，机械或品质相关专业优先；细心、责任心强，会看图纸和使用基本量具者优先。",
+      "source_url": "https://www.ncss.cn/student/jobs/2aUVKqX9iqQMxLcqP7gu4Z/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-yuhe-2027-interior-assoc",
+      "title": "室内设计助理",
+      "company": "湖南屿合传世空间设计有限公司",
+      "cities": [
+        "湖南"
+      ],
+      "category": "艺术设计",
+      "education": "专科",
+      "education_requirement": "专科及以上",
+      "majors": [
+        "环境艺术设计",
+        "建筑设计类",
+        "建筑装饰工程"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：按要求完成项目测绘放图和图文归档，绘制CAD施工图，排版设计方案汇报PPT并制作相关元素图，协助设计师搜集整理项目资料，负责图纸打印和装订。任职要求：专科及以上，环境艺术设计、建筑设计类、建筑装饰工程专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/WF6juSDopHym3YHB5bNRh7/detail.html",
+      "published_at": "2026-10-30",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-wanmo-2027-forestry-assoc",
+      "title": "林业技术员",
+      "company": "古蔺县万墨工程咨询有限公司",
+      "cities": [
+        "四川"
+      ],
+      "category": "农林环境",
+      "education": "专科",
+      "education_requirement": "专科及以上",
+      "majors": [
+        "不限"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：开展造林、抚育和退耕还林项目的质量检查，承担森林资源调查、样地监测和采伐作业设计外业，协助林业有害生物监测防治，配合乡镇林业站开展林权和林地流转技术服务。任职要求：专科及以上，平台标注专业不限，会使用GPS、罗盘、测高仪者更匹配。",
+      "source_url": "https://www.ncss.cn/student/jobs/VXmDaLvyMSGDvZPYtpQZZU/detail.html",
+      "published_at": "2026-11-01",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-yashiding-2027-english-assoc",
+      "title": "英语翻译",
+      "company": "山东雅诗鼎文化传播有限公司",
+      "cities": [
+        "山东"
+      ],
+      "category": "外语传播",
+      "education": "专科",
+      "education_requirement": "专科及以上",
+      "majors": [
+        "不限"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：撰写和审核英语新闻稿，负责英语新闻选题策划和统筹执行，运营海外社交账号并分析数据，挖掘海外智库、高校和专家资源并建立合作。任职要求：专科及以上，平台标注专业不限；详情未单列其他条件，以来源页为准。",
+      "source_url": "https://www.ncss.cn/student/jobs/DNPyhbD6vYmXJepBW3igP3/detail.html",
+      "published_at": "2026-11-02",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-huayu-2027-media-assoc",
+      "title": "新媒体运营师",
+      "company": "重庆华语文化传媒有限公司",
+      "cities": [
+        "重庆"
+      ],
+      "category": "外语传播",
+      "education": "专科",
+      "education_requirement": "专科及以上",
+      "majors": [
+        "不限专业"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：负责抖音、小红书、公众号内容编辑发布，策划图文和短视频脚本并跟进拍摄剪辑，维护评论和粉丝互动，统计账号数据并制作报表，配合线上推广活动。任职要求：专科及以上，专业不限；详情未单列其他条件，以来源页为准。",
+      "source_url": "https://www.ncss.cn/student/jobs/Lrkw129iGqF9uQJ9kYzi5U/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
+    },
+    {
+      "job_id": "ncss-changrui-2027-elderly-care-assoc",
+      "title": "养老护理员（长瑞健康养老产业投资公司）",
+      "company": "大余县城市与乡村发展投资集团有限责任公司",
+      "cities": [
+        "江西"
+      ],
+      "category": "生物医药",
+      "education": "专科",
+      "education_requirement": "专科及以上",
+      "majors": [
+        "护理类",
+        "康复治疗类",
+        "公共卫生与卫生管理类",
+        "健康管理与促进类"
+      ],
+      "graduation_year": "来源未限定毕业届别",
+      "jd_text": "岗位职责：评估老年人状况并设计个性化养老方案，照料饮食、清洁和睡眠等日常生活，采取安全保护措施，协助用药观察和护理记录，协助急救，并开展健康教育和康复护理。任职要求：专科及以上，护理、康复治疗、公共卫生、健康管理等专业。",
+      "source_url": "https://www.ncss.cn/student/jobs/UENVzDbZfZFkaUMKjaLRfK/detail.html",
+      "published_at": "2026-11-03",
+      "publication_type": "repost",
+      "application_url": null,
+      "verified_at": "2026-11-03T18:00:00+08:00",
+      "application_status": "unverified",
+      "verification_note": "国家平台职位详情已于2026-11-03核对，JD为转述，详情未单列完整任职要求，相关条件取自平台的学历和专业字段；日期为平台显示的更新时间，首次发布日期未注明；投递状态和截止时间未核实。"
     }
   ]
 }
