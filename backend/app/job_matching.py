@@ -6,7 +6,7 @@ import logging
 import os
 from datetime import datetime, timezone
 
-from app import matching, job_embedding
+from app import matching, job_embedding, skill_evidence
 from app.job_repository import test_ready
 from app.job_schemas import JobMatchRequest
 from app.routers.diagnose import MAX_TOTAL_CHARS, MIN_CHARS, SYSTEM_PROMPT
@@ -34,6 +34,12 @@ def base_scores(resume, jobs):
         item.update(job_id=job["job_id"], title=job["title"], analysis_status="pending", degraded_reason=None)
         items.append(item)
     return ranked(items)
+
+
+def add_skill_assessments(items, resume, jobs_by_id):
+    for item in items:
+        item["skill_assessments"] = skill_evidence.observations(
+            resume, jobs_by_id[item["job_id"]]["jd_text"])
 
 
 def readable_resume(repository, identifier):
@@ -146,6 +152,8 @@ class JobMatchService:
                 async with asyncio.timeout(TOTAL_TIMEOUT):
                     row = dict(id=snapshot["resume_id"], name="", text=snapshot["resume_text"])
                     items = await asyncio.to_thread(base_scores, row, snapshot["jobs"])
+                    jobs_by_id = {job["job_id"]: job for job in snapshot["jobs"]}
+                    await asyncio.to_thread(add_skill_assessments, items, row["text"], jobs_by_id)
                     embedding_status = "disabled"
                     embedding_error = None
                     if snapshot.get("embedding_enabled"):
@@ -162,7 +170,7 @@ class JobMatchService:
                     payload = {**json.loads(self.repository.task(identifier)["payload"]),
                                "embedding_status": embedding_status, "embedding_error": embedding_error}
                     self.repository.update(identifier, payload=payload)
-                    by_id = {job["job_id"]: job for job in snapshot["jobs"]}
+                    by_id = jobs_by_id
                     top_k = snapshot["top_k"]
                     selected = items[:top_k]
                     for item in items[top_k:]:
@@ -198,6 +206,8 @@ class JobMatchService:
                                 if report.meta.mode != "llm":
                                     reason = "mock_report"
                                 else:
+                                    report = skill_evidence.reconcile_job_report(report, item["skill_assessments"])
+                                    skill_evidence.validate_job_report(report, item["skill_assessments"])
                                     score = round(.35 * item["stage1_score"] + .65 * report.overall_score)
                                     item.update(score=score, **matching.level_fields(score), degraded=False,
                                                 reason=report.summary, report=report.model_dump(),
@@ -208,6 +218,10 @@ class JobMatchService:
                             reason = "item_timeout"
                         except matching.LlmError as exc:
                             reason = "item_timeout" if str(exc) in {"diagnose_timeout", "diagnose_http_504"} else "model_failed"
+                        except skill_evidence.InconsistentSkillReport:
+                            logger.warning("job report failed consistency check task_id=%s job_id=%s",
+                                           identifier, item["job_id"])
+                            reason = "model_failed"
                         except Exception:
                             reason = "model_failed"
                         if reason:

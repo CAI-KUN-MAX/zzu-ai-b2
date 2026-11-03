@@ -1,0 +1,8 @@
+{
+  "note": "虚构示例，证据须以实际解析文本为准。",
+  "skill_assessments": [
+    {"skill_name": "Java", "requirement": true, "jd_evidence": "熟悉 Java", "resume_evidence": ["项目中使用 Java 开发订单服务"], "evidence_status": "demonstrated", "assessment": "简历体现 Java 的实践描述。"},
+    {"skill_name": "MySQL", "requirement": true, "jd_evidence": "熟悉 MySQL", "resume_evidence": ["技能：MySQL"], "evidence_status": "mentioned_only", "assessment": "简历提及 MySQL，但缺少具体实践证据。"},
+    {"skill_name": "Docker", "requirement": true, "jd_evidence": "熟悉 Docker", "resume_evidence": [], "evidence_status": "not_found", "assessment": "简历中未体现 Docker 相关经验。"}
+  ]
+}
