@@ -39,6 +39,9 @@ interface JobResultPageProps {
   mode?: "recommend" | "manual";
   /** 用同一份简历和同一批岗位重新创建任务后回调新的 taskId */
   onRestart: (taskId: string) => void;
+  /** 由 App 持有：侧栏要高亮「模拟面试」，点「匹配结果」时也要能退出面试 */
+  interviewOpen: boolean;
+  onInterviewOpenChange: (open: boolean) => void;
 }
 
 function Chip({ text, tone }: { text: string; tone: "hit" | "miss" }) {
@@ -79,24 +82,27 @@ function analysisLabel(item: JobMatchItem): string {
 }
 
 /** 岗位详情覆盖层：诊断报告 + 模拟面试 */
+/** 面试占满内容区（侧栏保留）：请求和岗位名放在结果页，详情卡只负责发起 */
+interface InterviewTarget {
+  request: MatchContext["interview_request"];
+  title: string;
+}
+
 function JobDetail({
   item,
   job,
   taskId,
   resumeId,
-  resumeName,
-  resumeStatus,
   embeddingStatus,
+  onStartInterview,
 }: {
   item: JobMatchItem;
   job?: Job;
   taskId: string;
   resumeId: string;
-  resumeName: string;
-  resumeStatus: ResumeStatus;
   embeddingStatus?: EmbeddingStatus;
+  onStartInterview: (interview: InterviewTarget) => void;
 }) {
-  const [interviewOpen, setInterviewOpen] = useState(false);
   const [interviewRequest, setInterviewRequest] = useState<MatchContext["interview_request"] | null>(null);
   const [contextError, setContextError] = useState<string | null>(null);
   const tone = levelTone(item.level);
@@ -186,7 +192,10 @@ function JobDetail({
 
           <button
             type="button"
-            onClick={() => setInterviewOpen(true)}
+            onClick={() => interviewRequest && onStartInterview({
+              request: interviewRequest,
+              title: job ? `${job.title} · ${job.company}` : item.title,
+            })}
             disabled={!interviewRequest}
             className="group mt-5 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -376,18 +385,6 @@ function JobDetail({
           <span>诊断与建议由 AI 生成，仅供参考，不构成录用判断。</span>
         </p>
       </div>
-
-      {interviewOpen && interviewRequest ? (
-        <InterviewPage
-          resumeId={interviewRequest.resume_id}
-          resumeName={resumeName}
-          resumeStatus={resumeStatus}
-          jdText={interviewRequest.jd_text}
-          jobTitle={job ? `${job.title} · ${job.company}` : item.title}
-          layer={40}
-          onExit={() => setInterviewOpen(false)}
-        />
-      ) : null}
     </div>
   );
 }
@@ -636,12 +633,30 @@ export function JobResultPage({
   onReset,
   onRestart,
   mode,
+  interviewOpen,
+  onInterviewOpenChange,
 }: JobResultPageProps) {
   const { data: task, error, transient, polling, retry } = useTask(getJobMatchTask, taskId);
   const [restarting, setRestarting] = useState(false);
   const [restartError, setRestartError] = useState<string | null>(null);
   const [loadedJobs, setLoadedJobs] = useState<Record<string, Job>>({});
   const restartInFlight = useRef(false);
+  const [interview, setInterview] = useState<InterviewTarget | null>(null);
+  const resultScrollY = useRef(0);
+  const interviewing = interviewOpen && interview !== null;
+
+  // 结果页只是隐藏，回来时停在进入面试前的位置
+  const wasInterviewing = useRef(false);
+  useEffect(() => {
+    if (wasInterviewing.current && !interviewing) window.scrollTo({ top: resultScrollY.current, behavior: "instant" });
+    wasInterviewing.current = interviewing;
+  }, [interviewing]);
+
+  function startInterview(target: InterviewTarget) {
+    resultScrollY.current = window.scrollY;
+    setInterview(target);
+    onInterviewOpenChange(true);
+  }
 
   const missingIds = (task?.items ?? []).map((item) => item.job_id).filter((id) => !jobIndex[id]).join(",");
   useEffect(() => {
@@ -784,7 +799,18 @@ export function JobResultPage({
   }
 
   return (
-    <main className="offer-results">
+    <>
+    {interviewing ? (
+      <InterviewPage
+        resumeId={interview.request.resume_id}
+        resumeName={resumeName}
+        resumeStatus={resumeStatus}
+        jdText={interview.request.jd_text}
+        jobTitle={interview.title}
+        onExit={() => onInterviewOpenChange(false)}
+      />
+    ) : null}
+    <main className="offer-results" hidden={interviewing}>
       <div className="picker-title">
         <div>
           <span className="offer-eyebrow">YOUR MATCH REPORT</span>
@@ -819,9 +845,10 @@ export function JobResultPage({
             </button>; })}</div>
             <p className="picker-hint">结果根据简历与岗位内容计算，分析建议仅供参考。</p>
           </section>
-          {detailJob && <JobDetail key={detailJob.job_id} item={detailJob} job={displayedJobs[detailJob.job_id]} taskId={taskId} resumeId={resumeId} resumeName={resumeName} resumeStatus={resumeStatus} embeddingStatus={task?.embedding_status} />}
+          {detailJob && <JobDetail key={detailJob.job_id} item={detailJob} job={displayedJobs[detailJob.job_id]} taskId={taskId} resumeId={resumeId} embeddingStatus={task?.embedding_status} onStartInterview={startInterview} />}
         </div>
       )}
     </main>
+    </>
   );
 }
