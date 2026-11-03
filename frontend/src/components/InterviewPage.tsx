@@ -28,8 +28,6 @@ interface InterviewPageProps {
   jobTitle?: string;
   /** 返回筛选结果页；原页面不卸载，展开状态与报告都还在 */
   onExit: () => void;
-  /** 覆盖层层级：默认 30；嵌在岗位详情里时传 40，避免被详情盖住 */
-  layer?: number;
 }
 
 interface RoundRecord {
@@ -112,7 +110,6 @@ export function InterviewPage({
   jdText,
   jobTitle,
   onExit,
-  layer = 30,
 }: InterviewPageProps) {
   const [phase, setPhase] = useState<Phase>("confirm");
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -185,19 +182,9 @@ export function InterviewPage({
     return () => { cancelled = true; };
   }, [phase, sessionId, reportAttempt]);
 
-  // 覆盖层铺满视口时锁住底层页面滚动，避免出现双滚动条
-  useEffect(() => {
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, []);
-
   // 换题或进入完成页时回到顶部，否则用户会停在上一题的半截位置
-  const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0, behavior: "instant" });
   }, [phase, currentRound]);
 
   // setState 是异步的，快速双击时两次点击可能都读到旧的 busy，
@@ -311,12 +298,9 @@ export function InterviewPage({
   }
 
   return (
-    <div
-      ref={scrollRef}
-      className={`offer-interview fixed inset-0 overflow-y-auto ${layer >= 40 ? "z-40" : "z-30"}`}
-    >
+    <main className="offer-interview">
       {/* overflow-wrap 可继承：问题、回答、反馈里的长链接或长英文串在任意位置换行，手机上不撑破卡片 */}
-      <div className="offer-interview-shell mx-auto px-4 pb-16 pt-6 [overflow-wrap:anywhere] sm:px-6 sm:pt-10">
+      <div className="offer-interview-shell [overflow-wrap:anywhere]">
         {/* 顶部条 */}
         <div className="flex items-center justify-between gap-3">
           <button
@@ -679,6 +663,6 @@ export function InterviewPage({
           </div>
         ) : null}
       </div>
-    </div>
+    </main>
   );
 }
