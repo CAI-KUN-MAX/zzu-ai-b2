@@ -60,6 +60,16 @@ class TaskCreated(Contract):
     task_id: str
 
 
+class SkillAssessment(Contract):
+    skill_name: str
+    requirement: bool
+    jd_evidence: str
+    resume_evidence: list[str]
+    demonstrated_evidence: str | None = None
+    evidence_status: Literal["demonstrated", "mentioned_only", "not_found", "uncertain"]
+    assessment: str
+
+
 class JobMatchItem(Contract):
     job_id: str
     title: str
@@ -77,6 +87,7 @@ class JobMatchItem(Contract):
     degraded_reason: Literal["ai_disabled", "not_selected", "input_too_short", "input_too_long",
                              "model_failed", "item_timeout", "batch_timeout", "mock_report"] | None
     analysis_status: Literal["pending", "running", "succeeded", "degraded"]
+    skill_assessments: list[SkillAssessment] = Field(default_factory=list)
     report: DiagnoseResponse | None = None
 
 

@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IS_MOCK_MODE } from "./api/http";
 import { createJobRecommendation, listJobs } from "./api/jobs";
 import { DOCUMENT_ACCEPT, IMAGE_ACCEPT, getIngestTask, uploadResumes, validateFiles } from "./api/resumes";
+import { JobCarousel } from "./components/JobCarousel";
+import { JobJdDialog } from "./components/JobJdDialog";
 import { JobMatchPage, type JobMatchDraft } from "./components/JobMatchPage";
 import { JobResultPage } from "./components/JobResultPage";
 import { useTask } from "./lib/useTask";
@@ -32,6 +34,22 @@ function initialView(last: MatchRecord | null): View {
   return { name: "home" };
 }
 
+/** 岗位速览先让不同企业露面，目录按 ID 排序时同一家会连成一片 */
+function previewJobs(jobs: Job[], limit: number) {
+  const seen = new Set<string>();
+  const first: Job[] = [];
+  const rest: Job[] = [];
+  jobs.forEach((job) => {
+    if (seen.has(job.company)) {
+      rest.push(job);
+    } else {
+      seen.add(job.company);
+      first.push(job);
+    }
+  });
+  return [...first, ...rest].slice(0, limit);
+}
+
 function clearHash() {
   if (window.location.hash) {
     window.history.replaceState(null, "", window.location.pathname + window.location.search);
@@ -52,6 +70,7 @@ export default function App() {
   const { data: homeIngest, error: homePollError, polling: homePolling, retry: retryHomeIngest } = useTask<IngestTask>(getIngestTask, homeUploadTask);
   const [homeTotal, setHomeTotal] = useState(0);
   const [homeCategories, setHomeCategories] = useState(0);
+  const [homeJdJob, setHomeJdJob] = useState<Job | null>(null);
   // 草稿只在切页时读一次，用 ref 存避免每次勾选都让 App 重渲染
   const draftRef = useRef<JobMatchDraft>({ ...loadDraft(), files: [] });
   // hashchange 回调里要读最新的可恢复记录，不能依赖闭包里的初始值
@@ -126,18 +145,7 @@ export default function App() {
     if (view.name === "home") setRecentResume(loadLastResume());
   }, [view.name]);
 
-  // 首页「近期截止」用的当月日历，只标今天，不做节假日
-  const calendarDays = useMemo(() => {
-    const now = new Date();
-    const firstWeekday = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
-    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-    const cells: { key: string; day: string; today: boolean }[] = [];
-    for (let i = 0; i < firstWeekday; i += 1) cells.push({ key: `blank-${i}`, day: "", today: false });
-    for (let day = 1; day <= daysInMonth; day += 1) {
-      cells.push({ key: `day-${day}`, day: String(day), today: day === now.getDate() });
-    }
-    return cells;
-  }, []);
+  const previewList = useMemo(() => previewJobs(homeJobs, 12), [homeJobs]);
 
   // 刷新时带着 #result 但已没有可恢复的记录，去掉这个无效 hash
   useEffect(() => {
@@ -179,6 +187,15 @@ export default function App() {
     draftRef.current = draft;
     saveDraft({ resumeTaskId: draft.resumeTaskId, selected: draft.selected });
   }, []);
+
+  /** 首页岗位详情里勾选：写进选岗草稿，到选岗页时已经是选中状态 */
+  function toggleHomeJob(jobId: string) {
+    const { selected } = draftRef.current;
+    handleDraftChange({
+      ...draftRef.current,
+      selected: selected.includes(jobId) ? selected.filter((id) => id !== jobId) : [...selected, jobId],
+    });
+  }
 
   function openResult(match: MatchRecord) {
     setLastMatch(match);
@@ -327,26 +344,7 @@ export default function App() {
                 </div>
               </section>
 
-              <section className="dashboard-panel">
-                <span className="offer-eyebrow">YOUR OPPORTUNITIES</span>
-                <h2>近期截止</h2>
-                <div className="dashboard-calendar" aria-hidden="true">
-                  {["日", "一", "二", "三", "四", "五", "六"].map((weekday) => (
-                    <span key={weekday} className="wk">{weekday}</span>
-                  ))}
-                  {calendarDays.map((cell) => (
-                    <span key={cell.key} className={cell.today ? "today" : ""}>{cell.day}</span>
-                  ))}
-                </div>
-                <p className="dashboard-copy">
-                  目前没有经过确认的截止日期，建议前往招聘来源查看最新信息。
-                </p>
-                <button className="dashboard-link" onClick={() => setView({ name: "job" })}>
-                  浏览岗位 →
-                </button>
-              </section>
-
-              <section className="dashboard-panel dashboard-wide">
+              <section className="dashboard-panel dashboard-wide" aria-label="岗位速览">
                 <div className="dashboard-heading">
                   <h2>岗位速览</h2>
                   <button className="dashboard-link" onClick={() => setView({ name: "job" })}>
@@ -354,42 +352,21 @@ export default function App() {
                   </button>
                 </div>
                 {homeJobs.length ? (
-                  <div className="dashboard-cards">
-                    {homeJobs.slice(0, 3).map((job) => (
-                      <article key={job.job_id} className="dashboard-card">
-                        <div className="picker-company-row">
-                          <span className="picker-logo">{job.company.slice(0, 1)}</span>
-                          <span className="picker-company">
-                            <strong>{job.company}</strong>
-                            <small>{job.cities.join(" / ")}</small>
-                          </span>
-                        </div>
-                        <strong>{job.title}</strong>
-                        <small>{job.jd_text.replace(/\s+/g, " ").slice(0, 52)}…</small>
-                        <div className="dashboard-card-tags">
-                          <span>{job.category}</span>
-                          <span>{job.education}</span>
-                          <span>{job.graduation_year} 届</span>
-                        </div>
-                        <button className="dashboard-link" onClick={() => setView({ name: "job" })}>
-                          查看要求 →
-                        </button>
-                      </article>
-                    ))}
-                  </div>
+                  <JobCarousel jobs={previewList} selectedIds={draftRef.current.selected} onOpen={setHomeJdJob} />
                 ) : (
                   <p className="dashboard-copy">岗位目录暂时不可用，请稍后查看。</p>
                 )}
               </section>
 
-              <section className="dashboard-panel">
-                <span className="offer-eyebrow">PRACTICE</span>
-                <h2>今日练习</h2>
-                <p className="dashboard-copy">
-                  {lastMatch
-                    ? "针对上次选中的岗位继续练习五轮模拟面试。"
-                    : "先完成岗位匹配，再针对选中的岗位进行五轮练习。"}
-                </p>
+              <section className="dashboard-panel dashboard-practice" aria-label="今日练习">
+                <div>
+                  <h2>今日练习</h2>
+                  <p className="dashboard-copy">
+                    {lastMatch
+                      ? "针对上次选中的岗位继续练习五轮模拟面试。"
+                      : "先完成岗位匹配，再针对选中的岗位进行五轮练习。"}
+                  </p>
+                </div>
                 <button
                   className="dashboard-link"
                   onClick={() => (lastMatch ? openResult(lastMatch) : setView({ name: "job" }))}
@@ -432,6 +409,14 @@ export default function App() {
           />
         )}
         </div>
+        {homeJdJob ? (
+          <JobJdDialog
+            job={homeJdJob}
+            selected={draftRef.current.selected.includes(homeJdJob.job_id)}
+            onToggle={() => toggleHomeJob(homeJdJob.job_id)}
+            onClose={() => setHomeJdJob(null)}
+          />
+        ) : null}
         <div className="offer-mobile-nav" aria-label="移动导航">
           <button onClick={() => { clearHash(); setView({ name: "home" }); }}>⌂<small>首页</small></button>
           <button onClick={() => { clearHash(); setView({ name: "job" }); }}>▦<small>选岗</small></button>

@@ -34,7 +34,13 @@
 
 前 8 岗（MATCH_LLM_TOP_K 可降低，0 关闭）共享现有 AI 并发门限；单项预算 90 秒含并发等待，整批自开始处理起 165 秒含基础评分及向量处理，不含任务排队。这些预算不是 ETA。整批超时使任务为 `failed/JOB_MATCH_TIMEOUT`，未结束岗位标为 `batch_timeout`，保留已有逐岗结果；单项超时只使该岗位降级。真实 AI 成功后 score=round(0.35*stage1_score+0.65*report.overall_score)，否则保持基础分。命中/缺口与 subscores 解释规则分；report 解释 AI 诊断。
 
-analysis_status：pending/running 表示尚未结束（degraded=true、degraded_reason=null）；succeeded 表示真实 AI 报告完成；degraded 表示已结束降级。degraded_reason：ai_disabled、not_selected、input_too_short、input_too_long、model_failed、item_timeout、batch_timeout、mock_report。降级没有 report，reason=null；不编造 AI 理由。任务级 succeeded 允许部分或全部降级。
+每个岗位增加 `skill_assessments`，包含 `skill_name`、`requirement`（是否在 JD 中识别到该技能）、`jd_evidence`（JD 原文片段）、`resume_evidence`（简历原文片段数组）、`demonstrated_evidence`（被识别为实践描述的原文，其余为 null）、`evidence_status` 和 `assessment`。状态为 `demonstrated`（识别到实践描述）、`mentioned_only`（仅提及）、`not_found`（提取文本未找到）、`uncertain`（语境不清或否定）。识别基于有限术语和上下文规则，并非穷举；未找到只表示已提取文本中未识别到，不证明不会。已提取文本可能受 OCR 或排版影响，建议核对原文件。成功报告中涉及已识别技能的亮点和缺口按同一证据重新生成，不改变评分公式；未识别技能仍需人工核对。`matched` / `missing` 仍是规则评分关键词，与实践证据状态不同。字段对旧任务默认为空数组。
+
+技能证据独立示例见 `examples/job_skill_evidence.json`。
+
+为避免把可选条件误当作必需缺口，简单的“不要求”、加分项及包含“或”的要求不会生成对应技能判断；识别不到或表述复杂时也可能漏项。非技能反馈会保留，不能保证识别同义词或所有隐含矛盾。
+
+analysis_status：pending/running 表示尚未结束（degraded=true、degraded_reason=null）；succeeded 表示真实 AI 报告完成；degraded 表示已结束降级。degraded_reason：ai_disabled、not_selected、input_too_short、input_too_long、model_failed、item_timeout、batch_timeout、mock_report。模型结果与已识别实践证据直接冲突且无法安全保留时归入 model_failed，以兼容现有前端。降级没有 report，reason=null；不编造 AI 理由。任务级 succeeded 允许部分或全部降级。
 
 同一 resume_id、简历内容、岗位集合与快照及评分/提示词版本、Embedding 配置的重复请求，复用 queued/running/succeeded 任务；任务失败或 Embedding 降级的任务允许重建。原简历 ID 纳入指纹，保证后续面试使用的仍是原 ID。成功后重复请求是结果重放，不保证再次调用模型；未完成模型调用按输入合并、成功 LLM 报告持久缓存。重启中断任务为 failed/TASK_INTERRUPTED，可重新 POST。仅支持单 worker。
 
