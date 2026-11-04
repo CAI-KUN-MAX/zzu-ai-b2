@@ -14,7 +14,7 @@ from app.routers.diagnose import MAX_TOTAL_CHARS, MIN_CHARS, SYSTEM_PROMPT
 from app.routers.resumes import fail
 
 logger = logging.getLogger(__name__)
-SCORING_VERSION = "job-ranking-v8"
+SCORING_VERSION = "job-ranking-v9"
 # 单独出现时区分度低；不排除“可用性测试”等具体复合技能。
 GENERIC_JOB_TERMS = frozenset({"原型", "文档", "流程", "测试", "验证"})
 RECOMMENDATION_RESULT_LIMIT = 8
@@ -26,18 +26,42 @@ def ranked(items):
     return sorted(items, key=lambda item: (-item["score"], item["job_id"]))
 
 
-def ux_intent(text):
-    # Only a labelled intention is eligible; avoid inferring intent from experience.
-    matches = re.findall(r"(?:求职意向|意向岗位|期望岗位|目标岗位)\s*[:：]\s*([^\n\r；;。，,]{1,50})", text, re.I)
-    return any(not re.search(r"不考虑|不希望|不要|非", value) and re.search(r"用户体验|交互设计|用户研究|用户洞察|(?<![a-z])ux(?![a-z])", value, re.I)
-               for value in matches)
+# Explicit labelled intentions only. Other fields are not interpreted as preferences.
+INTENT_FIELDS = re.compile(r"(?:求职意向|意向岗位|期望岗位|目标岗位)\s*[:：]\s*([^\n\r；;。]{1,80})", re.I)
+INTENT_DIRECTIONS = (
+    (r"用户体验|交互设计|用户研究|用户洞察|(?<![a-z])ux(?![a-z])",
+     r"用户体验|交互设计|用户研究|用户洞察|人机交互|(?<![a-z])ux(?![a-z])", True),
+    (r"后端|后台开发|服务端", r"后端|后台开发|服务端", False),
+    (r"前端|web前端", r"前端", False),
+    (r"数据分析|数据分析师", r"数据分析", False),
+    (r"产品经理", r"产品经理", False),
+    (r"软件测试|测试工程师", r"软件测试|测试工程师", False),
+)
+
+
+def explicit_intentions(text):
+    values = []
+    for match in INTENT_FIELDS.finditer(text):
+        # A comma may start an unrelated resume section; require subsequent items
+        # to look like short job titles rather than treating experience as intent.
+        parts = re.split(r"[，,、/|]", match.group(1))
+        for index, part in enumerate(parts):
+            value = part.strip()
+            if index and (len(value) > 12 or re.search(r"参与|负责|项目|经验|熟悉|使用|开展", value)):
+                break
+            if value and not re.search(r"不考虑|不希望|不要|不求|非", value):
+                values.append(value)
+    return values
 
 
 def intent_bonus(resume_text, job):
-    if not ux_intent(resume_text):
-        return 0
-    text = job["title"] + " " + job["jd_text"]
-    return 20 if re.search(r"用户体验|交互设计|用户研究|用户洞察|人机交互|(?<![a-z])ux(?![a-z])", text, re.I) else 0
+    intentions = explicit_intentions(resume_text)
+    for intent_pattern, job_pattern, search_jd in INTENT_DIRECTIONS:
+        if any(re.search(intent_pattern, value, re.I) for value in intentions):
+            source = job["title"] + (" " + job["jd_text"] if search_jd else "")
+            if re.search(job_pattern, source, re.I):
+                return 20
+    return 0
 
 
 def base_scores(resume, jobs, recommendation=False):
@@ -125,10 +149,6 @@ class JobMatchService:
         if not candidates:
             fail(404, "NO_RECOMMENDABLE_JOBS", "没有符合意向的岗位，请调整筛选条件")
         jobs = [job.model_dump(mode="json") for job in candidates]
-        if ux_intent(row["text"]):
-            jobs = [job for job in jobs if intent_bonus(row["text"], job)]
-            if not jobs:
-                fail(404, "NO_RECOMMENDABLE_JOBS", "未找到带有用户体验方向线索的岗位，可手动选择岗位")
         scored = await asyncio.to_thread(base_scores, dict(id=row["id"], name="", text=row["text"]), jobs, True)
         return self.create(JobMatchRequest(resume_id=payload.resume_id,
                                            job_ids=[item["job_id"] for item in scored[:30]]),

@@ -332,7 +332,7 @@ function JobDetail({
         ) : <p className="mt-5 text-sm text-ink-500">岗位目录详情暂不可用，请返回目录核对岗位来源。</p>}
 
         {/* 基础评分构成：所有岗位都有，与 AI 诊断的四个维度不是一回事 */}
-        {item.intent_bonus ? <p className="text-xs text-ink-500">明确求职意向与岗位文本关联：基础分加 {item.intent_bonus} 分，仅供参考。</p> : null}
+        {item.intent_bonus ? <p className="text-xs text-ink-500">有限规则识别到求职意向与岗位方向线索：基础分加 {item.intent_bonus} 分，仅供参考。</p> : null}
         {item.subscores.length > 0 ? (
           <div className="mt-5">
             <DimensionBars

@@ -101,6 +101,21 @@ class JobMatchingTests(unittest.TestCase):
         resume["text"] = "求职意向：用户体验设计。"
         self.assertEqual(base_scores(resume, [ux], False)[0]["intent_bonus"], 0)
 
+    def test_supported_intents_multiple_and_job_title_boundaries(self):
+        from app.job_matching import intent_bonus
+        cases = [
+            ("后端开发", "后端开发工程师"), ("前端开发", "前端工程师"),
+            ("数据分析", "数据分析师"), ("产品经理", "产品经理"),
+            ("软件测试", "软件测试工程师"),
+        ]
+        for intention, title in cases:
+            with self.subTest(intention=intention):
+                self.assertEqual(intent_bonus("求职意向：" + intention, {"title": title, "jd_text": ""}), 20)
+                self.assertEqual(intent_bonus("求职意向：" + intention, {"title": "销售", "jd_text": title}), 0)
+        self.assertEqual(intent_bonus("求职意向：前端开发、后端开发。", {"title": "后端工程师", "jd_text": ""}), 20)
+        self.assertEqual(intent_bonus("求职意向：前端开发，参与后端项目。", {"title": "后端工程师", "jd_text": ""}), 0)
+        self.assertEqual(intent_bonus("求职意向：不考虑后端开发。", {"title": "后端工程师", "jd_text": ""}), 0)
+
     def test_catalogue_filters_paging_and_detail(self):
         response = self.client.get("/api/jobs").json()
         self.assertEqual(response["total"], 3)
