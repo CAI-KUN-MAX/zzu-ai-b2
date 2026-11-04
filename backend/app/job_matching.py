@@ -14,7 +14,7 @@ from app.routers.diagnose import MAX_TOTAL_CHARS, MIN_CHARS, SYSTEM_PROMPT
 from app.routers.resumes import fail
 
 logger = logging.getLogger(__name__)
-SCORING_VERSION = "job-ranking-v7"
+SCORING_VERSION = "job-ranking-v8"
 # 单独出现时区分度低；不排除“可用性测试”等具体复合技能。
 GENERIC_JOB_TERMS = frozenset({"原型", "文档", "流程", "测试", "验证"})
 RECOMMENDATION_RESULT_LIMIT = 8
@@ -125,6 +125,10 @@ class JobMatchService:
         if not candidates:
             fail(404, "NO_RECOMMENDABLE_JOBS", "没有符合意向的岗位，请调整筛选条件")
         jobs = [job.model_dump(mode="json") for job in candidates]
+        if ux_intent(row["text"]):
+            jobs = [job for job in jobs if intent_bonus(row["text"], job)]
+            if not jobs:
+                fail(404, "NO_RECOMMENDABLE_JOBS", "未找到带有用户体验方向线索的岗位，可手动选择岗位")
         scored = await asyncio.to_thread(base_scores, dict(id=row["id"], name="", text=row["text"]), jobs, True)
         return self.create(JobMatchRequest(resume_id=payload.resume_id,
                                            job_ids=[item["job_id"] for item in scored[:30]]),

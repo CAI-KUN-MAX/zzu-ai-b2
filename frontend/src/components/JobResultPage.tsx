@@ -17,6 +17,7 @@ import { Highlights } from "./report/Highlights";
 import { Gaps } from "./report/Gaps";
 import { RewriteSuggestions } from "./report/RewriteSuggestions";
 import { InterviewPage } from "./InterviewPage";
+import { readInterviewTips, saveInterviewTips } from "../lib/interviewTips";
 import {
   AlertIcon,
   ArrowLeftIcon,
@@ -661,7 +662,8 @@ export function JobResultPage({
   const [loadedJobs, setLoadedJobs] = useState<Record<string, Job>>({});
   const restartInFlight = useRef(false);
   const [interview, setInterview] = useState<InterviewTarget | null>(null);
-  const [interviewTips, setInterviewTips] = useState<Record<string, string[]>>({});
+  const [interviewTips, setInterviewTips] = useState<Record<string, string[]>>(() => readInterviewTips(taskId, resumeId));
+  useEffect(() => setInterviewTips(readInterviewTips(taskId, resumeId)), [taskId, resumeId]);
   const resultScrollY = useRef(0);
   const interviewing = interviewOpen && interview !== null;
 
@@ -828,7 +830,11 @@ export function JobResultPage({
         jdText={interview.request.jd_text}
         jobTitle={interview.title}
         onExit={(tips) => {
-          if (tips && interview) setInterviewTips((previous) => ({ ...previous, [interview.jobId]: tips }));
+          if (tips && interview) setInterviewTips((previous) => {
+            const next = { ...previous, [interview.jobId]: tips };
+            saveInterviewTips(taskId, resumeId, next);
+            return next;
+          });
           onInterviewOpenChange(false);
         }}
       />
@@ -841,14 +847,14 @@ export function JobResultPage({
           <p>
             {resumeName} ·{" "}
             {mode === "recommend"
-              ? `为你推荐 ${items.length} 个岗位，请以招聘来源核对状态`
+              ? `为你推荐 ${items.length} 个岗位；匹配结果可能遗漏相关岗位，请以招聘来源核对状态`
               : `${items.length} 个岗位按匹配分排序`}
           </p>
         </div>
         <button type="button" className="picker-last" onClick={onReset}>← 重新选择岗位</button>
       </div>
       {detailJob && interviewTips[detailJob.job_id]?.length ? <section className="picker-panel" aria-label="面试后的简历核对提示">
-        <h2>面试后的简历核对提示</h2><p>你已确认以下提示适用于该岗位且符合真实经历；请自行决定如何修改简历。离开结果页后不会保存。</p>
+        <h2>面试后的简历核对提示</h2><p>你已确认以下提示适用于该岗位且符合真实经历；请自行决定如何修改简历。保存在当前浏览器标签页，关闭标签页后清除。</p>
         <ul>{interviewTips[detailJob.job_id].map((tip, index) => <li key={index}>{tip}</li>)}</ul>
       </section> : null}
       <EmbeddingNotice status={task?.embedding_status} error={task?.embedding_error} />

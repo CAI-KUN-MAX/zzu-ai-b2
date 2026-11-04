@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from app.job_matching import JobMatchService
+from fastapi import HTTPException
 
 
 class RecommendationCandidatesTests(unittest.TestCase):
@@ -32,6 +33,24 @@ class RecommendationCandidatesTests(unittest.TestCase):
             self.assertEqual(result["items"][0]["job_id"], "job-11")
             self.assertEqual(len(result["items"]), 8)
         asyncio.run(check())
+
+    def test_explicit_ux_intent_excludes_unrelated_and_no_match_is_honest(self):
+        repository = MagicMock()
+        repository.resume.return_value = {"id": "r", "status": "ready", "text": "本科。求职意向：用户体验设计。"}
+        jobs = [dict(job_id="ux", title="用户洞察岗", education="本科", jd_text="负责用户研究。"),
+                dict(job_id="embedded", title="嵌入式工程师", education="本科", jd_text="负责嵌入式软件开发。")]
+        repository.recommendation_candidates.return_value = [
+            SimpleNamespace(model_dump=lambda job=job, **kwargs: job) for job in jobs]
+        service = JobMatchService(repository, None)
+        service.create = MagicMock(return_value={"task_id": "t"})
+        payload = SimpleNamespace(resume_id="r", category=None, city=None)
+        self.assertEqual(asyncio.run(service.recommend(payload)), {"task_id": "t"})
+        self.assertEqual(service.create.call_args.args[0].job_ids, ["ux"])
+        repository.recommendation_candidates.return_value = repository.recommendation_candidates.return_value[1:]
+        with self.assertRaises(HTTPException) as error:
+            asyncio.run(service.recommend(payload))
+        self.assertEqual(error.exception.status_code, 404)
+        self.assertEqual(service.create.call_count, 1)
 
     def test_larger_candidate_pool_and_top_eight_response(self):
         repository = MagicMock()

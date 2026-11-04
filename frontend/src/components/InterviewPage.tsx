@@ -609,7 +609,7 @@ export function InterviewPage({
               {report ? (
                 <div className="mt-4 rounded-xl bg-surface-soft/80 px-4 py-3 text-[12px] leading-relaxed text-ink-700">
                   <p>{report.confirmation_notice}</p>
-                  <p className="mt-1">勾选后返回结果页可查看；刷新或离开结果页后清除，不会自动修改简历。</p>
+                  <p className="mt-1">勾选后返回结果页可查看，保存在当前浏览器标签页；关闭标签页后清除，不会自动修改简历。</p>
                   <details className="mt-2">
                     <summary className="cursor-pointer font-medium">查看本次面试的岗位要求</summary>
                     <p className="mt-2 whitespace-pre-wrap">{report.jd_text}</p>
