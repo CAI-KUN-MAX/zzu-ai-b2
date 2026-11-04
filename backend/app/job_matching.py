@@ -14,6 +14,7 @@ from app.routers.resumes import fail
 
 logger = logging.getLogger(__name__)
 SCORING_VERSION = "job-ranking-v5"
+RECOMMENDATION_RESULT_LIMIT = 8
 ITEM_TIMEOUT = 90
 TOTAL_TIMEOUT = 165
 
@@ -78,6 +79,7 @@ class JobMatchService:
         # Snapshots are deliberately stored, unlike the older HR-facing match task.
         snapshot = dict(owner=owner, resume_id=row["id"], resume_text=row["text"], jobs=jobs,
                         recommendation=recommendation,
+                        **({"recommendation_result_limit": RECOMMENDATION_RESULT_LIMIT} if recommendation else {}),
                         scoring_version=SCORING_VERSION, prompt_version=matching.PROMPT_VERSION,
                         system_prompt_hash=hashlib.sha256(SYSTEM_PROMPT.encode()).hexdigest(),
                         top_k=max(0, min(8, int(os.getenv("MATCH_LLM_TOP_K", "8")))),
@@ -125,7 +127,7 @@ class JobMatchService:
                     embedding_error=snapshot.get("embedding_error"),
                     error=error.get("message") if isinstance(error, dict) else error,
                     error_code=error.get("code") if isinstance(error, dict) else None,
-                    items=items[:8] if snapshot.get("recommendation") else items)
+                    items=items[:RECOMMENDATION_RESULT_LIMIT] if snapshot.get("recommendation") else items)
 
     def context(self, identifier, job_id):
         snapshot = json.loads(self.task(identifier)["payload"])
@@ -155,7 +157,6 @@ class JobMatchService:
                     row = dict(id=snapshot["resume_id"], name="", text=snapshot["resume_text"])
                     items = await asyncio.to_thread(base_scores, row, snapshot["jobs"])
                     jobs_by_id = {job["job_id"]: job for job in snapshot["jobs"]}
-                    await asyncio.to_thread(add_skill_assessments, items, row["text"], jobs_by_id)
                     embedding_status = "disabled"
                     embedding_error = None
                     if snapshot.get("embedding_enabled"):
@@ -172,6 +173,9 @@ class JobMatchService:
                     payload = {**json.loads(self.repository.task(identifier)["payload"]),
                                "embedding_status": embedding_status, "embedding_error": embedding_error}
                     self.repository.update(identifier, payload=payload)
+                    if snapshot.get("recommendation_result_limit"):
+                        items = items[:snapshot["recommendation_result_limit"]]
+                    await asyncio.to_thread(add_skill_assessments, items, row["text"], jobs_by_id)
                     by_id = jobs_by_id
                     top_k = snapshot["top_k"]
                     selected = items[:top_k]
