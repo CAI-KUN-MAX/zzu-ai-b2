@@ -256,3 +256,10 @@
 .offer-account-user button { flex-shrink:0; color:#6d7990; font-size:11px; }
 .offer-account-user button:hover { color:#a53b52; }
 .offer-account-note { margin-top:8px; color:#8490a2; font-size:10px; line-height:1.6; }
+.offer-mobile-account { display:none; }
+@media(max-width:760px) {
+  .offer-topbar-desktop { display:none; }
+  .offer-mobile-account { display:flex; align-items:center; gap:10px; min-width:0; color:#4b65c8; font-size:12px; }
+  .offer-mobile-account span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .offer-mobile-account button { flex-shrink:0; padding:8px 10px; border:1px solid #ffffffb8; border-radius:12px; background:#ffffff9e; }
+}

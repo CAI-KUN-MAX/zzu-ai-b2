@@ -1,12 +1,15 @@
 import { ApiError, request } from "./http";
 
-/**
- * 登录相关接口。后端尚未实现时这些请求会返回 404/501，
- * 这里不做任何 mock，让页面如实提示"服务暂未开放"。
- */
-
 export interface AuthUser {
+  id: string;
   username: string;
+}
+
+function parseUser(value: unknown): AuthUser | null {
+  if (!value || typeof value !== "object") return null;
+  const user = value as Partial<AuthUser>;
+  return typeof user.id === "string" && user.id && typeof user.username === "string" && user.username
+    ? { id: user.id, username: user.username } : null;
 }
 
 /** 用户名：4–20 位英文字母、数字或下划线，提交前按小写处理 */
@@ -21,9 +24,11 @@ export function normalizeUsername(raw: string): string {
 /** 返回 null 表示确实未登录；网络或服务异常一律抛出，交给页面重试 */
 export async function fetchMe(): Promise<AuthUser | null> {
   try {
-    const data = await request<{ username?: string }>("/api/auth/me", { method: "GET" });
-    const username = typeof data?.username === "string" ? data.username.trim() : "";
-    return username ? { username } : null;
+    const data = await request<{ authenticated: boolean; user: unknown }>("/api/auth/me", { method: "GET" });
+    if (data.authenticated === false && data.user === null) return null;
+    const user = parseUser(data.user);
+    if (data.authenticated === true && user) return user;
+    throw new ApiError("身份服务返回的数据不完整", "AUTH_BAD_RESPONSE");
   } catch (err) {
     // 401/403 才是"没登录"，其他错误不能当成未登录
     if (err instanceof ApiError && (err.status === 401 || err.status === 403)) return null;
@@ -32,16 +37,16 @@ export async function fetchMe(): Promise<AuthUser | null> {
 }
 
 async function postAuth(path: string, payload: Record<string, unknown>): Promise<AuthUser> {
-  const data = await request<{ username?: string }>(path, {
+  const data = await request<{ user: unknown }>(path, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  const username = typeof data?.username === "string" ? data.username.trim() : "";
-  if (!username) {
+  const user = parseUser(data.user);
+  if (!user) {
     throw new ApiError("登录服务返回的数据不完整", "AUTH_BAD_RESPONSE");
   }
-  return { username };
+  return user;
 }
 
 export function login(username: string, password: string): Promise<AuthUser> {
