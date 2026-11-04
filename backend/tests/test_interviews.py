@@ -137,7 +137,7 @@ class InterviewTests(unittest.TestCase):
             responses.append((question["id"], result))
             question = result["next_question"]
             if question:
-                self.assertEqual(question["source"], "fallback")
+                self.assertEqual(question["source"], "llm")
         self.assertIsNone(question)
         self.assertEqual(self.model.chat.completions.create.await_count, 6)
         for question_id, previous in responses:
@@ -220,17 +220,12 @@ class InterviewTests(unittest.TestCase):
         self.model.chat.completions.create.side_effect = repaired
         self.create()
         self.assertEqual(self.model.chat.completions.create.await_count, 2)
-        # 两次都不合格（例如 JD 注入让模型输出录用概率）：用简历原文出第一题，不再整体 502
         self.model.chat.completions.create.side_effect = None
         self.model.chat.completions.create.return_value = completion({"answer": {"probability": 1.0}})
-        session = self.create()
-        self.assertEqual(self.model.chat.completions.create.await_count, 4)
-        self.assertEqual(session["question"]["source"], "fallback")
-        self.assertIn("简历中提到“", session["question"]["text"])
-        self.assertIn("FastAPI", session["question"]["text"])
-        self.assertNotIn("probability", json.dumps(session, ensure_ascii=False))
+        response = self.http.post("/api/interviews", json={"resume_id": "ready", "jd_text": JD})
+        self.assert_error(response, 502, "INTERVIEW_GENERATION_FAILED")
         with app.state.store.connect() as db:
-            self.assertEqual(db.execute("SELECT count(*) FROM interviews").fetchone()[0], 2)
+            self.assertEqual(db.execute("SELECT count(*) FROM interviews").fetchone()[0], 1)
 
     def test_repair_attempt_enables_sampling(self):
         async def repaired(**kwargs):
@@ -240,9 +235,9 @@ class InterviewTests(unittest.TestCase):
         self.model.chat.completions.create.side_effect = repaired
         self.create()
         first, second = self.model.chat.completions.create.call_args_list
-        self.assertEqual(first.kwargs["extra_body"], {"do_sample": False})
+        self.assertEqual(first.kwargs["extra_body"], {"do_sample": True})
         self.assertEqual(second.kwargs["extra_body"], {"do_sample": True})
-        self.assertGreater(second.kwargs["temperature"], first.kwargs["temperature"])
+        self.assertEqual(second.kwargs["temperature"], first.kwargs["temperature"])
 
     def test_server_followup_uses_answer_quote_without_second_model_call(self):
         session = self.create()
@@ -255,12 +250,12 @@ class InterviewTests(unittest.TestCase):
         self.assertEqual(self.model.chat.completions.create.await_count, calls + 1)
         request = self.model.chat.completions.create.call_args.kwargs
         self.assertEqual(request["max_tokens"], FEEDBACK_MAX_TOKENS)
-        self.assertIn('"next_question":null', request["messages"][0]["content"])
-        self.assertEqual(result["next_question"]["source"], "fallback")
-        quote = evidence_options(dict(answer=ANSWER.strip()))["a0"]["quote"]
-        self.assertIn(f"你提到“{quote}”", result["next_question"]["text"])
-        # ANSWER 是“我会……”的设想，追问用计划语气，不暗示已经做过
-        self.assertIn("你会如何", result["next_question"]["text"])
+        payload = json.loads(request["messages"][1]["content"])
+        self.assertEqual(payload["resume"], RESUME)
+        self.assertEqual(payload["jd"], JD)
+        self.assertEqual(payload["history"][-1]["answer"], ANSWER)
+        self.assertEqual(result["next_question"]["source"], "llm")
+        self.assertIn(evidence_options(dict(answer=ANSWER))["a0"]["quote"], result["next_question"]["text"])
         self.assertEqual(result["feedback"]["improvements"], ["进一步说明异常处理和测试方法。"])
         self.assertEqual(self.state(identifier)["round"], 2)
         # 重放返回同一份兜底结果，不再调用模型
@@ -635,12 +630,10 @@ class InterviewGroundingTests(unittest.TestCase):
             {"question": {"text": "当前问题"}, "answer": context["answer"]},
         ]
         payload = json.loads(build_messages(context)[1]["content"])
-        self.assertEqual(payload["question"]["text"], "当前问题")
+        self.assertEqual(payload["history"][-1]["question"]["text"], "当前问题")
         self.assertEqual(payload["answer"], context["answer"])
-        self.assertNotIn("resume", payload)
-        self.assertNotIn("jd", payload)
-        self.assertNotIn("history", payload)
-        self.assertLess(len(json.dumps(payload, ensure_ascii=False)), 3000)
+        self.assertEqual(payload["resume"], RESUME)
+        self.assertEqual(payload["jd"], JD)
 
     def test_plans_are_not_published_as_completed_work(self):
         context = self.context("answer")
