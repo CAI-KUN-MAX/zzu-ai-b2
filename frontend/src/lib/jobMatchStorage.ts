@@ -43,12 +43,30 @@ const CLOCK_SKEW_MS = 60 * 1000;
 const RESUME_STATUSES: ResumeStatus[] = ["ready", "need_review", "failed"];
 
 /**
+ * 本地记录按身份隔离：游客沿用历史 key（老数据不丢），登录后用账号前缀单独存一份，
+ * 这样切换账号不会看到别人的简历和匹配记录。
+ */
+let storageScope = "guest";
+
+export function setStorageScope(scope: string) {
+  storageScope = scope && scope !== "guest" ? scope : "guest";
+}
+
+export function getStorageScope(): string {
+  return storageScope;
+}
+
+function scopedKey(key: string): string {
+  return storageScope === "guest" ? key : `zzu.${storageScope}.${key}`;
+}
+
+/**
  * 区分「没有记录」和「有记录但解析失败」：
  * 后者必须被清理，否则坏数据会一直留在本地，每次进来都要解析一次。
  */
 function readRaw(key: string): { exists: boolean; value: unknown } {
   try {
-    const raw = window.localStorage.getItem(key);
+    const raw = window.localStorage.getItem(scopedKey(key));
     if (raw === null) return { exists: false, value: null };
     return { exists: true, value: JSON.parse(raw) };
   } catch {
@@ -63,8 +81,8 @@ function read<T>(key: string): T | null {
 
 function write(key: string, value: unknown) {
   try {
-    if (value === null) window.localStorage.removeItem(key);
-    else window.localStorage.setItem(key, JSON.stringify(value));
+    if (value === null) window.localStorage.removeItem(scopedKey(key));
+    else window.localStorage.setItem(scopedKey(key), JSON.stringify(value));
   } catch {
     // 存不了就只在内存里保留，不影响主流程
   }

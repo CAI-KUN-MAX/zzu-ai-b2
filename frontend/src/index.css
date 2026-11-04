@@ -233,3 +233,26 @@
   .picker-select { flex:1 1 0; min-width:0; }
   .picker-select select { width:100%; max-width:none; }
 }
+
+/* 登录 / 注册弹窗 */
+.auth-tabs { display:flex; gap:6px; padding:4px; border-radius:13px; background:#eef2f9; margin-bottom:18px; }
+.auth-tabs button { flex:1; padding:8px; border-radius:10px; font-size:13px; color:#5b6880; transition:background .15s,color .15s; }
+.auth-tabs button.active { background:#fff; color:#28344a; font-weight:600; box-shadow:0 2px 8px #283c5a1a; }
+.auth-field { display:block; margin-top:14px; }
+.auth-field > span { display:block; margin-bottom:6px; font-size:12px; color:#5b6880; }
+.auth-field input { width:100%; padding:10px 12px; border:1px solid #e2e8f0; border-radius:11px; font-size:13px; color:#28344a; outline:none; background:#fff; transition:border-color .15s,box-shadow .15s; }
+.auth-field input::placeholder { color:#a8b2c1; }
+.auth-field input:focus { border-color:#93a9f5; box-shadow:0 0 0 3px #8fa6f826; }
+.auth-field input:disabled { background:#f7f9fc; color:#8a97ab; }
+.auth-error { margin-top:12px; padding:9px 12px; border:1px solid #f2c8d2; border-radius:11px; background:#fdf1f4; color:#a53b52; font-size:12px; line-height:1.6; }
+.auth-note { margin-top:14px; color:#7a879b; font-size:11px; line-height:1.75; }
+
+/* 侧栏底部身份区 */
+.offer-account { margin-top:auto; padding-top:14px; }
+.offer-account-btn { display:flex; align-items:center; gap:8px; width:100%; padding:9px 11px; border:1px solid #ffffffb8; border-radius:13px; background:#ffffff9e; color:#4b65c8; font-size:12px; font-weight:500; }
+.offer-account-btn:hover { background:#fff; }
+.offer-account-user { display:flex; align-items:center; gap:8px; width:100%; padding:8px 10px; border:1px solid #ffffffb8; border-radius:13px; background:#ffffff9e; }
+.offer-account-user strong { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; font-weight:500; color:#28344a; }
+.offer-account-user button { flex-shrink:0; color:#6d7990; font-size:11px; }
+.offer-account-user button:hover { color:#a53b52; }
+.offer-account-note { margin-top:8px; color:#8490a2; font-size:10px; line-height:1.6; }
