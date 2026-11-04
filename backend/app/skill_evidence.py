@@ -16,14 +16,18 @@ SKILLS = {
     "PostgreSQL": ("PostgreSQL",), "SQL": ("SQL",), "Git": ("Git",),
     "Linux": ("Linux",), "Spark": ("Spark",), "Excel": ("Excel",),
     "Pandas": ("Pandas",), "PyTorch": ("PyTorch",), "TensorFlow": ("TensorFlow",),
-    "PCR": ("PCR", "聚合酶链式反应"), "用户访谈": ("用户访谈", "user interview"),
+    "PCR": ("PCR", "聚合酶链式反应"), "用户访谈": ("用户访谈", "user interview", "user interviews"),
+    "Figma": ("Figma",), "Axure": ("Axure",),
+    "用户研究": ("用户研究", "user research"),
+    "可用性测试": ("可用性测试", "usability testing", "usability test"),
+    "用户洞察": ("用户洞察",), "交互设计": ("交互设计", "interaction design"),
     "有限元分析": ("有限元分析", "finite element analysis"),
 }
 SENTENCE = re.compile(r"[^\n。；;！？!?]+")
 SECTION_END = re.compile(r"^\s*(?:专业技能|技能清单|教育经历|自我评价|获奖经历|个人信息)\s*[:：]?\s*$")
 PROJECT_SECTION = re.compile(r"^\s*(?:项目经历|实习经历|工作经历|项目经验|实习经验)\s*[:：]?\s*$")
-PRACTICE = re.compile(r"使用|采用|运用|基于|利用|负责|参与|搭建|开发|设计|实现|部署|优化|构建|完成|used|built|developed|implemented|deployed", re.I)
-TASK = re.compile(r"项目|系统|服务|平台|接口|功能|模块|数据|数据库|应用|实验|测试|分析|报告|流程|project|service|application|system|feature|data|test", re.I)
+PRACTICE = re.compile(r"使用|采用|运用|基于|利用|负责|参与|开展|进行|搭建|开发|设计|实现|部署|优化|构建|完成|used|built|developed|implemented|deployed|conducted", re.I)
+TASK = re.compile(r"项目|系统|服务|平台|接口|功能|模块|数据|数据库|应用|实验|测试|分析|报告|流程|访谈|研究|原型|交互|洞察|project|service|application|system|feature|data|test|interview|research|prototype", re.I)
 NEGATION = re.compile(r"没有|缺乏|缺少|不会|未使用|未接触|未掌握|不熟悉|不掌握|无相关|无经验|尚未|不了解|没有实践|无实践|not\s+(?:used|experienced|familiar)|no\s+experience", re.I)
 WEAK = re.compile(r"了解|学习|接触|入门|听说|理论|计划|将要|拟使用|学习中|待学习|无实践|缺少实践|缺乏实践|未实践|未使用|未接触", re.I)
 

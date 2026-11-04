@@ -179,7 +179,7 @@ function JobDetail({
               </div>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-medium text-ink-500">能力缺口</p>
+              <p className="text-[11px] font-medium text-ink-500">未命中关键词</p>
               <div className="mt-1 flex flex-wrap gap-1">
                 {item.missing.length > 0 ? (
                   item.missing.map((keyword) => <Chip key={keyword} text={keyword} tone="miss" />)
@@ -189,6 +189,22 @@ function JobDetail({
               </div>
             </div>
           </div>
+
+          {item.skill_assessments && item.skill_assessments.length > 0 ? (
+            <section className="mt-4 rounded-xl bg-surface-soft/70 p-3.5" aria-label="技能证据">
+              <h2 className="text-sm font-semibold text-ink-700">技能证据</h2>
+              <p className="mt-1 text-xs text-ink-500">基于已提取文本的有限词汇识别，未找到不代表不会，请结合原文核对。</p>
+              <ul className="mt-3 space-y-3">
+                {item.skill_assessments.map((skill) => (
+                  <li key={skill.skill_name} className="text-xs text-ink-700">
+                    <p className="font-semibold">{skill.skill_name}：{skill.assessment}</p>
+                    <p className="mt-1 whitespace-pre-wrap">岗位要求：{skill.jd_evidence}</p>
+                    <p className="mt-1 whitespace-pre-wrap">简历原文：{skill.resume_evidence.length ? skill.resume_evidence.join("；") : "已提取文本中未找到"}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
 
           <button
             type="button"
@@ -375,7 +391,7 @@ function JobDetail({
             <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             <span>
               这个岗位没有 AI 深度诊断
-              {item.degraded_reason ? `：${DEGRADED_REASON[item.degraded_reason].detail}` : ""}。总分即基础分，命中与缺口已列在上方。
+              {item.degraded_reason ? `：${DEGRADED_REASON[item.degraded_reason].detail}` : ""}。总分即基础分，关键词命中情况已列在上方。
             </span>
           </p>
         )}

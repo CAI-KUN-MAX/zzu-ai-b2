@@ -16,11 +16,10 @@ from app.interview_schemas import (AnswerDraft, Feedback, FirstQuestionDraft, In
 logger = logging.getLogger(__name__)
 TOTAL_TIMEOUT = 75
 CALL_TIMEOUT = 50
-# 第一题只需一个短问题；回答轮只让模型生成短反馈，下一题由服务器即时生成。
-# 相比原来每轮最多生成 2400 token 的「反馈 + 追问」，显著缩短模型输出时间。
+# 限制模型输出长度，首题和后续追问均由模型生成。
 CREATE_MAX_TOKENS = 600
 FEEDBACK_MAX_TOKENS = 900
-# 第一次关闭采样，结果稳定；修复重试开启采样，否则同一输入每次得到同一份不合格输出，用户怎么重试都会失败
+# 开启采样以增加同一份简历和岗位重复练习时的变化。
 REPAIR_TEMPERATURE = 0.7
 MAX_CONTEXT_CHARS = 20000
 TTL_SECONDS = 24 * 60 * 60
@@ -58,11 +57,10 @@ improvements 是具体可执行的改进建议；reference_points 是建议回�
 CREATE_FORMAT = """服务器阶段要求：本次生成第一题，只返回如下结构：
 {"question":{"text":"一道问题","focus":"考察点","evidence_refs":["j0"]}}
 """
-ANSWER_FORMAT = """服务器阶段要求：本次只生成本轮反馈，下一题由服务器依据回答原文生成。
-next_question 固定返回 JSON null，不要生成追问。只返回：
+ANSWER_FORMAT = """服务器阶段要求：生成本轮反馈和下一道面试问题。结合完整岗位 JD、简历和面试历史，像面试官一样追问回答中的具体内容，考察岗位相关能力，避免重复。只返回：
 {"feedback":{"reference_points":["建议覆盖的要点"],
 "strengths":[{"text":"有原文依据的优点","answer_ref":"a0"}],"improvements":["建议"]},
-"next_question":null}
+"next_question":{"text":"与回答相关的追问","focus":"考察点","evidence_refs":["a0","j0"]}}
 """
 FINAL_FORMAT = """服务器阶段要求：这是第五轮也是最后一轮。本次只生成反馈，绝对不要继续出题。
 next_question 必须为 JSON null。不要因为全局提问规则生成第六题。只返回如下结构：
@@ -119,15 +117,7 @@ def build_messages(context):
     if hypothetical_answer(context):
         phase += "\n本轮回答主要描述设想。只评价所描述的思路，不将其写成已经实施的成果，追问使用‘你会如何’或‘你计划’措辞。"
     options = evidence_options(context)
-    # 回答阶段只需评价当前回答。整份简历、完整 JD 和历史轮次会显著放大输入，
-    # 且下一题已经改由服务器生成；只发送当前问题、回答和有限证据片段即可。
-    payload = ({**context, "evidence_options": options} if context["action"] == "create" else {
-        "action": "answer",
-        "round": context["round"],
-        "question": context["history"][-1]["question"],
-        "answer": context["answer"],
-        "evidence_options": options,
-    })
+    payload = {**context, "evidence_options": options}
     return [{"role": "system", "content": SYSTEM_PROMPT + "\n" + phase},
             {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}]
 
@@ -243,7 +233,7 @@ def parse_output(raw, context):
     question = draft.question if context["action"] == "create" else draft.next_question
 
     def reject(check):
-        # 反馈已校验完毕时带上 draft，便于服务端兜底生成追问而不是整轮失败
+        # 反馈已校验完毕，保留草稿用于识别追问校验错误。
         if context["action"] == "answer":
             raise QuestionRejected(check, draft)
         raise ValueError(check)
@@ -394,24 +384,15 @@ class InterviewService:
                             check_context(messages)
                             response = await client.chat.completions.create(
                                 model=model, messages=messages, response_format={"type": "json_object"},
-                                temperature=REPAIR_TEMPERATURE if attempt else .2,
+                                temperature=REPAIR_TEMPERATURE,
                                 max_tokens=(CREATE_MAX_TOKENS if context["action"] == "create"
                                             else FEEDBACK_MAX_TOKENS),
-                                extra_body={"do_sample": bool(attempt)})
+                                extra_body={"do_sample": True})
                             try:
                                 if not response.choices or response.choices[0].finish_reason != "stop":
                                     raise ValueError("incomplete_output")
-                                # 回答轮的模型只负责反馈。按最终轮规则解析会强制 next_question=null，
-                                # 随后由服务器基于本轮回答原文生成追问，避免追问校验失败再调用一次模型。
-                                parse_context = ({**context, "round": MAX_ROUNDS}
-                                                 if context["action"] == "answer" else context)
-                                result = parse_output(response.choices[0].message.content, parse_context)
+                                result = parse_output(response.choices[0].message.content, context)
                                 source = "llm"
-                                if context["action"] == "answer" and context["round"] < MAX_ROUNDS:
-                                    result = fallback_question(context, result)
-                                    if result is None:
-                                        raise ValueError("invalid_next_question")
-                                    source = "fallback"
                                 logger.info("interview request_id=%s category=success elapsed_ms=%s", request_id,
                                             int((time.monotonic() - started) * 1000))
                                 return result, source
@@ -440,19 +421,6 @@ class InterviewService:
                                         logger.warning("interview request_id=%s category=schema_detail field=%s type=%s",
                                                        request_id, field or "root", kind)
                                 if attempt:
-                                    if context["action"] == "create":
-                                        fallback = fallback_first_question(context)
-                                        if fallback is not None:
-                                            logger.info("interview request_id=%s category=fallback_first_question check=%s",
-                                                        request_id, check)
-                                            return fallback, "fallback"
-                                    # 只有追问不合格：保留已校验的反馈，用本轮回答原文拼追问，轮次照常推进
-                                    if isinstance(validation_error, QuestionRejected):
-                                        fallback = fallback_question(context, validation_error.draft)
-                                        if fallback is not None:
-                                            logger.info("interview request_id=%s category=fallback_question check=%s",
-                                                        request_id, check)
-                                            return fallback, "fallback"
                                     fail(502, "INTERVIEW_GENERATION_FAILED", "面试内容生成失败，请重试；本轮尚未推进")
                                 feedback = {
                                     "invalid_next_question": "第五轮 next_question 必须为 null，前四轮必须有下一题。",
