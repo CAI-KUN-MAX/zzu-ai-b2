@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 
 from docx import Document
-from fastapi.testclient import TestClient
+from fixture_client import CsrfClient as TestClient
 from app.main import app
 
 
@@ -43,7 +43,7 @@ class GuestAccessTests(unittest.TestCase):
                 self.assertEqual(stranger.get("/api/job-matches/" + recommendation.json()["task_id"]).status_code, 404)
                 duplicate = stranger.post("/api/resumes/batch", files={"files": ("copy.docx", content)})
                 self.assertEqual(duplicate.status_code, 202)
-                self.assertEqual(stranger.get(f"/api/resumes/{resume_id}/text").status_code, 200)
+                self.assertEqual(stranger.get(f"/api/resumes/{resume_id}/text").status_code, 404)
                 self.assertEqual(stranger.get("/api/tasks/" + task_id).status_code, 404)
                 self.assertEqual(owner.get("/api/tasks/guest:" + stranger.cookies.get("resume_guest")).status_code, 404)
                 jobs = owner.get("/api/jobs?page_size=1").json()["items"]

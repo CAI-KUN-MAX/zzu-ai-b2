@@ -186,6 +186,20 @@ class Store:
             """)
             if "low_conf" not in {row[1] for row in db.execute("PRAGMA table_info(resumes)")}:
                 db.execute("ALTER TABLE resumes ADD COLUMN low_conf INTEGER NOT NULL DEFAULT 0")
+            if "owner" not in {row[1] for row in db.execute("PRAGMA table_info(resumes)")}:
+                # Rebuild to remove the legacy global UNIQUE constraint on sha256.
+                db.execute("BEGIN IMMEDIATE")
+                db.execute("ALTER TABLE resumes RENAME TO resumes_legacy")
+                db.execute("""CREATE TABLE resumes (
+                    id TEXT PRIMARY KEY, name TEXT NOT NULL, sha256 TEXT NOT NULL,
+                    file_path TEXT NOT NULL, source TEXT NOT NULL, text TEXT NOT NULL DEFAULT '',
+                    chars INTEGER DEFAULT 0, pages INTEGER DEFAULT 0, provider TEXT DEFAULT '',
+                    elapsed_ms INTEGER DEFAULT 0, status TEXT NOT NULL DEFAULT 'parsing',
+                    error TEXT, created_at TEXT NOT NULL, low_conf INTEGER NOT NULL DEFAULT 0,
+                    owner TEXT)""")
+                db.execute("INSERT INTO resumes (id,name,sha256,file_path,source,text,chars,pages,provider,elapsed_ms,status,error,created_at,low_conf) SELECT id,name,sha256,file_path,source,text,chars,pages,provider,elapsed_ms,status,error,created_at,low_conf FROM resumes_legacy")
+                db.execute("DROP TABLE resumes_legacy")
+            db.execute("CREATE INDEX IF NOT EXISTS resumes_owner_hash ON resumes(owner,sha256)")
         self.interrupt()
 
     def interrupt(self):
@@ -223,13 +237,17 @@ class Store:
                        "ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,updated_at=excluded.updated_at",
                        (identifier, payload, now(), now()))
 
-    def enqueue(self, uploads):
-        """Files are validated before this transaction; identical bytes share one row."""
+    def enqueue(self, uploads, owner):
+        """Deduplicate only within the current identity, including its legacy grants."""
         task_id = uuid.uuid4().hex
         ids = []
         with self.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            acl = db.execute("SELECT payload FROM tasks WHERE id=? AND kind='guest_acl'", (owner,)).fetchone()
+            owned = set(json.loads(acl["payload"]).get("resources", [])) if acl else set()
             for upload in uploads:
-                existing = db.execute("SELECT id,status FROM resumes WHERE sha256=?", (upload["sha256"],)).fetchone()
+                candidates = db.execute("SELECT id,status,owner FROM resumes WHERE sha256=?", (upload["sha256"],)).fetchall()
+                existing = next ( (row for row in candidates if row["owner"] == owner or (row["owner"] is None and row["id"] in owned)), None)
                 if existing:
                     resume_id = existing["id"]
                     # Failed rows may be retried after OCR is enabled or service restarts.
@@ -237,15 +255,21 @@ class Store:
                         db.execute("UPDATE resumes SET status='parsing',error=NULL WHERE id=?", (resume_id,))
                 else:
                     resume_id = uuid.uuid4().hex
-                    final = self.directory / "uploads" / upload["sha256"]
+                    final = self.directory / "uploads" / resume_id
                     upload["path"].replace(final)
-                    db.execute("INSERT INTO resumes (id,name,sha256,file_path,source,created_at) VALUES (?,?,?,?,?,?)",
-                               (resume_id, upload["name"], upload["sha256"], str(final), upload["kind"], now()))
+                    db.execute("INSERT INTO resumes (id,name,sha256,file_path,source,created_at,owner) VALUES (?,?,?,?,?,?,?)",
+                               (resume_id, upload["name"], upload["sha256"], str(final), upload["kind"], now(), owner))
                 if resume_id not in ids:
                     ids.append(resume_id)
             db.execute("INSERT INTO tasks (id,kind,status,stage,payload,created_at,updated_at) "
                        "VALUES (?,'ingest','queued','等待解析',?,?,?)",
                        (task_id, json.dumps({"resume_ids": ids}), now(), now()))
+            owned.update(ids)
+            owned.add(task_id)
+            acl_payload = json.dumps({"resources": sorted(owned)})
+            db.execute("INSERT INTO tasks (id,kind,status,payload,created_at,updated_at) VALUES (?,'guest_acl','succeeded',?,?,?) "
+                       "ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,updated_at=excluded.updated_at",
+                       (owner, acl_payload, now(), now()))
         return task_id
 
 

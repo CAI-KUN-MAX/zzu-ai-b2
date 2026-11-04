@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from fastapi.testclient import TestClient as UnprivilegedClient
+from fixture_client import CsrfClient as UnprivilegedClient
 
 from app.interview_schemas import InterviewAnswer, InterviewAnswerResult, InterviewSession
 from app.interviews import (FEEDBACK_MAX_TOKENS, InterviewService, SYSTEM_PROMPT, build_messages,

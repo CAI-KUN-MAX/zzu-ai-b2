@@ -60,7 +60,7 @@ async def upload_batch(
                 fail(400, "INVALID_INPUT", "不能上传空文件")
             kind = await asyncio.to_thread(detect_type, path)
             uploads.append(dict(name=name, sha256=digest.hexdigest(), path=path, kind=kind))
-        identifier = request.app.state.store.enqueue(uploads)
+        identifier = request.app.state.store.enqueue(uploads, request.state.owner)
         request.app.state.ingest_jobs.submit(identifier)
         return {"task_id": identifier}
     except IngestError as exc:

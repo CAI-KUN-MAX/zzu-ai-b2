@@ -31,12 +31,12 @@ async def get_job(job_id: str, request: Request):
 
 @router.post("/api/job-matches", status_code=202, response_model=TaskCreated)
 async def create_job_match(payload: JobMatchRequest, request: Request):
-    return request.app.state.job_matches.create(payload)
+    return request.app.state.job_matches.create(payload, owner=request.state.owner)
 
 
 @router.post("/api/job-recommendations", status_code=202, response_model=TaskCreated)
 async def recommend_jobs(payload: JobRecommendationRequest, request: Request):
-    return await request.app.state.job_matches.recommend(payload)
+    return await request.app.state.job_matches.recommend(payload, owner=request.state.owner)
 
 
 @router.get("/api/job-matches/{task_id}", response_model=JobMatchTask, response_model_exclude_unset=True)

@@ -6,7 +6,19 @@ import re
 from fastapi.testclient import TestClient
 
 
-class FixtureClient(TestClient):
+class CsrfClient(TestClient):
+    def request(self, method, url, **kwargs):
+        if method.upper() not in {'GET', 'HEAD', 'OPTIONS'}:
+            if not self.cookies.get('resume_csrf'):
+                super().request('GET', '/api/auth/me')
+            headers = dict(kwargs.pop('headers', {}) or {})
+            headers.setdefault('origin', 'http://testserver')
+            headers.setdefault('x-csrf-token', self.cookies.get('resume_csrf'))
+            kwargs['headers'] = headers
+        return super().request(method, url, **kwargs)
+
+
+class FixtureClient(CsrfClient):
     def request(self, method, url, **kwargs):
         token = "a" * 64
         self.cookies.set("resume_guest", token)
