@@ -110,7 +110,7 @@ function buildApiError(parsed: unknown, status: number): ApiError {
 }
 
 export interface RequestOptions {
-  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  method?: "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: BodyInit | null;
   /** 注意：上传 FormData 时不要传 Content-Type，边界由浏览器生成 */
   headers?: Record<string, string>;
@@ -121,6 +121,13 @@ export interface RequestOptions {
   /** 外部取消（轮询 cleanup、页面卸载） */
   signal?: AbortSignal;
 }
+
+function csrfCookie(): string | undefined {
+  return document.cookie.split(";").map((part) => part.trim())
+    .find((part) => part.startsWith("resume_csrf="))?.slice("resume_csrf=".length);
+}
+
+let csrfBootstrap: Promise<unknown> | null = null;
 
 /** 发起请求并解析 JSON；失败一律抛 ApiError */
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -141,10 +148,19 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   signal?.addEventListener("abort", forwardAbort);
 
   try {
+    const requestHeaders: Record<string, string> = { Accept: "application/json", ...headers };
+    if (["POST", "PUT", "PATCH", "DELETE"].includes(method.toUpperCase())) {
+      if (!csrfCookie()) {
+        csrfBootstrap ??= request("/api/auth/me").finally(() => { csrfBootstrap = null; });
+        await csrfBootstrap;
+      }
+      const csrf = csrfCookie();
+      if (csrf) requestHeaders["X-CSRF-Token"] = csrf;
+    }
     const res = await fetch(`${API_BASE}${path}`, {
       method,
       credentials: "include",
-      headers: { Accept: "application/json", ...headers },
+      headers: requestHeaders,
       body,
       signal: controller.signal,
     });

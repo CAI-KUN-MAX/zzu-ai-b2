@@ -18,12 +18,16 @@ from app.job_repository import JobRepository
 from app.job_matching import JobMatchService
 from app.guest_access import GuestAccessMiddleware
 from app.routers.jobs import router as jobs_router
+from app.auth import AuthStore
+from app.routers.auth import router as auth_router
 
 
 @asynccontextmanager
 async def lifespan(app):
     app.state.store = Store(data_directory())
     app.state.store.initialize()
+    app.state.auth = AuthStore(app.state.store)
+    app.state.auth.initialize()
     app.state.ingest_jobs = IngestJobs(app.state.store)
     app.state.match_jobs = MatchJobs(app.state.store)
     app.state.job_repository = JobRepository(app.state.store)
@@ -52,13 +56,14 @@ CORS_ORIGINS = [origin.strip() for origin in os.getenv(
 ).split(",") if origin.strip()]
 if "*" in CORS_ORIGINS:
     raise ValueError("CORS_ORIGINS cannot contain '*' with guest credentials")
+app.state.allowed_origins = CORS_ORIGINS
 app.add_middleware(GuestAccessMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "Accept"],
+    allow_headers=["Content-Type", "Accept", "X-CSRF-Token"],
 )
 
 def error_response(status, request_id=None, code=None, message=None):
@@ -78,7 +83,10 @@ def error_response(status, request_id=None, code=None, message=None):
 @app.exception_handler(HTTPException)
 async def handle_http_error(request: Request, exc: HTTPException):
     detail = exc.detail if isinstance(exc.detail, dict) else {}
-    return error_response(exc.status_code, detail.get("request_id"), detail.get("code"), detail.get("message"))
+    response = error_response(exc.status_code, detail.get("request_id"), detail.get("code"), detail.get("message"))
+    if exc.headers:
+        response.headers.update(exc.headers)
+    return response
 
 
 @app.exception_handler(RequestValidationError)
@@ -91,6 +99,7 @@ app.include_router(resumes_router)
 app.include_router(match_router)
 app.include_router(interviews_router)
 app.include_router(jobs_router)
+app.include_router(auth_router)
 
 @app.get("/")
 def read_root():

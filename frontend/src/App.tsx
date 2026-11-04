@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IS_MOCK_MODE } from "./api/http";
+import { useAuth } from "./lib/useAuth";
 import { createJobRecommendation, listJobs } from "./api/jobs";
 import { DOCUMENT_ACCEPT, IMAGE_ACCEPT, getIngestTask, uploadResumes, validateFiles } from "./api/resumes";
 import { JobCarousel } from "./components/JobCarousel";
 import { JobJdDialog } from "./components/JobJdDialog";
 import { JobMatchPage, type JobMatchDraft } from "./components/JobMatchPage";
 import { JobResultPage } from "./components/JobResultPage";
+import { AuthDialog } from "./components/AuthDialog";
 import { OfferMark } from "./components/icons";
 import { useTask } from "./lib/useTask";
 import {
@@ -63,6 +65,9 @@ function clearHash() {
 }
 
 export default function App() {
+  const auth = useAuth();
+  const [authDialog, setAuthDialog] = useState<"login" | "register" | null>(null);
+  const [authActionError, setAuthActionError] = useState<string | null>(null);
   const [lastMatch, setLastMatch] = useState<MatchRecord | null>(() => loadLastMatch());
   const [view, setView] = useState<View>(() => initialView(lastMatch));
   const [interviewOpen, setInterviewOpen] = useState(false);
@@ -270,6 +275,17 @@ export default function App() {
     }
   }
 
+  /** 身份变了就整页重载：内存里的简历、匹配、会话都要按新身份重来 */
+  async function handleLogout() {
+    if (authActionError) setAuthActionError(null);
+    try {
+      await auth.logout();
+      window.location.reload();
+    } catch (err) {
+      setAuthActionError(err instanceof Error ? err.message : "退出失败，请稍后再试");
+    }
+  }
+
   function handleReset() {
     clearHash();
     setView({ name: "job" });
@@ -290,9 +306,53 @@ export default function App() {
             <button className={view.name === "records" ? "active" : ""} onClick={() => { clearHash(); setView({ name: "records" }); }}><span>▤</span>记录</button>
           </nav>
           <div className="offer-sidebar-note">从一份简历开始，<br />找到适合你的下一步。</div>
+          <div className="offer-account">
+            {auth.status === "loading" ? (
+              <p className="offer-account-note">正在确认登录状态…</p>
+            ) : auth.status === "error" ? (
+              <button type="button" className="offer-account-btn" onClick={() => void auth.refresh()}>
+                身份确认失败，点此重试
+              </button>
+            ) : auth.status === "authenticated" && auth.user ? (
+              <>
+                <div className="offer-account-user">
+                  <span className="picker-logo small">{auth.user.username.slice(0, 1).toUpperCase()}</span>
+                  <strong title={auth.user.username}>{auth.user.username}</strong>
+                  <button type="button" onClick={() => void handleLogout()}>退出</button>
+                </div>
+                <p className="offer-account-note">当前记录的简历与结果只属于这个账号</p>
+              </>
+            ) : auth.unavailable ? (
+              <>
+                <button type="button" className="offer-account-btn" onClick={() => setAuthDialog("login")}>
+                  登录 / 注册（即将开放）
+                </button>
+                <p className="offer-account-note">账号服务还没上线，可以先以游客身份使用</p>
+              </>
+            ) : (
+              <>
+                <button type="button" className="offer-account-btn" onClick={() => setAuthDialog("login")}>
+                  登录 / 注册 →
+                </button>
+                <p className="offer-account-note">游客也能用，登录后可单独保存自己的记录</p>
+              </>
+            )}
+            {authActionError ? <p className="auth-error">{authActionError}</p> : null}
+          </div>
         </aside>
         <div className="offer-content">
-          <header className="offer-topbar"><span>简历与岗位匹配</span><span>{IS_MOCK_MODE ? "演示数据" : "你的求职空间"}</span></header>
+          <header className="offer-topbar">
+            <span>简历与岗位匹配</span>
+            <span className="offer-topbar-desktop">{IS_MOCK_MODE ? "演示数据" : "你的求职空间"}</span>
+            <div className="offer-mobile-account">
+              {auth.status === "loading" ? <span>确认身份中…</span> : auth.status === "error" ? (
+                <button type="button" onClick={() => void auth.refresh()}>身份确认失败，重试</button>
+              ) : auth.status === "authenticated" && auth.user ? (
+                <><span>{auth.user.username}</span><button type="button" onClick={() => void handleLogout()}>退出</button></>
+              ) : <button type="button" onClick={() => setAuthDialog("login")}>登录 / 注册</button>}
+              {authActionError ? <span role="alert">{authActionError}</span> : null}
+            </div>
+          </header>
           {view.name === "home" ? (
             <main className="offer-dashboard">
               <section className="dashboard-panel dashboard-main">
@@ -429,6 +489,18 @@ export default function App() {
             selected={draftRef.current.selected.includes(homeJdJob.job_id)}
             onToggle={() => toggleHomeJob(homeJdJob.job_id)}
             onClose={() => setHomeJdJob(null)}
+          />
+        ) : null}
+        {authDialog ? (
+          <AuthDialog
+            initialMode={authDialog}
+            onLogin={auth.login}
+            onRegister={auth.register}
+            onClose={() => setAuthDialog(null)}
+            onSuccess={() => {
+              setAuthDialog(null);
+              window.location.reload();
+            }}
           />
         ) : null}
         <div className="offer-mobile-nav" aria-label="移动导航">
