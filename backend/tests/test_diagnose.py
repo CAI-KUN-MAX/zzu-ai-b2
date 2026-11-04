@@ -318,6 +318,8 @@ class RouteTests(unittest.IsolatedAsyncioTestCase):
         except ImportError:
             import httpx2 as httpx
         async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+            client.cookies.set('resume_csrf', 'a' * 64)
+            client.headers.update({'origin': 'http://test', 'x-csrf-token': 'a' * 64})
             missing = await client.post("/api/diagnose", json={})
             self.assertEqual(missing.status_code, 422)
             self.assertEqual(missing.json()["error"]["code"], "VALIDATION_ERROR")

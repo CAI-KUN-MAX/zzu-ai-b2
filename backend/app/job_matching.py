@@ -61,7 +61,7 @@ class JobMatchService:
         self.match_jobs = match_jobs
         self.jobs = set()
 
-    def create(self, payload, *, recommendation=False):
+    def create(self, payload, *, recommendation=False, owner=None):
         if not payload.resume_id.strip() or not payload.job_ids or any(not i.strip() for i in payload.job_ids):
             fail(400, "INVALID_INPUT", "请选择一份简历和至少一个岗位")
         if len(payload.job_ids) > 50:
@@ -76,7 +76,7 @@ class JobMatchService:
                 fail(409, "JOB_NOT_OPEN", "岗位已关闭或岗位信息不完整")
             jobs.append(job.model_dump(mode="json"))
         # Snapshots are deliberately stored, unlike the older HR-facing match task.
-        snapshot = dict(resume_id=row["id"], resume_text=row["text"], jobs=jobs,
+        snapshot = dict(owner=owner, resume_id=row["id"], resume_text=row["text"], jobs=jobs,
                         recommendation=recommendation,
                         scoring_version=SCORING_VERSION, prompt_version=matching.PROMPT_VERSION,
                         system_prompt_hash=hashlib.sha256(SYSTEM_PROMPT.encode()).hexdigest(),
@@ -92,7 +92,7 @@ class JobMatchService:
             task.add_done_callback(self.jobs.discard)
         return {"task_id": identifier}
 
-    async def recommend(self, payload):
+    async def recommend(self, payload, *, owner=None):
         if not payload.resume_id.strip() or (payload.city is not None and not payload.city.strip()):
             fail(400, "INVALID_INPUT", "请选择一份简历并填写有效的意向城市")
         row = readable_resume(self.repository, payload.resume_id)
@@ -103,7 +103,7 @@ class JobMatchService:
         scored = await asyncio.to_thread(base_scores, dict(id=row["id"], name="", text=row["text"]), jobs)
         return self.create(JobMatchRequest(resume_id=payload.resume_id,
                                            job_ids=[item["job_id"] for item in scored[:30]]),
-                           recommendation=True)
+                           recommendation=True, owner=owner)
 
     def task(self, identifier):
         task = self.repository.task(identifier)

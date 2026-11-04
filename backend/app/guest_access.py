@@ -3,15 +3,42 @@ import json
 import re
 import secrets
 import uuid
+import hmac
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, Response
+from app.auth import SESSION_COOKIE
 
 COOKIE = "resume_guest"
 
 
 class GuestAccessMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
+        path = request.url.path
+        if path.startswith('/api/') and request.method not in {'GET', 'HEAD', 'OPTIONS'}:
+            origin = request.headers.get('origin', '')
+            same_origin = str(request.base_url).rstrip('/')
+            allowed = set(request.app.state.allowed_origins) | {same_origin}
+            csrf = request.cookies.get('resume_csrf', '')
+            supplied = request.headers.get('x-csrf-token', '')
+            if (origin not in allowed or not re.fullmatch(r'[a-f0-9]{64}', csrf)
+                    or not re.fullmatch(r'[a-f0-9]{64}', supplied) or not hmac.compare_digest(csrf, supplied)):
+                response = JSONResponse({'error': {'code': 'CSRF_REJECTED', 'message': '请求来源或安全令牌无效', 'request_id': uuid.uuid4().hex}}, status_code=403)
+                if path.startswith('/api/auth/'):
+                    response.headers['Cache-Control'] = 'no-store'
+                return response
+        if path.startswith('/api/auth/'):
+            if request.method == 'POST' and path in {'/api/auth/register', '/api/auth/login'}:
+                address = request.client.host if request.client else 'unknown'
+                allowed, retry = request.app.state.auth.allow_attempt(address, path + ':ip')
+                if not allowed:
+                    response = JSONResponse({'error': {'code': 'RATE_LIMITED', 'message': '请求过于频繁', 'request_id': uuid.uuid4().hex}}, status_code=429, headers={'Retry-After': str(retry), 'Cache-Control': 'no-store'})
+                    return response
+            response = await call_next(request)
+            response.headers['Cache-Control'] = 'no-store'
+            if path == '/api/auth/me' and not re.fullmatch(r'[a-f0-9]{64}', request.cookies.get('resume_csrf', '')):
+                response.set_cookie('resume_csrf', secrets.token_hex(32), secure=request.url.scheme == 'https', samesite='lax', max_age=86400 * 7)
+            return response
         if (not request.url.path.startswith("/api/") or request.method == "OPTIONS"
                 or request.url.path == "/api/diagnose" or request.url.path.startswith("/api/jobs")):
             return await call_next(request)
@@ -20,7 +47,9 @@ class GuestAccessMiddleware(BaseHTTPMiddleware):
         if fresh:
             token = secrets.token_hex(32)
         store = request.app.state.store
-        acl_id = "guest:" + token
+        user = request.app.state.auth.resolve(request.cookies.get(SESSION_COOKIE, ''))
+        acl_id = 'user:' + user['id'] if user else 'guest:' + token
+        request.state.owner = acl_id
         row = store.get("tasks", acl_id)
         owned = set(json.loads(row["payload"]).get("resources", [])) if row else set()
         path = request.url.path
