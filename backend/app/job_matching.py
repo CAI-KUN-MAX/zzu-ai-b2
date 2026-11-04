@@ -13,7 +13,9 @@ from app.routers.diagnose import MAX_TOTAL_CHARS, MIN_CHARS, SYSTEM_PROMPT
 from app.routers.resumes import fail
 
 logger = logging.getLogger(__name__)
-SCORING_VERSION = "job-ranking-v5"
+SCORING_VERSION = "job-ranking-v6"
+# 单独出现时区分度低；不排除“可用性测试”等具体复合技能。
+GENERIC_JOB_TERMS = frozenset({"原型", "文档", "流程", "测试", "验证"})
 RECOMMENDATION_RESULT_LIMIT = 8
 ITEM_TIMEOUT = 90
 TOTAL_TIMEOUT = 165
@@ -27,7 +29,8 @@ def base_scores(resume, jobs):
     items = []
     for job in jobs:
         jd = job["jd_text"]
-        item = matching.score_resume(jd, resume, matching.jd_terms(jd), matching.profile2gram(jd),
+        item = matching.score_resume(jd, resume, [term for term in matching.jd_terms(jd) if term not in GENERIC_JOB_TERMS],
+                                     matching.profile2gram(jd),
                                      required_education=job["education"])
         item.pop("resume_id")
         item.pop("name")

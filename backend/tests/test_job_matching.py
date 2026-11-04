@@ -76,6 +76,17 @@ class JobMatchingTests(unittest.TestCase):
             time.sleep(.01)
         self.fail("job matching did not terminate")
 
+    def test_generic_terms_do_not_count_as_specific_job_skills(self):
+        resume = {"id": "r", "name": "test", "text": "本科，参与原型、文档、流程、测试、验证。"}
+        generic = fixture_job("generic", "本科要求，负责原型、文档、流程、测试、验证。")
+        item = base_scores(resume, [generic])[0]
+        self.assertFalse(set(item["matched"]) & {"原型", "文档", "流程", "测试", "验证"})
+        ux = fixture_job("ux", "本科要求，熟悉用户研究、用户访谈和可用性测试。")
+        resume["text"] = "本科，开展用户研究和用户访谈，执行可用性测试。"
+        item = base_scores(resume, [ux])[0]
+        self.assertIn("可用性测试", item["matched"])
+        self.assertIn("用户研究", item["matched"])
+
     def test_catalogue_filters_paging_and_detail(self):
         response = self.client.get("/api/jobs").json()
         self.assertEqual(response["total"], 3)

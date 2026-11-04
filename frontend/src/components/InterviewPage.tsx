@@ -589,6 +589,17 @@ export function InterviewPage({
                 全部 {rounds.length} 轮反馈都在下面。建议先把「可以补充」里的点挑两条写进回答，再重新练一遍同样的题。
               </p>
 
+              <section className="mt-4 rounded-xl border border-surface-line px-4 py-3" aria-label="面试反馈汇总">
+                <h2 className="text-sm font-semibold">面试反馈汇总</h2>
+                <p className="mt-1 text-xs text-ink-500">以下整理自各轮反馈，未重新评分；请结合岗位要求和真实经历核对。</p>
+                {([['表现亮点', 'strengths'], ['后续练习与简历核对', 'improvements']] as const).map(([label, field]) => {
+                  const entries = rounds.flatMap((round) => round.feedback[field].map((text) => ({ text, round: round.round })));
+                  return <div key={field} className="mt-3 text-sm text-ink-700"><h3 className="font-medium">{label}</h3>
+                    {entries.length ? <ul className="mt-1 list-inside list-disc space-y-1">{entries.map((entry, index) => <li key={`${entry.round}-${index}`}>第 {entry.round} 轮：{entry.text}</li>)}</ul> : <p className="mt-1 text-xs text-ink-500">本次没有相关反馈</p>}
+                  </div>;
+                })}
+              </section>
+
               {!IS_MOCK_MODE && reportError ? (
                 <p role="alert" className="mt-3 text-sm text-rose-700">
                   {reportError} <button type="button" className="underline" onClick={() => setReportAttempt((n) => n + 1)}>重新加载报告</button>
