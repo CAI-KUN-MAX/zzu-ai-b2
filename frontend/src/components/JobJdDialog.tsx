@@ -11,7 +11,7 @@ interface JobJdDialogProps {
 }
 
 /**
- * 选岗前查看完整 JD：岗位要求、学历专业、来源与核验时间，可直接在弹窗里勾选。
+ * 选岗前查看岗位描述：岗位要求、学历专业、来源与核验时间，可直接在弹窗里勾选。
  *
  * 必须挂到 document.body：外层 .offer-shell 带 backdrop-filter，
  * 会创建新的包含块，导致内部 position:fixed 相对它定位而不是视口，

@@ -221,7 +221,7 @@ function JobDetail({
           {contextError ? <p role="alert" className="mt-2 text-[12px] text-rose-700">{contextError}</p> : null}
         </section>
 
-        {/* 岗位信息：完整 JD + 来源/投递链接，数据全部来自 /api/jobs */}
+        {/* 岗位信息：岗位描述 + 来源/投递链接，数据全部来自 /api/jobs */}
         {job ? (
           <section className="mt-5 rounded-xl2 border border-surface-line bg-white p-5 shadow-card sm:p-6">
             <div className="flex items-center justify-between gap-3">
