@@ -328,6 +328,16 @@ export type JobDegradedReason =
   | "batch_timeout"
   | "mock_report";
 
+export interface SkillAssessment {
+  skill_name: string;
+  requirement: boolean;
+  jd_evidence: string;
+  resume_evidence: string[];
+  demonstrated_evidence: string | null;
+  evidence_status: "demonstrated" | "mentioned_only" | "not_found" | "uncertain";
+  assessment: string;
+}
+
 /** 单个岗位的匹配结果 */
 export interface JobMatchItem {
   job_id: string;
@@ -346,6 +356,7 @@ export interface JobMatchItem {
   subscores: DimensionScore[];
   matched: string[];
   missing: string[];
+  skill_assessments?: SkillAssessment[];
   reason: string | null;
   degraded: boolean;
   degraded_reason: JobDegradedReason | null;

@@ -6,6 +6,20 @@ from app.skill_evidence import InconsistentSkillReport, observations, reconcile_
 
 
 class SkillEvidenceTests(unittest.TestCase):
+    def test_ux_practice_mentions_and_negation_are_distinct(self):
+        resume = ("项目经历\n开展用户访谈与可用性测试。\n"
+                  "使用 Figma 设计交互原型。\n技能：Axure。\n未使用用户研究。")
+        jd = "要求用户访谈、可用性测试、Figma、Axure 和用户研究。"
+        skills = {item["skill_name"]: item for item in observations(resume, jd)}
+        self.assertEqual(skills["用户访谈"]["evidence_status"], "demonstrated")
+        self.assertEqual(skills["可用性测试"]["evidence_status"], "demonstrated")
+        self.assertEqual(skills["Figma"]["evidence_status"], "demonstrated")
+        self.assertEqual(skills["Axure"]["evidence_status"], "mentioned_only")
+        self.assertEqual(skills["用户研究"]["evidence_status"], "uncertain")
+        for skill in skills.values():
+            self.assertIn(skill["jd_evidence"], jd)
+            self.assertTrue(all(quote in resume for quote in skill["resume_evidence"]))
+
     def test_shared_resume_and_jd_with_multiple_sources(self):
         resume = ("技能：Java、MySQL、Spring Boot\n项目经历\n"
                   "订单项目：使用 Java 开发订单服务。\n"

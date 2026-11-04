@@ -13,7 +13,7 @@ from app.routers.diagnose import MAX_TOTAL_CHARS, MIN_CHARS, SYSTEM_PROMPT
 from app.routers.resumes import fail
 
 logger = logging.getLogger(__name__)
-SCORING_VERSION = "job-ranking-v4"
+SCORING_VERSION = "job-ranking-v5"
 ITEM_TIMEOUT = 90
 TOTAL_TIMEOUT = 165
 
@@ -61,7 +61,7 @@ class JobMatchService:
         self.match_jobs = match_jobs
         self.jobs = set()
 
-    def create(self, payload):
+    def create(self, payload, *, recommendation=False):
         if not payload.resume_id.strip() or not payload.job_ids or any(not i.strip() for i in payload.job_ids):
             fail(400, "INVALID_INPUT", "请选择一份简历和至少一个岗位")
         if len(payload.job_ids) > 50:
@@ -77,6 +77,7 @@ class JobMatchService:
             jobs.append(job.model_dump(mode="json"))
         # Snapshots are deliberately stored, unlike the older HR-facing match task.
         snapshot = dict(resume_id=row["id"], resume_text=row["text"], jobs=jobs,
+                        recommendation=recommendation,
                         scoring_version=SCORING_VERSION, prompt_version=matching.PROMPT_VERSION,
                         system_prompt_hash=hashlib.sha256(SYSTEM_PROMPT.encode()).hexdigest(),
                         top_k=max(0, min(8, int(os.getenv("MATCH_LLM_TOP_K", "8")))),
@@ -101,7 +102,8 @@ class JobMatchService:
         jobs = [job.model_dump(mode="json") for job in candidates]
         scored = await asyncio.to_thread(base_scores, dict(id=row["id"], name="", text=row["text"]), jobs)
         return self.create(JobMatchRequest(resume_id=payload.resume_id,
-                                           job_ids=[item["job_id"] for item in scored[:8]]))
+                                           job_ids=[item["job_id"] for item in scored[:30]]),
+                           recommendation=True)
 
     def task(self, identifier):
         task = self.repository.task(identifier)
@@ -123,7 +125,7 @@ class JobMatchService:
                     embedding_error=snapshot.get("embedding_error"),
                     error=error.get("message") if isinstance(error, dict) else error,
                     error_code=error.get("code") if isinstance(error, dict) else None,
-                    items=items)
+                    items=items[:8] if snapshot.get("recommendation") else items)
 
     def context(self, identifier, job_id):
         snapshot = json.loads(self.task(identifier)["payload"])
