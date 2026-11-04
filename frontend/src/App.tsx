@@ -341,7 +341,18 @@ export default function App() {
           </div>
         </aside>
         <div className="offer-content">
-          <header className="offer-topbar"><span>简历与岗位匹配</span><span>{IS_MOCK_MODE ? "演示数据" : "你的求职空间"}</span></header>
+          <header className="offer-topbar">
+            <span>简历与岗位匹配</span>
+            <span className="offer-topbar-desktop">{IS_MOCK_MODE ? "演示数据" : "你的求职空间"}</span>
+            <div className="offer-mobile-account">
+              {auth.status === "loading" ? <span>确认身份中…</span> : auth.status === "error" ? (
+                <button type="button" onClick={() => void auth.refresh()}>身份确认失败，重试</button>
+              ) : auth.status === "authenticated" && auth.user ? (
+                <><span>{auth.user.username}</span><button type="button" onClick={() => void handleLogout()}>退出</button></>
+              ) : <button type="button" onClick={() => setAuthDialog("login")}>登录 / 注册</button>}
+              {authActionError ? <span role="alert">{authActionError}</span> : null}
+            </div>
+          </header>
           {view.name === "home" ? (
             <main className="offer-dashboard">
               <section className="dashboard-panel dashboard-main">
