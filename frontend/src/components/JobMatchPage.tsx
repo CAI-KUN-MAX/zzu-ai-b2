@@ -105,6 +105,8 @@ export function JobMatchPage({
   const [recExpanded, setRecExpanded] = useState(false);
   const [recTaskId, setRecTaskId] = useState<string | null>(null);
   const [recError, setRecError] = useState<string | null>(null);
+  const [intent, setIntent] = useState({ category: "", city: "" });
+  const [confirmedIntent, setConfirmedIntent] = useState(intent);
   const [recAttempt, setRecAttempt] = useState(0);
   const resumePanelRef = useRef<HTMLElement>(null);
 
@@ -141,6 +143,8 @@ export function JobMatchPage({
   const hasResume = files.length > 0 || !!resumeTaskId;
   const recResumeId = parsed && resume ? resume.resume_id : null;
 
+  const recKey = JSON.stringify([recResumeId, confirmedIntent.category, confirmedIntent.city]);
+
   /* 简历可用后自动要一份推荐：推荐是默认入口，失败也不影响自己搜索和选择 */
   useEffect(() => {
     setRecError(null);
@@ -149,16 +153,16 @@ export function JobMatchPage({
       setRecTaskId(null);
       return;
     }
-    const known = recommendationTasks.get(recResumeId);
+    const known = recommendationTasks.get(recKey);
     if (known) {
       setRecTaskId(known);
       return;
     }
     setRecTaskId(null);
     let cancelled = false;
-    createJobRecommendation(recResumeId)
+    createJobRecommendation(recResumeId, { category: confirmedIntent.category || undefined, city: confirmedIntent.city || undefined })
       .then(({ task_id }) => {
-        recommendationTasks.set(recResumeId, task_id);
+        recommendationTasks.set(recKey, task_id);
         if (!cancelled) setRecTaskId(task_id);
       })
       .catch((err: unknown) => {
@@ -167,7 +171,7 @@ export function JobMatchPage({
     return () => {
       cancelled = true;
     };
-  }, [recResumeId, recAttempt]);
+  }, [recResumeId, recKey, recAttempt, confirmedIntent]);
 
   const { data: recTask, error: recPollError, retry: retryRecPoll } = useTask<JobMatchTask>(getJobMatchTask, recTaskId);
   // setState 是异步的，同一时刻连点两次都会读到旧的 submitting；用 ref 做同步闸门，只发一次请求
@@ -275,7 +279,7 @@ export function JobMatchPage({
   const listCollapsed = !filtering && recItems.length > 0 && !listExpanded;
 
   function retryRecommendation() {
-    if (recResumeId) recommendationTasks.delete(recResumeId);
+    if (recResumeId) recommendationTasks.delete(recKey);
     retryRecPoll();
     setRecAttempt((n) => n + 1);
   }
@@ -344,6 +348,19 @@ export function JobMatchPage({
                 <h2>为你推荐{recItems.length ? <span>{recItems.length}</span> : null}</h2>
                 <small>根据你的简历挑选，不合适也可以在下方自己找</small>
               </div>
+              {recResumeId && (
+                <form className="picker-toolbar" onSubmit={(event) => {
+                  event.preventDefault();
+                  setConfirmedIntent({ category: intent.category, city: intent.city.trim() });
+                }}>
+                  <label>意向方向 <select value={intent.category} onChange={(event) => setIntent({ ...intent, category: event.target.value })}>
+                    <option value="">不限</option>
+                    {categories.filter((item) => item !== ALL).map((item) => <option key={item}>{item}</option>)}
+                  </select></label>
+                  <label>意向城市 <input value={intent.city} onChange={(event) => setIntent({ ...intent, city: event.target.value })} placeholder="不限" /></label>
+                  <button type="submit">按意向推荐</button>
+                </form>
+              )}
               {!recResumeId ? (
                 <div className="picker-rec-note">
                   <p>{hasResume ? "简历解析完成后，这里会优先显示适合你的岗位。" : "上传简历后，这里会优先显示适合你的岗位。"}</p>

@@ -26,7 +26,7 @@
 
 ## 创建、轮询与重试
 
-`POST /api/job-recommendations` 接受 `{"resume_id":"原简历ID","category":null,"city":null}`，意向字段可省略；提供时按专业大类、城市精确筛选。对当前目录中 open 和满足完整性门槛的 unverified 岗位执行规则初排，最多取前 30 项作为候选，再复用岗位匹配任务，返回 202 `{"task_id":"任务ID"}`；通过原轮询和 context 接口获取结果。启用 Embedding 时在候选范围内重排，之后最多对前 8 岗进行 AI 分析；推荐结果最多返回 8 项，顺序可能随分析改变。初排 30 名以外仍可能遗漏相关岗位；Embedding 未启用或失败时仍按规则初排。无符合条件岗位返回 404 `NO_RECOMMENDABLE_JOBS`。少于 8 个时如实返回实际数量；未核验岗位不能表述为确认可投。规则分是排序参考，并非录用概率。
+`POST /api/job-recommendations` 接受 `{"resume_id":"原简历ID","category":null,"city":null}`，意向字段可省略；提供时按专业大类、城市精确筛选。对当前目录中 open 和满足完整性门槛的 unverified 岗位执行规则初排，最多取前 30 项作为候选，再复用岗位匹配任务，返回 202 `{"task_id":"任务ID"}`；通过原轮询和 context 接口获取结果。启用 Embedding 时在候选范围内重排，之后最多对前 8 岗进行 AI 分析；新推荐任务在深度分析前确定最多 8 项展示名单，后续只对名单内岗位重新排序。进度只统计入选深度分析的岗位。历史任务继续按原规则读取。初排 30 名以外仍可能遗漏相关岗位；Embedding 未启用或失败时仍按规则初排。无符合条件岗位返回 404 `NO_RECOMMENDABLE_JOBS`。少于 8 个时如实返回实际数量；未核验岗位不能表述为确认可投。规则分是排序参考，并非录用概率。
 
 `POST /api/job-matches`：`{"resume_id":"原简历ID","job_ids":["岗位ID1","岗位ID2"]}`。返回 202 `{"task_id":"任务ID"}`。仅接受 ready/need_review 且非空简历；`not_resume` 返回 HTTP 422 / `CONTENT_MISMATCH`。岗位 ID 原始列表 1–50 项，重复合并。整批验证后创建任务，禁止额外字段。允许 open 和满足测试池完整性门槛的 unverified 岗位；不允许 closed 岗位。兼容保留 `allow_unverified_for_testing` 字段，已不影响上述规则。匹配不改变岗位状态，也不代表当前可投。
 

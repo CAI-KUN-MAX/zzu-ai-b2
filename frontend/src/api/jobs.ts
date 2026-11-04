@@ -176,11 +176,11 @@ export async function createJobMatch(
   });
 }
 
-export async function createJobRecommendation(resumeId: string): Promise<{ task_id: string }> {
+export async function createJobRecommendation(resumeId: string, intent?: { category?: string; city?: string }): Promise<{ task_id: string }> {
   if (IS_MOCK_MODE) {
     await wait(600);
     const taskId = `mock-rec-${Date.now()}`;
-    mockSelected.set(taskId, MOCK_JOBS.map((job) => job.job_id));
+    mockSelected.set(taskId, MOCK_JOBS.filter((job) => (!intent?.category || job.category === intent.category) && (!intent?.city || job.cities.includes(intent.city))).slice(0, 8).map((job) => job.job_id));
     mockResumeOf.set(taskId, resumeId);
     mockPoll.set(taskId, 0);
     return { task_id: taskId };
@@ -188,7 +188,7 @@ export async function createJobRecommendation(resumeId: string): Promise<{ task_
   return request<{ task_id: string }>("/api/job-recommendations", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ resume_id: resumeId }),
+    body: JSON.stringify({ resume_id: resumeId, ...intent }),
     timeoutMessage: "创建推荐任务超时，请稍后重试",
   });
 }
