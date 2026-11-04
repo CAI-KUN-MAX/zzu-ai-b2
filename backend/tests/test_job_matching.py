@@ -560,7 +560,7 @@ class JobMatchingTests(unittest.TestCase):
         # Coverage remains explicit: quantity, category, education and concrete
         # major distribution are all checked by the catalogue report.
         self.assertEqual(len(catalogue.jobs), len(set(catalogue.jobs)))
-        report = check_catalogue(root / "catalogue" / "jobs.v1.json", date(2026, 11, 2))
+        report = check_catalogue(root / "catalogue" / "jobs.v1.json", date(2026, 11, 3))
         self.assertTrue(report["testing_target_met"])
         self.assertGreaterEqual(report["testing_pool"], 40)
         self.assertGreaterEqual(report["open"], 40)

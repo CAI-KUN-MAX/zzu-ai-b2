@@ -35,12 +35,17 @@ function initialView(last: MatchRecord | null): View {
   return { name: "home" };
 }
 
-/** 岗位速览先让不同企业露面，目录按 ID 排序时同一家会连成一片 */
+/** 随机展示岗位，并优先让不同企业露面。 */
 function previewJobs(jobs: Job[], limit: number) {
+  const shuffled = [...jobs];
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
   const seen = new Set<string>();
   const first: Job[] = [];
   const rest: Job[] = [];
-  jobs.forEach((job) => {
+  shuffled.forEach((job) => {
     if (seen.has(job.company)) {
       rest.push(job);
     } else {
