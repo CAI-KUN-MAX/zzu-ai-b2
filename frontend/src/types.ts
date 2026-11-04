@@ -348,6 +348,7 @@ export interface JobMatchItem {
   stage1_score: number;
   /** 纯规则分（技能关键词 55% + 文本相似度 30% + 学历 15%） */
   rule_score?: number | null;
+  intent_bonus?: number;
   /** 简历与 JD 的向量余弦相似度，-1~1；语义未启用或降级时为 null */
   embedding_similarity?: number | null;
   level: MatchLevel;

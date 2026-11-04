@@ -4,6 +4,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 from datetime import datetime, timezone
 
 from app import matching, job_embedding, skill_evidence
@@ -13,7 +14,7 @@ from app.routers.diagnose import MAX_TOTAL_CHARS, MIN_CHARS, SYSTEM_PROMPT
 from app.routers.resumes import fail
 
 logger = logging.getLogger(__name__)
-SCORING_VERSION = "job-ranking-v6"
+SCORING_VERSION = "job-ranking-v7"
 # 单独出现时区分度低；不排除“可用性测试”等具体复合技能。
 GENERIC_JOB_TERMS = frozenset({"原型", "文档", "流程", "测试", "验证"})
 RECOMMENDATION_RESULT_LIMIT = 8
@@ -25,13 +26,32 @@ def ranked(items):
     return sorted(items, key=lambda item: (-item["score"], item["job_id"]))
 
 
-def base_scores(resume, jobs):
+def ux_intent(text):
+    # Only a labelled intention is eligible; avoid inferring intent from experience.
+    matches = re.findall(r"(?:求职意向|意向岗位|期望岗位|目标岗位)\s*[:：]\s*([^\n\r；;。，,]{1,50})", text, re.I)
+    return any(not re.search(r"不考虑|不希望|不要|非", value) and re.search(r"用户体验|交互设计|用户研究|用户洞察|(?<![a-z])ux(?![a-z])", value, re.I)
+               for value in matches)
+
+
+def intent_bonus(resume_text, job):
+    if not ux_intent(resume_text):
+        return 0
+    text = job["title"] + " " + job["jd_text"]
+    return 20 if re.search(r"用户体验|交互设计|用户研究|用户洞察|人机交互|(?<![a-z])ux(?![a-z])", text, re.I) else 0
+
+
+def base_scores(resume, jobs, recommendation=False):
     items = []
     for job in jobs:
         jd = job["jd_text"]
         item = matching.score_resume(jd, resume, [term for term in matching.jd_terms(jd) if term not in GENERIC_JOB_TERMS],
                                      matching.profile2gram(jd),
                                      required_education=job["education"])
+        bonus = min(100 - item["score"], intent_bonus(resume["text"], job)) if recommendation else 0
+        item["score"] += bonus
+        item["stage1_score"] = item["score"]
+        item.update(matching.level_fields(item["score"]))
+        item["intent_bonus"] = bonus
         item.pop("resume_id")
         item.pop("name")
         item.update(rule_score=item["stage1_score"], embedding_similarity=None)
@@ -105,7 +125,7 @@ class JobMatchService:
         if not candidates:
             fail(404, "NO_RECOMMENDABLE_JOBS", "没有符合意向的岗位，请调整筛选条件")
         jobs = [job.model_dump(mode="json") for job in candidates]
-        scored = await asyncio.to_thread(base_scores, dict(id=row["id"], name="", text=row["text"]), jobs)
+        scored = await asyncio.to_thread(base_scores, dict(id=row["id"], name="", text=row["text"]), jobs, True)
         return self.create(JobMatchRequest(resume_id=payload.resume_id,
                                            job_ids=[item["job_id"] for item in scored[:30]]),
                            recommendation=True, owner=owner)
@@ -158,7 +178,7 @@ class JobMatchService:
                 self.repository.update(identifier, status="running", stage="基础评分", progress=5)
                 async with asyncio.timeout(TOTAL_TIMEOUT):
                     row = dict(id=snapshot["resume_id"], name="", text=snapshot["resume_text"])
-                    items = await asyncio.to_thread(base_scores, row, snapshot["jobs"])
+                    items = await asyncio.to_thread(base_scores, row, snapshot["jobs"], snapshot.get("recommendation", False))
                     jobs_by_id = {job["job_id"]: job for job in snapshot["jobs"]}
                     embedding_status = "disabled"
                     embedding_error = None
