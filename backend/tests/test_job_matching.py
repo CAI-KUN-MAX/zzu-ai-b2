@@ -89,6 +89,7 @@ class JobMatchingTests(unittest.TestCase):
 
     def test_recommendation_uses_only_explicit_supported_intent(self):
         ux = fixture_job("ux", "岗位职责：开展用户研究和体验评估，参与座舱 UI/UX 设计。任职要求：本科。")
+        ux["title"] = "用户体验设计师"
         other = fixture_job("other", "岗位职责：开发嵌入式软件。任职要求：本科。")
         resume = {"id": "r", "name": "test", "text": "本科，求职意向：用户体验设计。参与用户访谈。"}
         items = {item["job_id"]: item for item in base_scores(resume, [ux, other], True)}
@@ -100,6 +101,14 @@ class JobMatchingTests(unittest.TestCase):
             self.assertEqual(base_scores(resume, [ux], True)[0]["intent_bonus"], 0)
         resume["text"] = "求职意向：用户体验设计。"
         self.assertEqual(base_scores(resume, [ux], False)[0]["intent_bonus"], 0)
+
+    def test_ux_intent_does_not_promote_incidental_jd_mentions(self):
+        from app.job_matching import intent_bonus
+        resume = "求职意向：用户体验设计。"
+        unrelated = {"title": "后端开发工程师", "jd_text": "开发服务接口，关注用户体验和交互设计。"}
+        self.assertEqual(intent_bonus(resume, unrelated), 0)
+        self.assertEqual(intent_bonus(resume, {"title": "UX 设计师", "jd_text": "设计界面"}), 20)
+        self.assertEqual(intent_bonus("求职意向：不考虑用户体验设计。", {"title": "UX 设计师", "jd_text": ""}), 0)
 
     def test_supported_intents_multiple_and_job_title_boundaries(self):
         from app.job_matching import intent_bonus

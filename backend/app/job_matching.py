@@ -14,7 +14,7 @@ from app.routers.diagnose import MAX_TOTAL_CHARS, MIN_CHARS, SYSTEM_PROMPT
 from app.routers.resumes import fail
 
 logger = logging.getLogger(__name__)
-SCORING_VERSION = "job-ranking-v9"
+SCORING_VERSION = "job-ranking-v10"
 # 单独出现时区分度低；不排除“可用性测试”等具体复合技能。
 GENERIC_JOB_TERMS = frozenset({"原型", "文档", "流程", "测试", "验证"})
 RECOMMENDATION_RESULT_LIMIT = 8
@@ -30,7 +30,7 @@ def ranked(items):
 INTENT_FIELDS = re.compile(r"(?:求职意向|意向岗位|期望岗位|目标岗位)\s*[:：]\s*([^\n\r；;。]{1,80})", re.I)
 INTENT_DIRECTIONS = (
     (r"用户体验|交互设计|用户研究|用户洞察|(?<![a-z])ux(?![a-z])",
-     r"用户体验|交互设计|用户研究|用户洞察|人机交互|(?<![a-z])ux(?![a-z])", True),
+     r"用户体验|交互设计|用户研究|用户洞察|人机交互|(?<![a-z])ux(?![a-z])", False),
     (r"后端|后台开发|服务端", r"后端|后台开发|服务端", False),
     (r"前端|web前端", r"前端", False),
     (r"数据分析|数据分析师", r"数据分析", False),
