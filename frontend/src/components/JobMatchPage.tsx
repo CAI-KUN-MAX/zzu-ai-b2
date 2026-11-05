@@ -91,6 +91,7 @@ export function JobMatchPage({
   const [resumeTaskId, setResumeTaskId] = useState<string | null>(draft.resumeTaskId);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resumeExpired, setResumeExpired] = useState(false);
 
   const [jobs, setJobs] = useState<Job[]>([]);
   const [jobTotal, setJobTotal] = useState(0);
@@ -105,8 +106,6 @@ export function JobMatchPage({
   const [recExpanded, setRecExpanded] = useState(false);
   const [recTaskId, setRecTaskId] = useState<string | null>(null);
   const [recError, setRecError] = useState<string | null>(null);
-  const [intent, setIntent] = useState({ category: "", city: "" });
-  const [confirmedIntent, setConfirmedIntent] = useState(intent);
   const [recAttempt, setRecAttempt] = useState(0);
   const resumePanelRef = useRef<HTMLElement>(null);
 
@@ -118,6 +117,7 @@ export function JobMatchPage({
     data: ingest,
     error: pollError,
     transient: pollTransient,
+    fatal: pollFatal,
     retry: retryIngest,
   } = useTask<IngestTask>(getIngestTask, resumeTaskId);
 
@@ -133,6 +133,18 @@ export function JobMatchPage({
   // 只有后端明确返回失败才算解析失败；轮询网络错误或等待超时不能证明解析失败
   const resumeFailed = resume?.status === "failed" || ingest?.status === "failed";
 
+  // 后端已经没有这份简历了（换身份、服务清理、链接过期都会这样）：
+  // 不能把「记录不存在或不属于当前游客」这种内部说法丢给用户，直接回到重新上传
+  useEffect(() => {
+    if (!pollFatal) return;
+    setResumeTaskId(null);
+    setFiles([]);
+    setResumeExpired(true);
+    onDraftChange({ resumeTaskId: null, selected, files: [] });
+    // selected 变化不该触发清理，这里只跟 pollFatal 走
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pollFatal]);
+
   // 解析成功就记下来，首页「为我推荐岗位」不选岗也拿得到简历
   useEffect(() => {
     if (parsed && resume) {
@@ -143,8 +155,6 @@ export function JobMatchPage({
   const hasResume = files.length > 0 || !!resumeTaskId;
   const recResumeId = parsed && resume ? resume.resume_id : null;
 
-  const recKey = JSON.stringify([recResumeId, confirmedIntent.category, confirmedIntent.city]);
-
   /* 简历可用后自动要一份推荐：推荐是默认入口，失败也不影响自己搜索和选择 */
   useEffect(() => {
     setRecError(null);
@@ -153,16 +163,16 @@ export function JobMatchPage({
       setRecTaskId(null);
       return;
     }
-    const known = recommendationTasks.get(recKey);
+    const known = recommendationTasks.get(recResumeId);
     if (known) {
       setRecTaskId(known);
       return;
     }
     setRecTaskId(null);
     let cancelled = false;
-    createJobRecommendation(recResumeId, { category: confirmedIntent.category || undefined, city: confirmedIntent.city || undefined })
+    createJobRecommendation(recResumeId)
       .then(({ task_id }) => {
-        recommendationTasks.set(recKey, task_id);
+        recommendationTasks.set(recResumeId, task_id);
         if (!cancelled) setRecTaskId(task_id);
       })
       .catch((err: unknown) => {
@@ -171,7 +181,7 @@ export function JobMatchPage({
     return () => {
       cancelled = true;
     };
-  }, [recResumeId, recKey, recAttempt, confirmedIntent]);
+  }, [recResumeId, recAttempt]);
 
   const { data: recTask, error: recPollError, retry: retryRecPoll } = useTask<JobMatchTask>(getJobMatchTask, recTaskId);
   // setState 是异步的，同一时刻连点两次都会读到旧的 submitting；用 ref 做同步闸门，只发一次请求
@@ -279,7 +289,7 @@ export function JobMatchPage({
   const listCollapsed = !filtering && recItems.length > 0 && !listExpanded;
 
   function retryRecommendation() {
-    if (recResumeId) recommendationTasks.delete(recKey);
+    if (recResumeId) recommendationTasks.delete(recResumeId);
     retryRecPoll();
     setRecAttempt((n) => n + 1);
   }
@@ -348,19 +358,6 @@ export function JobMatchPage({
                 <h2>为你推荐{recItems.length ? <span>{recItems.length}</span> : null}</h2>
                 <small>根据你的简历挑选，不合适也可以在下方自己找</small>
               </div>
-              {recResumeId && (
-                <form className="picker-toolbar" onSubmit={(event) => {
-                  event.preventDefault();
-                  setConfirmedIntent({ category: intent.category, city: intent.city.trim() });
-                }}>
-                  <label>意向方向 <select value={intent.category} onChange={(event) => setIntent({ ...intent, category: event.target.value })}>
-                    <option value="">不限</option>
-                    {categories.filter((item) => item !== ALL).map((item) => <option key={item}>{item}</option>)}
-                  </select></label>
-                  <label>意向城市 <input value={intent.city} onChange={(event) => setIntent({ ...intent, city: event.target.value })} placeholder="不限" /></label>
-                  <button type="submit">按意向推荐</button>
-                </form>
-              )}
               {!recResumeId ? (
                 <div className="picker-rec-note">
                   <p>{hasResume ? "简历解析完成后，这里会优先显示适合你的岗位。" : "上传简历后，这里会优先显示适合你的岗位。"}</p>
@@ -436,7 +433,17 @@ export function JobMatchPage({
             {resume?.status === "need_review" && <p className="picker-error">识别质量偏低，请核对原文，匹配结果可能有偏差。</p>}
             {resume?.status === "not_resume" && <p className="picker-error">这份文件看起来不是简历，请更换后重试。</p>}
             {resume?.status === "failed" && <p className="picker-error">{resume.error?.message || "解析失败，请更换文件重试。"}</p>}
-            {pollError && <p className="picker-error" role="alert">{pollError} {pollUnavailable && <button type="button" onClick={retryPoll}>重新获取</button>}</p>}
+            {resumeExpired && !resumeTaskId ? (
+              <p className="picker-hint picker-expired" role="status">
+                之前的简历记录已失效，请重新上传一份。
+              </p>
+            ) : null}
+            {pollError && !pollFatal && (
+              <p className="picker-error" role="alert">
+                {pollError}{" "}
+                {pollUnavailable && <button type="button" onClick={retryPoll}>重新获取</button>}
+              </p>
+            )}
             <DropZone files={files} onChange={handleFileChange} disabled={uploading} maxFiles={1} title="上传或拖拽简历" />
             <p className="picker-hint">简历用于本次匹配分析。AI 建议仅供参考，不构成录用判断。</p>
           </section>
