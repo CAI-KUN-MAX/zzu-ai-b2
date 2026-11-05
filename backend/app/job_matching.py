@@ -14,7 +14,7 @@ from app.routers.diagnose import MAX_TOTAL_CHARS, MIN_CHARS, SYSTEM_PROMPT
 from app.routers.resumes import fail
 
 logger = logging.getLogger(__name__)
-SCORING_VERSION = "job-ranking-v10"
+SCORING_VERSION = "job-ranking-v11"
 # 单独出现时区分度低；不排除“可用性测试”等具体复合技能。
 GENERIC_JOB_TERMS = frozenset({"原型", "文档", "流程", "测试", "验证"})
 RECOMMENDATION_RESULT_LIMIT = 8
@@ -27,10 +27,10 @@ def ranked(items):
 
 
 # Explicit labelled intentions only. Other fields are not interpreted as preferences.
-INTENT_FIELDS = re.compile(r"(?:求职意向|意向岗位|期望岗位|目标岗位)\s*[:：]\s*([^\n\r；;。]{1,80})", re.I)
+INTENT_FIELDS = re.compile(r"(?:求职意向|意向岗位|期望岗位|目标岗位)(?:[ \t]*[:：][ \t]*|[ \t]+)([^\n\r；;。]{1,80})", re.I)
 INTENT_DIRECTIONS = (
-    (r"用户体验|交互设计|用户研究|用户洞察|(?<![a-z])ux(?![a-z])",
-     r"用户体验|交互设计|用户研究|用户洞察|人机交互|(?<![a-z])ux(?![a-z])", False),
+    (r"用户体验|交互设计|用户研究|用户洞察|user\s+experience|(?<![a-z])ux(?![a-z])",
+     r"用户体验|交互设计|用户研究|用户洞察|人机交互|user\s+experience|(?<![a-z])ux(?![a-z])", False),
     (r"后端|后台开发|服务端", r"后端|后台开发|服务端", False),
     (r"前端|web前端", r"前端", False),
     (r"数据分析|数据分析师", r"数据分析", False),
@@ -49,7 +49,7 @@ def explicit_intentions(text):
             value = part.strip()
             if index and (len(value) > 12 or re.search(r"参与|负责|项目|经验|熟悉|使用|开展", value)):
                 break
-            if value and not re.search(r"不考虑|不希望|不要|不求|非", value):
+            if value and not re.search(r"不考虑|不希望|不要|不求|不做|不是|不想|不从事|不接受|排除|非", value):
                 values.append(value)
     return values
 

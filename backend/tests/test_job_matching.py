@@ -37,6 +37,27 @@ def fixture_job(identifier, jd=JD, category="计算机", education="本科", sta
                 verification_note="虚构测试夹具，不计入真实岗位集")
 
 
+class IntentBoundaryTests(unittest.TestCase):
+    def test_explicit_intent_boundaries(self):
+        from app.job_matching import intent_bonus
+
+        cases = (
+            ("求职意向：不做后端开发。", "后端工程师", "", 0),
+            ("求职意向：不是后端开发。", "后端工程师", "", 0),
+            ("求职意向：前端开发、不要后端开发。", "后端工程师", "", 0),
+            ("求职意向：不考虑后端，希望从事前端开发。", "前端工程师", "", 20),
+            ("求职意向：user experience design。", "UX 设计师", "", 20),
+            ("求职意向 用户体验设计。", "User Experience Designer", "", 20),
+            ("求职意向 后端开发", "后端工程师", "", 20),
+            ("求职意向：用户体验设计。", "后端工程师", "关注用户体验", 0),
+            ("求职意向：用户体验设计。", "体验策略师", "用户研究与可用性测试", 0),
+            ("求职意向：前端开发，参与后端项目。", "后端工程师", "", 0),
+        )
+        for resume, title, jd, expected in cases:
+            with self.subTest(resume=resume, title=title):
+                self.assertEqual(intent_bonus(resume, {"title": title, "jd_text": jd}), expected)
+
+
 class JobMatchingTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
