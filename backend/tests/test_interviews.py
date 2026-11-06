@@ -101,6 +101,52 @@ class InterviewTests(unittest.TestCase):
     async def good_completion(self, **kwargs):
         return completion(model_output(json.loads(kwargs["messages"][1]["content"])))
 
+    def test_rejected_followups_use_labeled_fallback_and_replay(self):
+        session = self.create()
+
+        async def invalid_question(**kwargs):
+            data = model_output(json.loads(kwargs["messages"][1]["content"]))
+            data["next_question"]["text"] = "你如何使用Git管理版本？"
+            return completion(data)
+
+        self.model.chat.completions.create.side_effect = invalid_question
+        response = self.submit(session["interview_id"], session["question"]["id"])
+        self.assertEqual(response.status_code, 200, response.text)
+        result = response.json()
+        self.assertEqual(result["next_question"]["source"], "fallback")
+        self.assertTrue(result["next_question"]["text"].startswith("【备用题】"))
+        self.assertEqual(self.state(session["interview_id"])["round"], 2)
+        calls = self.model.chat.completions.create.await_count
+        replay = self.submit(session["interview_id"], session["question"]["id"])
+        self.assertEqual(replay.json(), result)
+        self.assertEqual(self.model.chat.completions.create.await_count, calls)
+
+    def test_invalid_feedback_does_not_use_fallback_after_bad_question(self):
+        session = self.create()
+        async def invalid_outputs(**kwargs):
+            data = model_output(json.loads(kwargs["messages"][1]["content"]))
+            data["next_question"]["text"] = "你如何使用Git管理版本？"
+            if kwargs["messages"][-1]["role"] == "user" and len(kwargs["messages"]) > 2:
+                del data["feedback"]["reference_points"]
+            return completion(data)
+        self.model.chat.completions.create.side_effect = invalid_outputs
+        response = self.submit(session["interview_id"], session["question"]["id"])
+        self.assert_error(response, 502, "INTERVIEW_GENERATION_FAILED")
+        self.assertEqual(self.state(session["interview_id"])["round"], 1)
+
+    def test_fallback_when_first_output_invalid_and_second_question_rejected(self):
+        session = self.create()
+        async def invalid_outputs(**kwargs):
+            data = model_output(json.loads(kwargs["messages"][1]["content"]))
+            data["next_question"]["text"] = "你如何使用Git管理版本？"
+            if len(kwargs["messages"]) == 2:
+                del data["feedback"]["reference_points"]
+            return completion(data)
+        self.model.chat.completions.create.side_effect = invalid_outputs
+        response = self.submit(session["interview_id"], session["question"]["id"])
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["next_question"]["source"], "fallback")
+
     def create(self, resume="ready", jd=JD):
         response = self.http.post("/api/interviews", json={"resume_id": resume, "jd_text": jd})
         self.assertEqual(response.status_code, 201, response.text)
@@ -498,6 +544,26 @@ class InterviewTests(unittest.TestCase):
 class InterviewGroundingTests(unittest.TestCase):
     def context(self, action="create", round_number=1):
         return dict(action=action, round=round_number, resume=RESUME, jd=JD, answer=ANSWER, history=[])
+
+    def test_followup_accepts_short_shared_terms_but_rejects_unrelated_question(self):
+        context = self.context("answer")
+        context["answer"] = "我根据用户需求建立数据表，通过主外键保证数据一致性，并为常用查询建立索引。"
+        draft = model_output(context)
+        draft["next_question"] = {"text": "你如何验证外键和数据约束的效果？", "focus": "数据库约束", "evidence_refs": ["a1"]}
+        self.assertIsNotNone(parse_output(json.dumps(draft, ensure_ascii=False), context).next_question)
+        draft["next_question"]["text"] = "你如何使用Git管理版本？"
+        with self.assertRaises(ValueError):
+            parse_output(json.dumps(draft, ensure_ascii=False), context)
+
+    def test_followup_prompt_supplies_real_answer_anchor(self):
+        context = self.context("answer")
+        context["answer"] = "我建立数据表，通过主外键保证一致性，并为查询建立索引。"
+        messages = build_messages(context)
+        payload = json.loads(messages[1]["content"])
+        anchor = payload["followup_anchor"]
+        self.assertEqual(anchor, {"id": "a0", "quote": "我建立数据表"})
+        self.assertIn(anchor["quote"], context["answer"])
+        self.assertIn("不可信数据", messages[0]["content"])
 
     def test_fabricated_question_evidence_rejected(self):
         context = self.context()
