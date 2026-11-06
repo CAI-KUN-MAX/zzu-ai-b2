@@ -39,6 +39,8 @@ export function useTask<T extends TaskLike>(
   error: string | null;
   /** error 是否为暂时性的（网络异常等），此时仍在自动重试 */
   transient: boolean;
+  /** error 是否为无法通过重试解决的业务错误（任务不存在、参数错误等） */
+  fatal: boolean;
   polling: boolean;
   /** 立即重新查询（例如用户点“重新获取”或已超过等待上限） */
   retry: () => void;
@@ -46,6 +48,7 @@ export function useTask<T extends TaskLike>(
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [transient, setTransient] = useState(false);
+  const [fatal, setFatal] = useState(false);
   const [polling, setPolling] = useState(false);
   const [round, setRound] = useState(0);
 
@@ -65,6 +68,7 @@ export function useTask<T extends TaskLike>(
       setData(null);
       setError(null);
       setTransient(false);
+      setFatal(false);
       setPolling(false);
       return;
     }
@@ -78,6 +82,7 @@ export function useTask<T extends TaskLike>(
 
     setError(null);
     setTransient(false);
+    setFatal(false);
     setPolling(true);
 
     const tick = async () => {
@@ -115,6 +120,7 @@ export function useTask<T extends TaskLike>(
         if (isFatal(err)) {
           setError(err instanceof ApiError ? err.message : "查询任务失败");
           setTransient(false);
+          setFatal(true);
           setPolling(false);
           return;
         }
@@ -140,5 +146,5 @@ export function useTask<T extends TaskLike>(
     };
   }, [taskId, round]);
 
-  return { data, error, transient, polling, retry };
+  return { data, error, transient, fatal, polling, retry };
 }

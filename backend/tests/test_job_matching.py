@@ -37,6 +37,27 @@ def fixture_job(identifier, jd=JD, category="计算机", education="本科", sta
                 verification_note="虚构测试夹具，不计入真实岗位集")
 
 
+class IntentBoundaryTests(unittest.TestCase):
+    def test_explicit_intent_boundaries(self):
+        from app.job_matching import intent_bonus
+
+        cases = (
+            ("求职意向：不做后端开发。", "后端工程师", "", 0),
+            ("求职意向：不是后端开发。", "后端工程师", "", 0),
+            ("求职意向：前端开发、不要后端开发。", "后端工程师", "", 0),
+            ("求职意向：不考虑后端，希望从事前端开发。", "前端工程师", "", 20),
+            ("求职意向：user experience design。", "UX 设计师", "", 20),
+            ("求职意向 用户体验设计。", "User Experience Designer", "", 20),
+            ("求职意向 后端开发", "后端工程师", "", 20),
+            ("求职意向：用户体验设计。", "后端工程师", "关注用户体验", 0),
+            ("求职意向：用户体验设计。", "体验策略师", "用户研究与可用性测试", 0),
+            ("求职意向：前端开发，参与后端项目。", "后端工程师", "", 0),
+        )
+        for resume, title, jd, expected in cases:
+            with self.subTest(resume=resume, title=title):
+                self.assertEqual(intent_bonus(resume, {"title": title, "jd_text": jd}), expected)
+
+
 class JobMatchingTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
@@ -75,6 +96,55 @@ class JobMatchingTests(unittest.TestCase):
                 return result
             time.sleep(.01)
         self.fail("job matching did not terminate")
+
+    def test_generic_terms_do_not_count_as_specific_job_skills(self):
+        resume = {"id": "r", "name": "test", "text": "本科，参与原型、文档、流程、测试、验证。"}
+        generic = fixture_job("generic", "本科要求，负责原型、文档、流程、测试、验证。")
+        item = base_scores(resume, [generic])[0]
+        self.assertFalse(set(item["matched"]) & {"原型", "文档", "流程", "测试", "验证"})
+        ux = fixture_job("ux", "本科要求，熟悉用户研究、用户访谈和可用性测试。")
+        resume["text"] = "本科，开展用户研究和用户访谈，执行可用性测试。"
+        item = base_scores(resume, [ux])[0]
+        self.assertIn("可用性测试", item["matched"])
+        self.assertIn("用户研究", item["matched"])
+
+    def test_recommendation_uses_only_explicit_supported_intent(self):
+        ux = fixture_job("ux", "岗位职责：开展用户研究和体验评估，参与座舱 UI/UX 设计。任职要求：本科。")
+        ux["title"] = "用户体验设计师"
+        other = fixture_job("other", "岗位职责：开发嵌入式软件。任职要求：本科。")
+        resume = {"id": "r", "name": "test", "text": "本科，求职意向：用户体验设计。参与用户访谈。"}
+        items = {item["job_id"]: item for item in base_scores(resume, [ux, other], True)}
+        self.assertEqual(items["ux"]["intent_bonus"], 20)
+        self.assertEqual(items["other"]["intent_bonus"], 0)
+        self.assertEqual(items["ux"]["score"], min(100, base_scores(resume, [ux])[0]["score"] + 20))
+        for text in ("本科，参与用户研究。", "求职意向：后端开发，参与用户体验项目。", "求职意向：不考虑用户体验设计。"):
+            resume["text"] = text
+            self.assertEqual(base_scores(resume, [ux], True)[0]["intent_bonus"], 0)
+        resume["text"] = "求职意向：用户体验设计。"
+        self.assertEqual(base_scores(resume, [ux], False)[0]["intent_bonus"], 0)
+
+    def test_ux_intent_does_not_promote_incidental_jd_mentions(self):
+        from app.job_matching import intent_bonus
+        resume = "求职意向：用户体验设计。"
+        unrelated = {"title": "后端开发工程师", "jd_text": "开发服务接口，关注用户体验和交互设计。"}
+        self.assertEqual(intent_bonus(resume, unrelated), 0)
+        self.assertEqual(intent_bonus(resume, {"title": "UX 设计师", "jd_text": "设计界面"}), 20)
+        self.assertEqual(intent_bonus("求职意向：不考虑用户体验设计。", {"title": "UX 设计师", "jd_text": ""}), 0)
+
+    def test_supported_intents_multiple_and_job_title_boundaries(self):
+        from app.job_matching import intent_bonus
+        cases = [
+            ("后端开发", "后端开发工程师"), ("前端开发", "前端工程师"),
+            ("数据分析", "数据分析师"), ("产品经理", "产品经理"),
+            ("软件测试", "软件测试工程师"),
+        ]
+        for intention, title in cases:
+            with self.subTest(intention=intention):
+                self.assertEqual(intent_bonus("求职意向：" + intention, {"title": title, "jd_text": ""}), 20)
+                self.assertEqual(intent_bonus("求职意向：" + intention, {"title": "销售", "jd_text": title}), 0)
+        self.assertEqual(intent_bonus("求职意向：前端开发、后端开发。", {"title": "后端工程师", "jd_text": ""}), 20)
+        self.assertEqual(intent_bonus("求职意向：前端开发，参与后端项目。", {"title": "后端工程师", "jd_text": ""}), 0)
+        self.assertEqual(intent_bonus("求职意向：不考虑后端开发。", {"title": "后端工程师", "jd_text": ""}), 0)
 
     def test_catalogue_filters_paging_and_detail(self):
         response = self.client.get("/api/jobs").json()

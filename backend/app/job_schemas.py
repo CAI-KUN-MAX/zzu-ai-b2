@@ -76,6 +76,7 @@ class JobMatchItem(Contract):
     score: int = Field(ge=0, le=100)
     stage1_score: int = Field(ge=0, le=100)
     rule_score: int | None = Field(default=None, ge=0, le=100)
+    intent_bonus: int = Field(default=0, ge=0, le=20)
     embedding_similarity: float | None = Field(default=None, ge=-1, le=1)
     level: Literal["high", "medium", "low"]
     level_label: str

@@ -33,6 +33,19 @@ class RecommendationCandidatesTests(unittest.TestCase):
             self.assertEqual(len(result["items"]), 8)
         asyncio.run(check())
 
+    def test_explicit_ux_intent_does_not_exclude_unrecognized_candidates(self):
+        repository = MagicMock()
+        repository.resume.return_value = {"id": "r", "status": "ready", "text": "本科。求职意向：用户体验设计。"}
+        jobs = [dict(job_id="ux", title="用户洞察岗", education="本科", jd_text="负责用户研究。"),
+                dict(job_id="unrecognized", title="体验策略师", education="本科", jd_text="分析乘客痛点。")]
+        repository.recommendation_candidates.return_value = [
+            SimpleNamespace(model_dump=lambda job=job, **kwargs: job) for job in jobs]
+        service = JobMatchService(repository, None)
+        service.create = MagicMock(return_value={"task_id": "t"})
+        result = asyncio.run(service.recommend(SimpleNamespace(resume_id="r", category=None, city=None)))
+        self.assertEqual(result, {"task_id": "t"})
+        self.assertEqual(set(service.create.call_args.args[0].job_ids), {"ux", "unrecognized"})
+
     def test_larger_candidate_pool_and_top_eight_response(self):
         repository = MagicMock()
         repository.resume.return_value = {"id": "r", "status": "ready", "text": "本科，Python 项目经历。"}

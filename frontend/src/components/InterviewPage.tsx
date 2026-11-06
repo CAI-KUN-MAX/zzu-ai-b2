@@ -27,7 +27,7 @@ interface InterviewPageProps {
   /** 岗位名称（如“后端开发 · 某公司”），有则在确认页展示，否则退回 JD 首行 */
   jobTitle?: string;
   /** 返回筛选结果页；原页面不卸载，展开状态与报告都还在 */
-  onExit: () => void;
+  onExit: (confirmedTips?: string[]) => void;
 }
 
 interface RoundRecord {
@@ -305,7 +305,7 @@ export function InterviewPage({
         <div className="flex items-center justify-between gap-3">
           <button
             type="button"
-            onClick={onExit}
+            onClick={() => onExit(report?.rounds.flatMap((round) => round.resume_suggestions.filter((_, index) => confirmedSuggestions[`${round.round}-${index}`])))}
             className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-ink-500 transition-colors hover:bg-white hover:text-ink-900"
           >
             <ArrowLeftIcon className="h-4 w-4" />
@@ -589,6 +589,17 @@ export function InterviewPage({
                 全部 {rounds.length} 轮反馈都在下面。建议先把「可以补充」里的点挑两条写进回答，再重新练一遍同样的题。
               </p>
 
+              <section className="mt-4 rounded-xl border border-surface-line px-4 py-3" aria-label="面试反馈汇总">
+                <h2 className="text-sm font-semibold">面试反馈汇总</h2>
+                <p className="mt-1 text-xs text-ink-500">以下整理自各轮反馈，未重新评分；请结合岗位要求和真实经历核对。</p>
+                {([['表现亮点', 'strengths'], ['后续练习与简历核对', 'improvements']] as const).map(([label, field]) => {
+                  const entries = rounds.flatMap((round) => round.feedback[field].map((text) => ({ text, round: round.round })));
+                  return <div key={field} className="mt-3 text-sm text-ink-700"><h3 className="font-medium">{label}</h3>
+                    {entries.length ? <ul className="mt-1 list-inside list-disc space-y-1">{entries.map((entry, index) => <li key={`${entry.round}-${index}`}>第 {entry.round} 轮：{entry.text}</li>)}</ul> : <p className="mt-1 text-xs text-ink-500">本次没有相关反馈</p>}
+                  </div>;
+                })}
+              </section>
+
               {!IS_MOCK_MODE && reportError ? (
                 <p role="alert" className="mt-3 text-sm text-rose-700">
                   {reportError} <button type="button" className="underline" onClick={() => setReportAttempt((n) => n + 1)}>重新加载报告</button>
@@ -598,7 +609,7 @@ export function InterviewPage({
               {report ? (
                 <div className="mt-4 rounded-xl bg-surface-soft/80 px-4 py-3 text-[12px] leading-relaxed text-ink-700">
                   <p>{report.confirmation_notice}</p>
-                  <p className="mt-1">勾选仅保留在当前页面，刷新或离开后清除；不会保存确认结果，也不会自动修改简历。</p>
+                  <p className="mt-1">勾选后返回结果页可查看，保存在当前浏览器标签页；关闭标签页后清除，不会自动修改简历。</p>
                   <details className="mt-2">
                     <summary className="cursor-pointer font-medium">查看本次面试的岗位要求</summary>
                     <p className="mt-2 whitespace-pre-wrap">{report.jd_text}</p>
@@ -616,7 +627,7 @@ export function InterviewPage({
                 </button>
                 <button
                   type="button"
-                  onClick={onExit}
+                  onClick={() => onExit(report?.rounds.flatMap((round) => round.resume_suggestions.filter((_, index) => confirmedSuggestions[`${round.round}-${index}`])))}
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-surface-line bg-white px-5 py-2.5 text-sm font-medium text-ink-700 transition-colors hover:border-brand-300 hover:text-brand-700"
                 >
                   返回结果页

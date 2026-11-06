@@ -305,7 +305,11 @@ export default function App() {
             <button className={view.name === "jobResult" && interviewOpen ? "active" : ""} onClick={() => lastMatch && !(view.name === "jobResult" && interviewOpen) && openResult(lastMatch)} disabled={!lastMatch} title={lastMatch ? "先选择结果中的岗位开始面试" : "完成匹配后开始面试"}><span>♬</span>模拟面试</button>
             <button className={view.name === "records" ? "active" : ""} onClick={() => { clearHash(); setView({ name: "records" }); }}><span>▤</span>记录</button>
           </nav>
-          <div className="offer-sidebar-note">从一份简历开始，<br />找到适合你的下一步。</div>
+          <div className="offer-sidebar-note">
+            {auth.status === "authenticated"
+              ? "记录跟随账号，换设备登录也能看到。"
+              : "当前是游客空间，记录只保存在这台设备上。"}
+          </div>
           <div className="offer-account">
             {auth.status === "loading" ? (
               <p className="offer-account-note">正在确认登录状态…</p>
@@ -341,18 +345,7 @@ export default function App() {
           </div>
         </aside>
         <div className="offer-content">
-          <header className="offer-topbar">
-            <span>简历与岗位匹配</span>
-            <span className="offer-topbar-desktop">{IS_MOCK_MODE ? "演示数据" : "你的求职空间"}</span>
-            <div className="offer-mobile-account">
-              {auth.status === "loading" ? <span>确认身份中…</span> : auth.status === "error" ? (
-                <button type="button" onClick={() => void auth.refresh()}>身份确认失败，重试</button>
-              ) : auth.status === "authenticated" && auth.user ? (
-                <><span>{auth.user.username}</span><button type="button" onClick={() => void handleLogout()}>退出</button></>
-              ) : <button type="button" onClick={() => setAuthDialog("login")}>登录 / 注册</button>}
-              {authActionError ? <span role="alert">{authActionError}</span> : null}
-            </div>
-          </header>
+          <header className="offer-topbar"><span>简历与岗位匹配</span><span>{IS_MOCK_MODE ? "演示数据" : "你的求职空间"}</span></header>
           {view.name === "home" ? (
             <main className="offer-dashboard">
               <section className="dashboard-panel dashboard-main">
