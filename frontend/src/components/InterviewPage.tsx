@@ -365,7 +365,7 @@ export function InterviewPage({
             <p className="mt-5 flex items-start gap-2 text-[11px] leading-relaxed text-ink-500">
               <InfoIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               <span>
-                练习只针对这一份简历和当前岗位，题目与反馈由 AI 生成，用于发现回答中的缺口，
+                练习只针对这一份简历和当前岗位，题目与反馈由 AI 生成；必要时使用标注的系统备用题，用于发现回答中的缺口，
                 不代表任何录用判断。
               </span>
             </p>
