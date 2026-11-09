@@ -168,9 +168,9 @@
 
 /* 岗位速览：横向滑动卡片 */
 .job-carousel { position:relative; margin-top:10px; }
-.job-carousel-track { display:flex; gap:14px; overflow-x:auto; scroll-snap-type:x mandatory; overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding:4px 2px 12px; }
+.job-carousel-track { display:flex; flex-wrap:wrap; gap:14px; overflow:visible; padding:4px 2px 12px; }
 .job-carousel-track::-webkit-scrollbar { display:none; }
-.job-slide { display:flex; flex:0 0 calc((100% - 28px) / 3); min-width:0; flex-direction:column; gap:9px; padding:16px; scroll-snap-align:start; text-align:left; color:#273248; border:1px solid #fff; border-radius:18px; background:linear-gradient(160deg,#ffffffb8,#f1f5ff82); box-shadow:inset 0 1px 1px #fff,0 16px 26px -24px #283c5a99; transition:box-shadow .2s ease; }
+.job-slide { display:flex; flex:1 1 calc((100% - 28px) / 3); min-width:0; flex-direction:column; gap:9px; padding:16px; scroll-snap-align:start; text-align:left; color:#273248; border:1px solid #fff; border-radius:18px; background:linear-gradient(160deg,#ffffffb8,#f1f5ff82); box-shadow:inset 0 1px 1px #fff,0 16px 26px -24px #283c5a99; transition:box-shadow .2s ease; }
 .job-slide:hover { box-shadow:inset 0 1px 1px #fff,0 22px 34px -24px #283c5a99; }
 .job-slide-picked { flex-shrink:0; padding:3px 9px; border-radius:999px; background:#e6ecff; color:#2f4fd6; font-size:11px; }
 .job-slide-title { font-size:15px; font-weight:500; line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
@@ -186,7 +186,7 @@
 .job-carousel-hint { display:none; flex-shrink:0; color:#6d7990; font-size:12px; }
 @media(max-width:1080px){ .job-slide { flex-basis:calc((100% - 14px) / 2); } }
 @media(max-width:760px),(hover:none){ .job-carousel-arrows { display:none; }.job-carousel-hint { display:inline; } }
-@media(max-width:760px){ .job-slide { flex-basis:84%; } }
+@media(max-width:760px){ .job-slide { flex-basis:100%; } }
 
 /* 选岗页：推荐优先、紧凑卡片、筛选和加载更多 */
 .picker-section-head { display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 10px; margin-bottom:12px; }
@@ -259,3 +259,6 @@
 
 /* 简历记录失效提示（不是错误，只是需要重新上传） */
 .picker-expired { margin-top:10px; padding:9px 12px; border:1px solid #f3e0b8; border-radius:11px; background:#fdf8ec; color:#8a6a2a; font-size:12px; line-height:1.7; }
+
+/* 岗位速览：默认铺 6 个，可展开 */
+.dashboard-heading-actions { display:flex; align-items:center; gap:14px; }

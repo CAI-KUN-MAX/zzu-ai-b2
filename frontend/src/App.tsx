@@ -162,6 +162,7 @@ export default function App() {
   }, [view.name]);
 
   const previewList = useMemo(() => previewJobs(homeJobs, 12), [homeJobs]);
+  const [jobsExpanded, setJobsExpanded] = useState(false);
 
   // 刷新时带着 #result 但已没有可恢复的记录，去掉这个无效 hash
   useEffect(() => {
@@ -412,12 +413,23 @@ export default function App() {
               <section className="dashboard-panel dashboard-wide" aria-label="岗位速览">
                 <div className="dashboard-heading">
                   <h2>岗位速览</h2>
-                  <button className="dashboard-link" onClick={() => setView({ name: "job" })}>
-                    查看全部 →
-                  </button>
+                  <div className="dashboard-heading-actions">
+                    {previewList.length > 6 ? (
+                      <button className="dashboard-link" onClick={() => setJobsExpanded((value) => !value)}>
+                        {jobsExpanded ? "收起" : `展开全部 ${previewList.length} 个`}
+                      </button>
+                    ) : null}
+                    <button className="dashboard-link" onClick={() => setView({ name: "job" })}>
+                      查看全部 →
+                    </button>
+                  </div>
                 </div>
                 {homeJobs.length ? (
-                  <JobCarousel jobs={previewList} selectedIds={draftRef.current.selected} onOpen={setHomeJdJob} />
+                  <JobCarousel
+                    jobs={jobsExpanded ? previewList : previewList.slice(0, 6)}
+                    selectedIds={draftRef.current.selected}
+                    onOpen={setHomeJdJob}
+                  />
                 ) : (
                   <p className="dashboard-copy">岗位目录暂时不可用，请稍后查看。</p>
                 )}
