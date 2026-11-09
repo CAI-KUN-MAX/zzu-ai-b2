@@ -68,7 +68,7 @@ function PickerCard({ job, active, reason, onToggle, onDetail }: PickerCardProps
         <span className="picker-card-text">
           <span className="picker-job-title">{job.title}</span>
           <small>{job.company} · {cityLabel(job.cities)} · {job.education}</small>
-          {reason ? <small className="picker-card-reason">{reason}</small> : null}
+          {reason ? <small className="picker-card-reason"><strong>推荐理由：</strong>{reason}</small> : null}
         </span>
         <span className="picker-check" aria-hidden="true">{active ? "✓" : ""}</span>
       </button>
@@ -102,7 +102,6 @@ export function JobMatchPage({
   const [city, setCity] = useState<string>(ALL);
   const [search, setSearch] = useState(initialSearch ?? "");
   const [shownCount, setShownCount] = useState(LIST_PAGE_SIZE);
-  const [listExpanded, setListExpanded] = useState(false);
   const [recExpanded, setRecExpanded] = useState(false);
   const [recTaskId, setRecTaskId] = useState<string | null>(null);
   const [recError, setRecError] = useState<string | null>(null);
@@ -285,8 +284,6 @@ export function JobMatchPage({
     () => (filtering ? visibleJobs : visibleJobs.filter((job) => !recIds.has(job.job_id))),
     [filtering, visibleJobs, recIds]
   );
-  // 有推荐时全部岗位先收起，用户想自己找时再展开
-  const listCollapsed = !filtering && recItems.length > 0 && !listExpanded;
 
   function retryRecommendation() {
     if (recResumeId) recommendationTasks.delete(recResumeId);
@@ -347,7 +344,7 @@ export function JobMatchPage({
 
   return (
     <main className="offer-picker">
-      <div className="picker-title"><div><span className="offer-eyebrow">FIND YOUR MATCH</span><h1>选择岗位</h1><p>挑选感兴趣的岗位，用简历发现更适合你的方向。</p></div>
+      <div className="picker-title"><div><span className="offer-eyebrow">FIND YOUR MATCH</span><h1>选择岗位</h1><p>可选择多个岗位，确认简历后点击“开始匹配”。</p></div>
         {lastMatch && <button className="picker-last" onClick={onOpenLastMatch}>继续查看上次结果 →</button>}
       </div>
       <div className="picker-layout">
@@ -397,14 +394,13 @@ export function JobMatchPage({
               {categories.map((item) => <button type="button" key={item} aria-pressed={item === category} onClick={() => setCategory(item)} className={item === category ? "active" : ""}>{item}<span>{item === ALL ? jobTotal : categoryCount.get(item) ?? 0}</span></button>)}
             </div>
           </div>
-          {jobsLoading ? (!recResumeId && <p className="picker-message" aria-busy="true">正在加载岗位…</p>) : jobsError ? <p className="picker-message" role="alert">{jobsError}</p> : listCollapsed ? (
-            <button type="button" className="picker-more" onClick={() => setListExpanded(true)}>浏览其他岗位（{listJobsToShow.length} 个）</button>
-          ) : listJobsToShow.length === 0 ? (
-            <div className="picker-message"><p>没有找到符合条件的岗位，请尝试其他分类或关键词。</p>{filtering && <button type="button" className="picker-clear" onClick={clearFilters}>清除筛选</button>}</div>
+          {jobsLoading ? (!recResumeId && <p className="picker-message" aria-busy="true">正在加载岗位…</p>) : jobsError ? <p className="picker-message" role="alert">{jobsError}</p> : listJobsToShow.length === 0 ? (
+            <div className="picker-message"><p>{filtering ? "没有找到符合条件的岗位，请尝试其他分类或关键词。" : recItems.length ? "其他岗位已全部显示在上方推荐中。" : "暂无可展示的岗位。"}</p>{filtering && <button type="button" className="picker-clear" onClick={clearFilters}>清除筛选</button>}</div>
           ) : (
             <section className="picker-list" aria-label={filtering ? "筛选结果" : "全部岗位"}>
               <div className="picker-section-head">
                 <h2>{filtering ? "筛选结果" : recItems.length ? "其他岗位" : "全部岗位"}<span>{listJobsToShow.length}</span></h2>
+                {!filtering && <small>可继续选择感兴趣的岗位</small>}
                 {filtering && <button type="button" className="picker-clear" onClick={clearFilters}>清除筛选</button>}
               </div>
               <div className="picker-grid">
