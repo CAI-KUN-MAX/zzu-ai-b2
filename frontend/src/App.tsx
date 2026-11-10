@@ -311,42 +311,35 @@ export default function App() {
               ? "记录跟随账号，换设备登录也能看到。"
               : "当前是游客空间，记录只保存在这台设备上。"}
           </div>
-          <div className="offer-account">
-            {auth.status === "loading" ? (
-              <p className="offer-account-note">正在确认登录状态…</p>
-            ) : auth.status === "error" ? (
-              <button type="button" className="offer-account-btn" onClick={() => void auth.refresh()}>
-                身份确认失败，点此重试
-              </button>
-            ) : auth.status === "authenticated" && auth.user ? (
-              <>
-                <div className="offer-account-user">
-                  <span className="picker-logo small">{auth.user.username.slice(0, 1).toUpperCase()}</span>
-                  <strong title={auth.user.username}>{auth.user.username}</strong>
-                  <button type="button" onClick={() => void handleLogout()}>退出</button>
-                </div>
-                <p className="offer-account-note">当前记录的简历与结果只属于这个账号</p>
-              </>
-            ) : auth.unavailable ? (
-              <>
-                <button type="button" className="offer-account-btn" onClick={() => setAuthDialog("login")}>
-                  登录 / 注册（即将开放）
-                </button>
-                <p className="offer-account-note">账号服务还没上线，可以先以游客身份使用</p>
-              </>
-            ) : (
-              <>
-                <button type="button" className="offer-account-btn" onClick={() => setAuthDialog("login")}>
-                  登录 / 注册 →
-                </button>
-                <p className="offer-account-note">游客也能用，登录后可单独保存自己的记录</p>
-              </>
-            )}
-            {authActionError ? <p className="auth-error">{authActionError}</p> : null}
-          </div>
         </aside>
         <div className="offer-content">
-          <header className="offer-topbar"><span>简历与岗位匹配</span><span>{IS_MOCK_MODE ? "演示数据" : "你的求职空间"}</span></header>
+          <header className="offer-topbar">
+            <span>简历与岗位匹配</span>
+            <span className="topbar-account">
+              {auth.status === "loading" ? (
+                <span className="topbar-hint">正在确认登录状态…</span>
+              ) : auth.status === "error" ? (
+                <button type="button" className="topbar-link" onClick={() => void auth.refresh()}>
+                  身份确认失败，重试
+                </button>
+              ) : auth.status === "authenticated" && auth.user ? (
+                <>
+                  <span className="topbar-user" title={auth.user.username}>
+                    <i>{auth.user.username.slice(0, 1).toUpperCase()}</i>
+                    {auth.user.username}
+                  </span>
+                  <button type="button" className="topbar-link" onClick={() => void handleLogout()}>退出</button>
+                </>
+              ) : (
+                <>
+                  {IS_MOCK_MODE ? <span className="topbar-hint">演示数据</span> : null}
+                  <button type="button" className="topbar-link" onClick={() => setAuthDialog("login")}>
+                    登录 / 注册
+                  </button>
+                </>
+              )}
+            </span>
+          </header>
           {view.name === "home" ? (
             <main className="offer-dashboard">
               <section className="dashboard-panel dashboard-main">
