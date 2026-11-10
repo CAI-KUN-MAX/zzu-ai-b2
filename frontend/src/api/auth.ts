@@ -6,6 +6,7 @@ import { ApiError, request } from "./http";
  */
 
 export interface AuthUser {
+  id: string;
   username: string;
 }
 
@@ -19,9 +20,10 @@ export function normalizeUsername(raw: string): string {
 }
 
 /** 后端返回 {"authenticated": bool, "user": {...} | null}，user 里的 username 才是真名 */
-function pickUser(payload: { user?: { username?: unknown } | null; authenticated?: boolean } | null): AuthUser | null {
+function pickUser(payload: { user?: { id?: unknown; username?: unknown } | null; authenticated?: boolean } | null): AuthUser | null {
   const username = payload?.user && typeof payload.user.username === "string" ? payload.user.username.trim() : "";
-  return username ? { username } : null;
+  const id = payload?.user && typeof payload.user.id === "string" ? payload.user.id.trim() : "";
+  return username && id ? { id, username } : null;
 }
 
 /**
@@ -29,15 +31,18 @@ function pickUser(payload: { user?: { username?: unknown } | null; authenticated
  * 顺带：这一发 GET 会让后端下发 CSRF cookie，后续写请求才有令牌可用。
  */
 export async function fetchMe(): Promise<AuthUser | null> {
-  const data = await request<{ authenticated?: boolean; user?: { username?: unknown } | null }>(
+  const data = await request<{ authenticated?: boolean; user?: { id?: unknown; username?: unknown } | null }>(
     "/api/auth/me",
     { method: "GET" }
   );
-  return pickUser(data);
+  if (data.authenticated === false && data.user === null) return null;
+  const user = pickUser(data);
+  if (data.authenticated !== true || !user) throw new ApiError("登录服务返回的数据不完整", "AUTH_BAD_RESPONSE");
+  return user;
 }
 
 async function postAuth(path: string, payload: Record<string, unknown>): Promise<AuthUser> {
-  const data = await request<{ user?: { username?: unknown } | null }>(path, {
+  const data = await request<{ user?: { id?: unknown; username?: unknown } | null }>(path, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),

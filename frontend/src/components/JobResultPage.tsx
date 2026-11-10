@@ -192,6 +192,13 @@ function JobDetail({
             </div>
           </div>
 
+          {item.report && item.report.gaps.length > 0 ? (
+            <div className="mt-5">
+              <Gaps gaps={item.report.gaps} className="mt-0" />
+              <RewriteSuggestions gaps={item.report.gaps} className="mt-5" />
+            </div>
+          ) : null}
+
           {item.skill_assessments && item.skill_assessments.length > 0 ? (
             <section className="mt-4 rounded-xl bg-surface-soft/70 p-3.5" aria-label="技能证据">
               <h2 className="text-sm font-semibold text-ink-700">技能证据</h2>
@@ -382,8 +389,6 @@ function JobDetail({
               className=""
             />
             <Highlights highlights={item.report.highlights} className="" />
-            <Gaps gaps={item.report.gaps} className="" />
-            <RewriteSuggestions gaps={item.report.gaps} className="" />
           </div>
         ) : isAnalyzing(item) ? (
           <p className="mt-5 flex items-start gap-2 rounded-xl border border-brand-100 bg-brand-50 px-4 py-3 text-[12px] leading-relaxed text-brand-700">
@@ -874,7 +879,7 @@ export function JobResultPage({
         <div className="offer-results-layout">
           <section className="picker-panel result-ranks" aria-label="匹配排序"><div className="picker-panel-head"><h2>匹配排序</h2><span>{items.length} 个岗位</span></div>
             <div className="result-rank-list">{items.map((item, index) => { const job = displayedJobs[item.job_id]; return <button key={item.job_id} type="button" aria-pressed={detailJob?.job_id === item.job_id} className={`result-rank ${detailJob?.job_id === item.job_id ? "active" : ""}`} onClick={() => setDetailJobId(item.job_id)}>
-              <span className="result-order">{index + 1}</span><span className="picker-logo small">{job?.company.slice(0,1) || "岗"}</span><span className="result-rank-text"><strong>{item.title}</strong><small>{job?.company || "岗位"}{job?.cities?.length ? " · " + job.cities[0] : ""} · {analysisLabel(item)}</small></span><span className="result-score">{item.score}</span>
+              <span className="result-order">{index + 1}</span><span className="picker-logo small">{job?.company.slice(0,1) || "岗"}</span><span className="result-rank-text"><strong>{item.title}</strong><small>{job?.company || "岗位"}{job?.cities?.length ? " · " + job.cities[0] : ""} · {analysisLabel(item)}{item.report?.gaps?.length ? ` · 待补 ${item.report.gaps.length} 项` : ""}</small></span><span className="result-score">{item.score}</span>
             </button>; })}</div>
             <p className="picker-hint">结果根据简历与岗位内容计算，分析建议仅供参考。</p>
           </section>

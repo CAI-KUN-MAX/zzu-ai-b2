@@ -50,3 +50,29 @@ test('authentication reads nested users and rejects malformed authenticated resp
   response = { authenticated: true, user: null };
   await assert.rejects(auth.fetchMe(), /不完整/);
 });
+
+test('concurrent writes share CSRF bootstrap and never write without a cookie', async () => {
+  const document = { cookie: '' };
+  const calls = [];
+  const fetch = async (url, options) => {
+    calls.push({ url, options });
+    if (url === '/api/auth/me') {
+      await new Promise(resolve => setTimeout(resolve, 10));
+      document.cookie = 'resume_csrf=localtesttoken';
+    }
+    return { ok: true, text: async () => '{}' };
+  };
+  const api = load('http.ts', { document, fetch });
+  await Promise.all([api.request('/api/a', { method: 'POST' }), api.request('/api/b', { method: 'POST' })]);
+  assert.equal(calls.filter(call => call.url === '/api/auth/me').length, 1);
+  assert.equal(calls.filter(call => call.options.headers['X-CSRF-Token'] === 'localtesttoken').length, 2);
+
+  document.cookie = '';
+  const failedCalls = [];
+  const missing = load('http.ts', { document, fetch: async url => {
+    failedCalls.push(url);
+    return { ok: true, text: async () => '{}' };
+  }});
+  await assert.rejects(missing.request('/api/a', { method: 'POST' }), /安全令牌/);
+  assert.deepEqual(failedCalls, ['/api/auth/me']);
+});
