@@ -110,7 +110,7 @@ function buildApiError(parsed: unknown, status: number): ApiError {
 }
 
 export interface RequestOptions {
-  method?: "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | "DELETE";
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: BodyInit | null;
   /** 注意：上传 FormData 时不要传 Content-Type，边界由浏览器生成 */
   headers?: Record<string, string>;
@@ -122,12 +122,15 @@ export interface RequestOptions {
   signal?: AbortSignal;
 }
 
-function csrfCookie(): string | undefined {
-  return document.cookie.split(";").map((part) => part.trim())
-    .find((part) => part.startsWith("resume_csrf="))?.slice("resume_csrf=".length);
+/**
+ * 读双提交用的 CSRF 令牌：后端在 GET /api/auth/me 时下发 resume_csrf cookie，
+ * 之后所有写请求要把同值放进 X-CSRF-Token，否则 403 CSRF_REJECTED。
+ */
+function readCsrfToken(): string {
+  if (typeof document === "undefined") return "";
+  const match = document.cookie.match(/(?:^|;\s*)resume_csrf=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : "";
 }
-
-let csrfBootstrap: Promise<unknown> | null = null;
 
 /** 发起请求并解析 JSON；失败一律抛 ApiError */
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -148,19 +151,16 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   signal?.addEventListener("abort", forwardAbort);
 
   try {
-    const requestHeaders: Record<string, string> = { Accept: "application/json", ...headers };
-    if (["POST", "PUT", "PATCH", "DELETE"].includes(method.toUpperCase())) {
-      if (!csrfCookie()) {
-        csrfBootstrap ??= request("/api/auth/me").finally(() => { csrfBootstrap = null; });
-        await csrfBootstrap;
-      }
-      const csrf = csrfCookie();
-      if (csrf) requestHeaders["X-CSRF-Token"] = csrf;
-    }
+    // 写方法统一补 CSRF；GET 不带（后端也不校验）
+    const csrf = method === "GET" ? "" : readCsrfToken();
     const res = await fetch(`${API_BASE}${path}`, {
       method,
       credentials: "include",
-      headers: requestHeaders,
+      headers: {
+        Accept: "application/json",
+        ...(csrf ? { "X-CSRF-Token": csrf } : {}),
+        ...headers,
+      },
       body,
       signal: controller.signal,
     });

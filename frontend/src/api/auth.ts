@@ -1,15 +1,12 @@
 import { ApiError, request } from "./http";
 
-export interface AuthUser {
-  id: string;
-  username: string;
-}
+/**
+ * 登录相关接口。后端尚未实现时这些请求会返回 404/501，
+ * 这里不做任何 mock，让页面如实提示"服务暂未开放"。
+ */
 
-function parseUser(value: unknown): AuthUser | null {
-  if (!value || typeof value !== "object") return null;
-  const user = value as Partial<AuthUser>;
-  return typeof user.id === "string" && user.id && typeof user.username === "string" && user.username
-    ? { id: user.id, username: user.username } : null;
+export interface AuthUser {
+  username: string;
 }
 
 /** 用户名：4–20 位英文字母、数字或下划线，提交前按小写处理 */
@@ -21,28 +18,31 @@ export function normalizeUsername(raw: string): string {
   return raw.trim().toLowerCase();
 }
 
-/** 返回 null 表示确实未登录；网络或服务异常一律抛出，交给页面重试 */
+/** 后端返回 {"authenticated": bool, "user": {...} | null}，user 里的 username 才是真名 */
+function pickUser(payload: { user?: { username?: unknown } | null; authenticated?: boolean } | null): AuthUser | null {
+  const username = payload?.user && typeof payload.user.username === "string" ? payload.user.username.trim() : "";
+  return username ? { username } : null;
+}
+
+/**
+ * 返回 null 表示确实未登录；网络或服务异常一律抛出，交给页面重试。
+ * 顺带：这一发 GET 会让后端下发 CSRF cookie，后续写请求才有令牌可用。
+ */
 export async function fetchMe(): Promise<AuthUser | null> {
-  try {
-    const data = await request<{ authenticated: boolean; user: unknown }>("/api/auth/me", { method: "GET" });
-    if (data.authenticated === false && data.user === null) return null;
-    const user = parseUser(data.user);
-    if (data.authenticated === true && user) return user;
-    throw new ApiError("身份服务返回的数据不完整", "AUTH_BAD_RESPONSE");
-  } catch (err) {
-    // 401/403 才是"没登录"，其他错误不能当成未登录
-    if (err instanceof ApiError && (err.status === 401 || err.status === 403)) return null;
-    throw err;
-  }
+  const data = await request<{ authenticated?: boolean; user?: { username?: unknown } | null }>(
+    "/api/auth/me",
+    { method: "GET" }
+  );
+  return pickUser(data);
 }
 
 async function postAuth(path: string, payload: Record<string, unknown>): Promise<AuthUser> {
-  const data = await request<{ user: unknown }>(path, {
+  const data = await request<{ user?: { username?: unknown } | null }>(path, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  const user = parseUser(data.user);
+  const user = pickUser(data);
   if (!user) {
     throw new ApiError("登录服务返回的数据不完整", "AUTH_BAD_RESPONSE");
   }
