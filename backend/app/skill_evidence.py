@@ -31,6 +31,14 @@ TASK = re.compile(r"项目|系统|服务|平台|接口|功能|模块|数据|数�
 NEGATION = re.compile(r"没有|缺乏|缺少|不会|未使用|未接触|未掌握|不熟悉|不掌握|无相关|无经验|尚未|不了解|没有实践|无实践|not\s+(?:used|experienced|familiar)|no\s+experience", re.I)
 WEAK = re.compile(r"了解|学习|接触|入门|听说|理论|计划|将要|拟使用|学习中|待学习|无实践|缺少实践|缺乏实践|未实践|未使用|未接触", re.I)
 
+STARTER_EXERCISES = {
+    "Java": "用 Java 编写并运行一个能读取输入、计算结果的小程序，保存源码和运行输出",
+    "Python": "用 Python 编写并运行一个读取数据、输出统计结果的小脚本，保存代码和运行输出",
+    "MySQL": "创建一张练习表并执行插入和查询，保存 SQL 语句与查询结果",
+    "Docker": "用 Docker 启动一个示例容器，保存启动命令和容器运行状态",
+    "React": "用 React 制作一个可输入并展示内容的小页面，保存代码和页面运行结果",
+}
+
 
 def mentions(text, name):
     return any(re.search(rf"(?<![A-Za-z0-9]){re.escape(alias)}(?![A-Za-z0-9])", text, re.I)
@@ -126,7 +134,13 @@ def reconcile_job_report(report, skills):
             # Choose a practical sentence, not an earlier bare mention.
             report.highlights.append(Highlight(title=skill["assessment"], evidence=skill["demonstrated_evidence"], source="resume"))
         else:
-            suggestion = (f"核对 {name} 的实际经历；仅在确有相关实践时补充具体任务和成果。")
+            exercise = STARTER_EXERCISES.get(name, f"按岗位要求完成一个 {name} 入门练习，记录操作步骤和可检查的结果")
+            if status == "mentioned_only":
+                suggestion = (f"梳理一次使用 {name} 的真实实践，记录任务、操作和结果；"
+                              f"如暂无实践，可先{exercise}。")
+            else:
+                suggestion = (f"先核对自己对 {name} 的掌握情况；如需补基础，可先{exercise}，"
+                              "再对照岗位要求确认下一步。")
             report.gaps.append(Gap(title=skill["assessment"], jd_requirement=skill["jd_evidence"],
                                    resume_evidence=skill["resume_evidence"][0] if skill["resume_evidence"] else None,
                                    suggestion=suggestion,

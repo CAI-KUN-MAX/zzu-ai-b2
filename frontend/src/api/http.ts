@@ -132,6 +132,20 @@ function readCsrfToken(): string {
   return match ? decodeURIComponent(match[1]) : "";
 }
 
+let csrfBootstrap: Promise<unknown> | null = null;
+
+async function ensureCsrfToken(): Promise<string> {
+  let token = readCsrfToken();
+  if (token) return token;
+  if (!csrfBootstrap) {
+    csrfBootstrap = request("/api/auth/me").finally(() => { csrfBootstrap = null; });
+  }
+  await csrfBootstrap;
+  token = readCsrfToken();
+  if (!token) throw new ApiError("无法获取安全令牌，请检查浏览器 Cookie 设置", "CSRF_UNAVAILABLE");
+  return token;
+}
+
 /** 发起请求并解析 JSON；失败一律抛 ApiError */
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const {
@@ -152,7 +166,8 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
 
   try {
     // 写方法统一补 CSRF；GET 不带（后端也不校验）
-    const csrf = method === "GET" ? "" : readCsrfToken();
+    const csrf = method === "GET" ? "" : await ensureCsrfToken();
+    if (controller.signal.aborted) throw new DOMException("Aborted", "AbortError");
     const res = await fetch(`${API_BASE}${path}`, {
       method,
       credentials: "include",

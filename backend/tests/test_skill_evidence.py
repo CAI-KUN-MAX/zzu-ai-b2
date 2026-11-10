@@ -62,6 +62,21 @@ class SkillEvidenceTests(unittest.TestCase):
         self.assertEqual(by_name["Docker"]["evidence_status"], "uncertain")
         self.assertEqual(by_name["PCR"]["evidence_status"], "not_found")
 
+    def test_suggestions_distinguish_missing_and_mentioned_evidence(self):
+        skills = observations("技能：MySQL。未使用 Docker。", "要求 Java、MySQL 和 Docker。")
+        report = MOCK_RESPONSES["medium"].model_copy(deep=True)
+        report.gaps = []
+        gaps = {gap.title: gap for gap in reconcile_job_report(report, skills).gaps}
+        java = next(g for title, g in gaps.items() if "Java" in title)
+        mysql = next(g for title, g in gaps.items() if "MySQL" in title)
+        docker = next(g for title, g in gaps.items() if "Docker" in title)
+        self.assertIn("编写并运行", java.suggestion)
+        self.assertIn("运行输出", java.suggestion)
+        self.assertIn("真实实践", mysql.suggestion)
+        self.assertIn("如暂无实践", mysql.suggestion)
+        self.assertIn("核对", docker.suggestion)
+        self.assertIn("仅在确有相关经历时", java.rewrite_suggestion)
+
     def test_action_does_not_apply_to_unrelated_mention(self):
         resume = "技能：MySQL，使用 Java 开发订单服务。"
         by_name = {item["skill_name"]: item for item in observations(resume, "需要 Java 和 MySQL")}

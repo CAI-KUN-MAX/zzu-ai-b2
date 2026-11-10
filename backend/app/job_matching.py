@@ -14,7 +14,7 @@ from app.routers.diagnose import MAX_TOTAL_CHARS, MIN_CHARS, SYSTEM_PROMPT
 from app.routers.resumes import fail
 
 logger = logging.getLogger(__name__)
-SCORING_VERSION = "job-ranking-v11"
+SCORING_VERSION = "job-ranking-v12"
 # 单独出现时区分度低；不排除“可用性测试”等具体复合技能。
 GENERIC_JOB_TERMS = frozenset({"原型", "文档", "流程", "测试", "验证"})
 RECOMMENDATION_RESULT_LIMIT = 8
