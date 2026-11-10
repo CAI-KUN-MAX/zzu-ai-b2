@@ -17,7 +17,6 @@ import { Highlights } from "./report/Highlights";
 import { Gaps } from "./report/Gaps";
 import { RewriteSuggestions } from "./report/RewriteSuggestions";
 import { InterviewPage } from "./InterviewPage";
-import { readInterviewTips, saveInterviewTips } from "../lib/interviewTips";
 import {
   AlertIcon,
   ArrowLeftIcon,
@@ -87,7 +86,6 @@ function analysisLabel(item: JobMatchItem): string {
 interface InterviewTarget {
   request: MatchContext["interview_request"];
   title: string;
-  jobId: string;
 }
 
 function JobDetail({
@@ -212,7 +210,6 @@ function JobDetail({
             type="button"
             onClick={() => interviewRequest && onStartInterview({
               request: interviewRequest,
-              jobId: item.job_id,
               title: job ? `${job.title} · ${job.company}` : item.title,
             })}
             disabled={!interviewRequest}
@@ -224,7 +221,7 @@ function JobDetail({
           {contextError ? <p role="alert" className="mt-2 text-[12px] text-rose-700">{contextError}</p> : null}
         </section>
 
-        {/* 岗位信息：岗位描述 + 来源/投递链接，数据全部来自 /api/jobs */}
+        {/* 岗位信息：完整 JD + 来源/投递链接，数据全部来自 /api/jobs */}
         {job ? (
           <section className="mt-5 rounded-xl2 border border-surface-line bg-white p-5 shadow-card sm:p-6">
             <div className="flex items-center justify-between gap-3">
@@ -332,13 +329,12 @@ function JobDetail({
         ) : <p className="mt-5 text-sm text-ink-500">岗位目录详情暂不可用，请返回目录核对岗位来源。</p>}
 
         {/* 基础评分构成：所有岗位都有，与 AI 诊断的四个维度不是一回事 */}
-        {item.intent_bonus ? <p className="text-xs text-ink-500">有限规则识别到求职意向与岗位方向线索：基础分加 {item.intent_bonus} 分，仅供参考。</p> : null}
         {item.subscores.length > 0 ? (
           <div className="mt-5">
             <DimensionBars
               dimensions={item.subscores}
               title={`匹配分 ${item.stage1_score}`}
-              hint="技能关键词、文本相似度和学历计算规则分；若识别到求职意向，另计加分"
+              hint="技能关键词 + 文本相近 + 学历，三项算出来"
               className=""
             />
             {/* 只有真的比较过内容才展示相近程度，避免把关键词结果说成内容理解 */}
@@ -352,8 +348,8 @@ function JobDetail({
             ) : (
               <p className="mt-2 text-[11px] text-ink-500">
                 {embeddingStatus === "disabled"
-                  ? "本次未启用语义向量；规则分包含关键词、字符相似度和学历"
-                  : "语义向量不可用；规则分包含关键词、字符相似度和学历"}
+                  ? "这次只按关键词算分，没有比较内容是否接近"
+                  : "内容相近程度暂时取不到，分数只按关键词算"}
               </p>
             )}
             {/* 只有真实 AI 成功（analysis_status=succeeded）时总分才按加权公式计算；模拟报告不参与加权 */}
@@ -662,8 +658,6 @@ export function JobResultPage({
   const [loadedJobs, setLoadedJobs] = useState<Record<string, Job>>({});
   const restartInFlight = useRef(false);
   const [interview, setInterview] = useState<InterviewTarget | null>(null);
-  const [interviewTips, setInterviewTips] = useState<Record<string, string[]>>(() => readInterviewTips(taskId, resumeId));
-  useEffect(() => setInterviewTips(readInterviewTips(taskId, resumeId)), [taskId, resumeId]);
   const resultScrollY = useRef(0);
   const interviewing = interviewOpen && interview !== null;
 
@@ -829,14 +823,7 @@ export function JobResultPage({
         resumeStatus={resumeStatus}
         jdText={interview.request.jd_text}
         jobTitle={interview.title}
-        onExit={(tips) => {
-          if (tips && interview) setInterviewTips((previous) => {
-            const next = { ...previous, [interview.jobId]: tips };
-            saveInterviewTips(taskId, resumeId, next);
-            return next;
-          });
-          onInterviewOpenChange(false);
-        }}
+        onExit={() => onInterviewOpenChange(false)}
       />
     ) : null}
     <main className="offer-results" hidden={interviewing}>
@@ -847,16 +834,12 @@ export function JobResultPage({
           <p>
             {resumeName} ·{" "}
             {mode === "recommend"
-              ? `为你推荐 ${items.length} 个岗位；匹配结果可能遗漏相关岗位，请以招聘来源核对状态`
+              ? `为你推荐 ${items.length} 个岗位，请以招聘来源核对状态`
               : `${items.length} 个岗位按匹配分排序`}
           </p>
         </div>
         <button type="button" className="picker-last" onClick={onReset}>← 重新选择岗位</button>
       </div>
-      {detailJob && interviewTips[detailJob.job_id]?.length ? <section className="picker-panel" aria-label="面试后的简历核对提示">
-        <h2>面试后的简历核对提示</h2><p>你已确认以下提示适用于该岗位且符合真实经历；请自行决定如何修改简历。保存在当前浏览器标签页，关闭标签页后清除。</p>
-        <ul>{interviewTips[detailJob.job_id].map((tip, index) => <li key={index}>{tip}</li>)}</ul>
-      </section> : null}
       <EmbeddingNotice status={task?.embedding_status} error={task?.embedding_error} />
       <ProgressBanner task={task} items={items} pollError={task?.status === "failed" ? null : error} polling={polling} restarting={restarting} onRestart={handleRestart} onRefetch={retry} />
       {restartError && <p className="picker-error" role="alert">{restartError}</p>}
@@ -874,7 +857,7 @@ export function JobResultPage({
         <div className="offer-results-layout">
           <section className="picker-panel result-ranks" aria-label="匹配排序"><div className="picker-panel-head"><h2>匹配排序</h2><span>{items.length} 个岗位</span></div>
             <div className="result-rank-list">{items.map((item, index) => { const job = displayedJobs[item.job_id]; return <button key={item.job_id} type="button" aria-pressed={detailJob?.job_id === item.job_id} className={`result-rank ${detailJob?.job_id === item.job_id ? "active" : ""}`} onClick={() => setDetailJobId(item.job_id)}>
-              <span className="result-order">{index + 1}</span><span className="picker-logo small">{job?.company.slice(0,1) || "岗"}</span><span className="result-rank-text"><strong>{item.title}</strong><small>{job?.company || "岗位"}{job?.cities?.length ? " · " + job.cities[0] : ""} · {analysisLabel(item)}</small></span><span className="result-score">{item.score}</span>
+              <span className="result-order">{index + 1}</span><span className="picker-logo small">{job?.company.slice(0,1) || "岗"}</span><span className="result-rank-text"><strong>{item.title}</strong><small>{job?.company || "岗位"}{job?.cities?.length ? " · " + job.cities[0] : ""} · {analysisLabel(item)}{item.report?.gaps?.length ? ` · 待补 ${item.report.gaps.length} 项` : ""}</small></span><span className="result-score">{item.score}</span>
             </button>; })}</div>
             <p className="picker-hint">结果根据简历与岗位内容计算，分析建议仅供参考。</p>
           </section>
