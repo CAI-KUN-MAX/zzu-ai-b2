@@ -190,6 +190,15 @@ function JobDetail({
             </div>
           </div>
 
+          {/* 待补齐项与改写建议放在最前：用户打开详情最想看这部分，
+              原来排在整个岗位 JD 之后，要滚很久才看得到 */}
+          {item.report && item.report.gaps.length > 0 ? (
+            <div className="mt-5">
+              <Gaps gaps={item.report.gaps} className="mt-0" />
+              <RewriteSuggestions gaps={item.report.gaps} className="mt-5" />
+            </div>
+          ) : null}
+
           {item.skill_assessments && item.skill_assessments.length > 0 ? (
             <section className="mt-4 rounded-xl bg-surface-soft/70 p-3.5" aria-label="技能证据">
               <h2 className="text-sm font-semibold text-ink-700">技能证据</h2>
@@ -378,8 +387,6 @@ function JobDetail({
               className=""
             />
             <Highlights highlights={item.report.highlights} className="" />
-            <Gaps gaps={item.report.gaps} className="" />
-            <RewriteSuggestions gaps={item.report.gaps} className="" />
           </div>
         ) : isAnalyzing(item) ? (
           <p className="mt-5 flex items-start gap-2 rounded-xl border border-brand-100 bg-brand-50 px-4 py-3 text-[12px] leading-relaxed text-brand-700">
