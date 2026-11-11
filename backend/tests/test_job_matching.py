@@ -343,8 +343,23 @@ class JobMatchingTests(unittest.TestCase):
             app.state.job_repository.jobs["a"] = current.model_copy(update={"evidence": evidence})
             changed = self.create(["a"])
             self.assertNotEqual(old, changed)
-            self.assertIsNone(self.wait(changed)["items"][0].get("report"))
+            self.assertIn("岗位内容可能不完整", self.wait(changed)["items"][0]["report"]["summary"])
             self.assertEqual(self.client.get("/api/job-matches/" + old).json()["items"][0]["degraded_reason"], "ai_disabled")
+
+    def test_unverified_unknown_content_still_uses_model_with_limit_notice(self):
+        async def fake(_resume, _jd):
+            report = MOCK_RESPONSES["medium"].model_copy(deep=True)
+            report.meta.mode = "llm"
+            return report
+        job = app.state.job_repository.jobs["a"]
+        app.state.job_repository.jobs["a"] = job.model_copy(update={"evidence": None, "jd_text": "岗位职责：负责Python接口开发和测试，参与团队协作与需求分析。任职要求：熟悉Python和MySQL，了解接口开发和单元测试。" * 2})
+        with patch.dict(os.environ, {"MATCH_LLM_TOP_K": "1"}), patch("app.matching.run_diagnose", side_effect=fake) as model:
+            result = self.wait(self.create(["a"]))
+        self.assertEqual(model.await_count, 1)
+        self.assertIn("岗位内容可能不完整", result["items"][0]["report"]["summary"])
+        job = app.state.job_repository.jobs["a"]
+        self.assertEqual(job.effective_status, "unverified")
+        self.assertFalse(job.application_verified)
 
     def test_real_catalogue_top_eight_with_synthetic_resume(self):
         app.state.job_repository = JobRepository(app.state.store)

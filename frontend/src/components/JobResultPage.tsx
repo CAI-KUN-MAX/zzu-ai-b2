@@ -287,6 +287,10 @@ function JobDetail({
               </div>
             </dl>
 
+            {job.jd_completeness !== "full" ? (
+              <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[12px] text-amber-700">岗位内容可能不完整，分析和面试仅依据已有内容，其他要求需向招聘方核实。</p>
+            ) : null}
+
             {job.effective_status !== "open" ? (
               <p className="mt-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[12px] leading-relaxed text-amber-700">
                 <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />

@@ -14,7 +14,7 @@ from app.routers.diagnose import MAX_TOTAL_CHARS, MIN_CHARS, SYSTEM_PROMPT
 from app.routers.resumes import fail
 
 logger = logging.getLogger(__name__)
-SCORING_VERSION = "job-ranking-v13-trust"
+SCORING_VERSION = "job-ranking-v14-limited-analysis"
 # 单独出现时区分度低；不排除“可用性测试”等具体复合技能。
 GENERIC_JOB_TERMS = frozenset({"原型", "文档", "流程", "测试", "验证"})
 RECOMMENDATION_RESULT_LIMIT = 8
@@ -170,10 +170,10 @@ class JobMatchService:
         for item in items:
             original = snapshot_jobs.get(item["job_id"], {})
             current = current_jobs.get(item["job_id"])
-            if (not current or current.jd_completeness != "full" or
+            if (not current or current.jd_completeness == "campaign" or
                     original.get("jd_text") != current.jd_text or
                     original.get("evidence") != current.model_dump(mode="json").get("evidence") or
-                    original.get("jd_completeness") != "full"):
+                    original.get("jd_completeness") != current.jd_completeness):
                 if item.get("report"):
                     item.update(report=None, reason=None, score=item["stage1_score"], degraded=True,
                                 degraded_reason="ai_disabled", analysis_status="degraded")
@@ -261,7 +261,7 @@ class JobMatchService:
                         item["analysis_status"] = "running"
                         self.repository.update(identifier, result=ranked(items))
                         try:
-                            if by_id[item["job_id"]].get("jd_completeness", "unknown") != "full":
+                            if by_id[item["job_id"]].get("jd_completeness", "unknown") == "campaign":
                                 reason = "ai_disabled"
                             elif min(len(text.strip()), len(jd.strip())) < MIN_CHARS:
                                 reason = "input_too_short"
@@ -271,7 +271,7 @@ class JobMatchService:
                                 trace_token = matching.report_trace.set((identifier, item["job_id"]))
                                 try:
                                     async with asyncio.timeout(ITEM_TIMEOUT):
-                                        proof = by_id[item["job_id"]].get("evidence", {}).get("content")
+                                        proof = (by_id[item["job_id"]].get("evidence") or {}).get("content")
                                         namespace = "job-trust-v1:" + json.dumps(proof, sort_keys=True, ensure_ascii=False)
                                         report = await self.match_jobs.shared_report_for(text, jd, namespace)
                                 finally:
@@ -280,6 +280,8 @@ class JobMatchService:
                                     reason = "mock_report"
                                 else:
                                     report = skill_evidence.reconcile_job_report(report, item["skill_assessments"])
+                                    if by_id[item["job_id"]].get("jd_completeness") != "full":
+                                        report.summary = "岗位内容可能不完整，以下分析仅依据现有文本，缺失要求仍需核实。" + report.summary
                                     skill_evidence.validate_job_report(report, item["skill_assessments"])
                                     score = round(.35 * item["stage1_score"] + .65 * report.overall_score)
                                     item.update(score=score, **matching.level_fields(score), degraded=False,
