@@ -6,6 +6,7 @@ import { saveLastResume } from "../lib/jobMatchStorage";
 import { useTask } from "../lib/useTask";
 import { DropZone } from "./DropZone";
 import { JobJdDialog } from "./JobJdDialog";
+import { jobStatus, jobContent } from "../lib/jobTrust";
 
 /** 返回首页或刷新后保留的输入：已上传的简历（解析任务 ID）和已选岗位 */
 export interface JobMatchDraft {
@@ -45,7 +46,7 @@ const LIST_PAGE_SIZE = 12;
 /** 推荐先露出几张，其余点开再看 */
 const REC_PREVIEW = 4;
 /** 同一份简历切页回来不重复发请求；刷新后后端也会复用同一个任务 */
-const recommendationTasks = new Map<string, string>();
+
 
 function cityLabel(cities: string[]) {
   return cities.length > 2 ? `${cities[0]} 等 ${cities.length} 城` : cities.join(" / ");
@@ -68,6 +69,7 @@ function PickerCard({ job, active, reason, onToggle, onDetail }: PickerCardProps
         <span className="picker-card-text">
           <span className="picker-job-title">{job.title}</span>
           <small>{job.company} · {cityLabel(job.cities)} · {job.education}</small>
+          <small>{jobStatus(job)} · {jobContent(job)}</small>
           {reason ? <small className="picker-card-reason"><strong>推荐理由：</strong>{reason}</small> : null}
         </span>
         <span className="picker-check" aria-hidden="true">{active ? "✓" : ""}</span>
@@ -162,16 +164,10 @@ export function JobMatchPage({
       setRecTaskId(null);
       return;
     }
-    const known = recommendationTasks.get(recResumeId);
-    if (known) {
-      setRecTaskId(known);
-      return;
-    }
     setRecTaskId(null);
     let cancelled = false;
     createJobRecommendation(recResumeId)
       .then(({ task_id }) => {
-        recommendationTasks.set(recResumeId, task_id);
         if (!cancelled) setRecTaskId(task_id);
       })
       .catch((err: unknown) => {
@@ -286,7 +282,6 @@ export function JobMatchPage({
   );
 
   function retryRecommendation() {
-    if (recResumeId) recommendationTasks.delete(recResumeId);
     retryRecPoll();
     setRecAttempt((n) => n + 1);
   }

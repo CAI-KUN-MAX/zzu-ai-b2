@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Job } from "../types";
+import { jobStatus } from "../lib/jobTrust";
 
 interface JobCarouselProps {
   jobs: Job[];
@@ -87,6 +88,7 @@ export function JobCarousel({ jobs, selectedIds, onOpen }: JobCarouselProps) {
               {selectedIds.includes(job.job_id) ? <span className="job-slide-picked">已选</span> : null}
             </span>
             <span className="job-slide-title">{job.title}</span>
+            <span>{jobStatus(job)}</span>
             <span className="job-slide-intro">{jobIntro(job)}</span>
             <span className="job-slide-more">查看详情 →</span>
           </button>

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import type { Job } from "../types";
 import { CheckIcon, XIcon } from "./icons";
+import { jobStatus, jobContent } from "../lib/jobTrust";
 
 interface JobJdDialogProps {
   job: Job;
@@ -88,13 +89,13 @@ export function JobJdDialog({ job, selected, onToggle, onClose }: JobJdDialogPro
             ))}
           </dl>
 
-          <p className="mt-4 text-[11px] font-medium text-ink-500">岗位要求</p>
+          <p className="mt-4 text-[11px] font-medium text-ink-500">{jobStatus(job)} · {jobContent(job)}</p>
           <p className="mt-1.5 whitespace-pre-wrap rounded-xl bg-surface-soft/70 px-3.5 py-3 text-[13px] leading-relaxed text-ink-900">
             {job.jd_text}
           </p>
 
           <p className="mt-3 text-[11px] leading-relaxed text-ink-500">
-            核验于 {job.verified_at.slice(0, 10)}，状态只代表核验当时的情况。
+            内容仅供参考，请以招聘来源为准。
             <a
               href={job.source_url}
               target="_blank"

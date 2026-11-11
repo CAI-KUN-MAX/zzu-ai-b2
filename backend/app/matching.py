@@ -194,8 +194,8 @@ async def run_diagnose(resume, jd):
         raise LlmError("diagnose_timeout") from None
 
 
-def cache_key(resume, jd):
-    return hashlib.sha256((resume + "\0" + jd + "\0" + PROMPT_VERSION + "\0" + SYSTEM_PROMPT).encode()).hexdigest()
+def cache_key(resume, jd, namespace=""):
+    return hashlib.sha256((resume + "\0" + jd + "\0" + PROMPT_VERSION + "\0" + SYSTEM_PROMPT + namespace).encode()).hexdigest()
 
 
 class MatchJobs:
@@ -235,13 +235,13 @@ class MatchJobs:
                 return None
         return None
 
-    async def shared_report_for(self, resume, jd):
+    async def shared_report_for(self, resume, jd, namespace=""):
         # Share work across job-ranking requests; cancellation of one caller
         # must not cancel another caller's report. Last waiter cancels the work.
-        key = cache_key(resume, jd)
+        key = cache_key(resume, jd, namespace)
         entry = self.inflight.get(key)
         if entry is None:
-            entry = {"task": asyncio.create_task(self.report_for(resume, jd)), "waiters": 0}
+            entry = {"task": asyncio.create_task(self.report_for(resume, jd, namespace)), "waiters": 0}
             self.inflight[key] = entry
         entry["waiters"] += 1
         try:
@@ -255,8 +255,8 @@ class MatchJobs:
                     entry["task"].cancel()
                 await asyncio.gather(entry["task"], return_exceptions=True)
 
-    async def report_for(self, resume, jd):
-        key = cache_key(resume, jd)
+    async def report_for(self, resume, jd, namespace=""):
+        key = cache_key(resume, jd, namespace)
         cached = self.cache_get(key)
         if cached:
             return cached

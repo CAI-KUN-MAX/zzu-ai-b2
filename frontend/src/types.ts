@@ -287,6 +287,9 @@ export interface Job {
   application_url: string | null;
   verified_at: string;
   application_status: JobApplicationStatus;
+  effective_status?: JobApplicationStatus;
+  jd_completeness?: "full" | "summary" | "campaign" | "unknown";
+  application_verified?: boolean;
   verification_note: string;
 }
 

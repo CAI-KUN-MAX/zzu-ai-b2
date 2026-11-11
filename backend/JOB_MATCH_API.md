@@ -16,11 +16,11 @@
 
 `GET /api/jobs?category=计算机&education=本科&application_status=open&page=1&page_size=20`
 
-参数均可选；不传 `application_status` 时返回 open 和满足测试池完整性门槛的 unverified 岗位，排除 closed；显式传入状态时按状态精确筛选。page=1、page_size=20（1–100）。education 按岗位最低学历精确筛选，不表示个人资格判定。category 为十个专业大类，详见 OpenAPI。返回 `{catalogue_version,total,page,page_size,items}`；items 为完整岗位，包含 job_id、title、company、cities、category、education、education_requirement、majors、graduation_year、jd_text、source_url、published_at（YYYY-MM-DD）、publication_type（original/repost）、application_url（未核实入口时为 null）、verified_at、application_status（open/closed/unverified）、verification_note。状态只代表 verified_at 时点的核验；没有自动保鲜承诺。
+参数均可选；不传 `application_status` 时返回 open 和满足测试池完整性门槛的 unverified 岗位，排除 closed；显式传入状态时按状态精确筛选。page=1、page_size=20（1–100）。education 按岗位最低学历精确筛选，不表示个人资格判定。category 为十个专业大类，详见 OpenAPI。返回 `{catalogue_version,total,page,page_size,items}`；items 为完整岗位，包含 job_id、title、company、cities、category、education、education_requirement、majors、graduation_year、jd_text、source_url、published_at（YYYY-MM-DD）、publication_type（original/repost）、application_url（未核实入口时为 null）、verified_at、application_status（open/closed/unverified）、verification_note。原始状态和 verified_at 不代表独立状态核验；展示使用有效状态。
 
 按用户确认，`open` 岗位必须有 `source_url`（岗位 JD 来源地址），但不强制提供单独的 `application_url`；未知投递入口保持 null，来源地址不自动视为投递入口。用户确认的状态是用户提供的信息，不代表系统独立验证或保证实际投递成功。目录验收中的 JD 完整性检查保持不变。
 
-`GET /api/jobs/{job_id}` 返回单条完整岗位；不存在为 404 JOB_NOT_FOUND。国家平台明确显示更新时间、但未给出首次发布日期时，按照用户授权将更新时间填入日期字段并在核验备注说明。`application_status=unverified` 可显式查看真实来源的候选岗位，其中部分历史记录仍只有摘要，不计入测试就绪集。待核验岗位没有明确投递入口时 `application_url=null`，不能把 `source_url` 当作投递地址；现有前端不显示状态，用户已知悉此限制。
+`GET /api/jobs/{job_id}` 返回单条完整岗位；不存在为 404 JOB_NOT_FOUND。国家平台明确显示更新时间、但未给出首次发布日期时，按照用户授权将更新时间填入日期字段并在核验备注说明。`application_status=unverified` 可显式查看真实来源的候选岗位，其中部分历史记录仍只有摘要，不计入测试就绪集。待核验岗位没有明确投递入口时 `application_url=null`，不能把 `source_url` 当作投递地址；前端显示有效状态，缺少证据时显示招聘状态待核实。
 
 `GET /api/jobs/testing-pool?category=生物医药&page=1&page_size=20` 返回满足完整性门槛的岗位，筛选标准为 JD 至少 80 字且同时具备岗位职责和任职要求。接口与普通目录采用同一 `JobList` 响应及分页、专业、最低学历筛选；`unverified` 不代表已确认可投。
 
@@ -63,4 +63,8 @@ analysis_status：pending/running 表示尚未结束（degraded=true、degraded_
 
 内部失败通过轮询返回 failed、JOB_MATCH_FAILED；基础评分尚未完成就耗尽整批预算时为 failed、JOB_MATCH_TIMEOUT；重启返回 failed、TASK_INTERRUPTED。错误不包含原文或模型内部异常。完整请求、排队、运行、成功、部分/全部降级、上下文与错误示例位于独立 JSON，示例数据均为虚构联调夹具，不能计入真实岗位数量。
 
-2026-10-27 目录含 40 条满足多专业测试结构门槛的真实岗位，十类各 4 条，其中最低学历硕士/博士 12 条、本科 28 条；可投岗位仍只有 11 条。前端不得把测试池中的 unverified 记录显示为已核验可投。岗位状态以 `verified_at` 时点为准，到达截止日期后需要重新核验。具体来源和缺口见 `catalogue/VALIDATION.md`。
+2026-10-27 目录含 40 条满足多专业测试结构门槛的真实岗位，十类各 4 条，其中最低学历硕士/博士 12 条、本科 28 条；可投岗位仍只有 11 条。前端不得把测试池中的 unverified 记录显示为已核验可投。历史 `verified_at` 并不证明状态核验，须按独立证据判断。具体来源和缺口见 `catalogue/VALIDATION.md`。
+
+## 岗位证据兼容扩展（2026-11-11）
+
+目录原始 `application_status`、`verified_at` 和 `verification_note` 保持不变，不再将其视为当前可投的充分证据。岗位响应新增 `effective_status`（open/closed/unverified）、`jd_completeness`（full/summary/campaign/unknown）和 `application_verified`（布尔）。历史记录缺少独立证据时有效状态为 unverified、正文完整度为 unknown、投递入口未核验；原始 closed 仍排除。字段缺失的旧客户端或旧任务应保守处理。投递 URL 本身不是入口证据。摘要或未知内容仅做基于现有文本的基础匹配，简章不做单岗分析；仅 full 且有独立证据的岗位可使用深度分析。证据快照及评分版本影响任务复用。证据文件 `catalogue/job-evidence.v1.json` 以 job_id 为键，每项可包含 status、content、application 证据，均需 HTTPS 来源、带时区的 checked_at 和 valid_until（前者必须早于后者）、非空 note；status 含 open/closed，content 含 full/summary/campaign 和 JD 文本 UTF-8 SHA-256，application 含精确 application_url。只有当前时间在有效期内且正文哈希或入口 URL 完全一致时相应证据生效；仅当前状态为 open 且入口证据有效才暴露可投标记。无证据默认为待核实，原始 closed 保守关闭。证据文件按读取刷新。旧 API 中 application_status 筛选仍按原始值；默认列表和推荐按有效状态及可分析文本筛选。旧任务深度报告在证据或 JD 不匹配时隐藏，基础分保留。

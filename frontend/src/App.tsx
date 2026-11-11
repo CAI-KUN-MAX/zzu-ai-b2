@@ -142,7 +142,7 @@ export default function App() {
         if (collected.length >= total) break;
       }
       if (cancelled) return;
-      const openJobs = collected.filter((job) => job.application_status === "open");
+      const openJobs = collected.filter((job) => job.effective_status !== "closed" && job.application_status !== "closed");
       setHomeJobs(openJobs);
       setHomeTotal(openJobs.length);
       setHomeCategories(new Set(openJobs.map((job) => job.category)).size);

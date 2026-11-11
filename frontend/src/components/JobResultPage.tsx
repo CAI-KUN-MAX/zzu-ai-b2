@@ -11,6 +11,7 @@ import type {
 } from "../types";
 import { createJobMatch, createJobRecommendation, getJob, getJobMatchTask, getMatchContext } from "../api/jobs";
 import { useTask } from "../lib/useTask";
+import { canApply, jobContent, jobStatus } from "../lib/jobTrust";
 import { levelTone } from "../lib/theme";
 import { DimensionBars } from "./report/DimensionBars";
 import { Highlights } from "./report/Highlights";
@@ -59,7 +60,7 @@ function Chip({ text, tone }: { text: string; tone: "hit" | "miss" }) {
 
 /** 降级原因：卡片上的短标签和详情里的完整说明 */
 const DEGRADED_REASON: Record<JobDegradedReason, { short: string; detail: string }> = {
-  ai_disabled: { short: "未做深度分析", detail: "当前没有开启 AI 深入分析" },
+  ai_disabled: { short: "未做深度分析", detail: "未开启 AI 深入分析，或岗位内容完整度尚未核实" },
   not_selected: { short: "未做深度分析", detail: "只会给排在前面的岗位（默认前 8 个）做 AI 深入分析，这个岗位没排进去" },
   input_too_short: { short: "简历太短", detail: "简历内容太少，不足以做 AI 分析" },
   input_too_long: { short: "内容太长", detail: "简历和岗位要求加起来超过 2 万字，超出了分析长度，可以精简后再试" },
@@ -155,9 +156,9 @@ function JobDetail({
                 <span className="text-xs text-ink-500">{job.education}</span>
               </>
             ) : null}
-            {job?.application_status === "unverified" ? (
+            {job && jobStatus(job) === "招聘状态待核实" ? (
               <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] text-amber-700 ring-1 ring-inset ring-amber-200">
-                待核验
+                招聘状态待核实
               </span>
             ) : null}
           </div>
@@ -215,6 +216,7 @@ function JobDetail({
             </section>
           ) : null}
 
+          <p className="mt-4 text-xs text-amber-700">模拟面试依据创建匹配任务时的岗位文本，可能与当前目录不同；岗位要求及招聘状态请向来源核对。</p>
           <button
             type="button"
             onClick={() => interviewRequest && onStartInterview({
@@ -238,18 +240,18 @@ function JobDetail({
               <h2 className="text-sm font-semibold">岗位信息</h2>
               <span
                 className={`rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ${
-                  job.application_status === "open"
+                  job.effective_status === "open"
                     ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
-                    : job.application_status === "closed"
+                    : job.effective_status === "closed"
                       ? "bg-slate-100 text-ink-500 ring-slate-200"
                       : "bg-amber-50 text-amber-700 ring-amber-200"
                 }`}
               >
-                {job.application_status === "open"
-                  ? "目录状态：开放"
-                  : job.application_status === "closed"
+                {job.effective_status === "open"
+                  ? "招聘开放"
+                  : job.effective_status === "closed"
                     ? "已关闭"
-                    : "待核验"}
+                    : "招聘状态待核实"}
               </span>
             </div>
 
@@ -285,11 +287,11 @@ function JobDetail({
               </div>
             </dl>
 
-            {job.application_status !== "open" ? (
+            {job.effective_status !== "open" ? (
               <p className="mt-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[12px] leading-relaxed text-amber-700">
                 <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>
-                  {job.application_status === "closed"
+                  {job.effective_status === "closed"
                     ? "该岗位已关闭，不能再投递，仅供参考。"
                     : "该岗位为待核验线索，投递入口未经核实，不能当作已确认可投。"}
                   {job.verification_note ? `（${job.verification_note}）` : ""}
@@ -299,7 +301,7 @@ function JobDetail({
 
             <details open className="mt-4 rounded-xl border border-surface-line">
               <summary className="cursor-pointer select-none px-3.5 py-2.5 text-[12px] font-medium text-ink-700">
-                目录中的岗位要求
+                {jobContent(job)}：目录中的岗位要求
               </summary>
               <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap border-t border-surface-line px-3.5 py-3 text-[12px] leading-relaxed text-ink-700 [overflow-wrap:anywhere]">
                 {job.jd_text}
@@ -315,25 +317,16 @@ function JobDetail({
               >
                 查看招聘来源
               </a>
-              {job.application_url ? (
+              {canApply(job) ? (
                 <a
-                  href={job.application_url}
+                  href={job.application_url ?? undefined}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-3.5 py-2 text-[12px] font-semibold text-white transition-colors hover:bg-brand-700"
                 >
                   前往投递
                 </a>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  title="该岗位尚未核实投递入口"
-                  className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-xl bg-ink-300 px-3.5 py-2 text-[12px] font-semibold text-white"
-                >
-                  前往投递（暂未核实）
-                </button>
-              )}
+              ) : null}
             </div>
           </section>
         ) : <p className="mt-5 text-sm text-ink-500">岗位目录详情暂不可用，请返回目录核对岗位来源。</p>}
@@ -653,7 +646,6 @@ export function JobResultPage({
   resumeId,
   resumeName,
   resumeStatus,
-  jobIndex,
   jobIds,
   onReset,
   onRestart,
@@ -685,7 +677,7 @@ export function JobResultPage({
     onInterviewOpenChange(true);
   }
 
-  const missingIds = (task?.items ?? []).map((item) => item.job_id).filter((id) => !jobIndex[id]).join(",");
+  const missingIds = (task?.items ?? []).map((item) => item.job_id).join(",");
   useEffect(() => {
     if (!missingIds) return;
     let cancelled = false;
@@ -699,7 +691,7 @@ export function JobResultPage({
     });
     return () => { cancelled = true; };
   }, [missingIds]);
-  const displayedJobs = { ...loadedJobs, ...jobIndex };
+  const displayedJobs = loadedJobs;
 
   /** 整批失败或任务已不存在时，不回首页、不重传简历，直接用原参数再建一个任务 */
   async function handleRestart() {
@@ -879,7 +871,7 @@ export function JobResultPage({
         <div className="offer-results-layout">
           <section className="picker-panel result-ranks" aria-label="匹配排序"><div className="picker-panel-head"><h2>匹配排序</h2><span>{items.length} 个岗位</span></div>
             <div className="result-rank-list">{items.map((item, index) => { const job = displayedJobs[item.job_id]; return <button key={item.job_id} type="button" aria-pressed={detailJob?.job_id === item.job_id} className={`result-rank ${detailJob?.job_id === item.job_id ? "active" : ""}`} onClick={() => setDetailJobId(item.job_id)}>
-              <span className="result-order">{index + 1}</span><span className="picker-logo small">{job?.company.slice(0,1) || "岗"}</span><span className="result-rank-text"><strong>{item.title}</strong><small>{job?.company || "岗位"}{job?.cities?.length ? " · " + job.cities[0] : ""} · {analysisLabel(item)}{item.report?.gaps?.length ? ` · 待补 ${item.report.gaps.length} 项` : ""}</small></span><span className="result-score">{item.score}</span>
+              <span className="result-order">{index + 1}</span><span className="picker-logo small">{job?.company.slice(0,1) || "岗"}</span><span className="result-rank-text"><strong>{item.title}</strong><small>{job?.company || "岗位"}{job?.cities?.length ? " · " + job.cities[0] : ""} · {job ? jobStatus(job) : "招聘状态待核实"} · {analysisLabel(item)}{item.report?.gaps?.length ? ` · 待补 ${item.report.gaps.length} 项` : ""}</small></span><span className="result-score">{item.score}</span>
             </button>; })}</div>
             <p className="picker-hint">结果根据简历与岗位内容计算，分析建议仅供参考。</p>
           </section>

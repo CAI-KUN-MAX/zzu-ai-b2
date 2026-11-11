@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 import io
 import json
 import os
@@ -28,13 +29,20 @@ JD = "本科及以上学历，计算机相关专业，要求熟悉Python和MySQL
 
 
 def fixture_job(identifier, jd=JD, category="计算机", education="本科", status="open"):
-    return dict(job_id=identifier, title="测试" + identifier, company="虚构测试公司", cities=["北京"],
+    job = dict(job_id=identifier, title="测试" + identifier, company="虚构测试公司", cities=["北京"],
                 category=category, education=education, education_requirement=education + "及以上",
                 majors=["测试专业"], graduation_year="2027", jd_text=jd,
                 source_url="https://example.com/" + identifier, published_at="2026-10-01",
                 publication_type="original", application_url="https://example.com/apply",
                 verified_at="2026-10-26T12:00:00+08:00", application_status=status,
                 verification_note="虚构测试夹具，不计入真实岗位集")
+    if status == "open":
+        proof = dict(source_url="https://example.com/proof", checked_at="2020-01-01T00:00:00Z",
+                     valid_until="2100-01-01T00:00:00Z", note="虚构测试证据")
+        job["evidence"] = {"status": {**proof, "status": "open"},
+                           "content": {**proof, "completeness": "full",
+                                       "jd_sha256": hashlib.sha256(jd.encode()).hexdigest()}}
+    return job
 
 
 class IntentBoundaryTests(unittest.TestCase):
@@ -68,6 +76,7 @@ class JobMatchingTests(unittest.TestCase):
         self.environment.start()
         self.client_context = TestClient(app)
         self.client = self.client_context.__enter__()
+        app.state.job_repository.evidence_path = None  # isolated synthetic fixtures only
         jobs = [fixture_job("a"), fixture_job("b"), fixture_job("c",
                 "本科及以上学历，新闻传播专业，负责新闻采写、媒体采访、内容编辑及发布，具备文字写作和沟通能力。", "外语传播"),
                 fixture_job("closed", status="closed")]
@@ -319,6 +328,36 @@ class JobMatchingTests(unittest.TestCase):
             self.assertEqual(item["score"], round(.35 * item["stage1_score"] + .65 * item["report"]["overall_score"]))
         self.assertEqual((first["analysis_completed"], first["analysis_total"]), (3, 3))
         self.assertEqual(datetime.fromisoformat(first["analysis_started_at"]).tzinfo, timezone.utc)
+
+    def test_evidence_change_invalidates_task_and_hides_old_report(self):
+        async def fake(_resume, _jd):
+            report = MOCK_RESPONSES["medium"].model_copy(deep=True)
+            report.meta.mode = "llm"
+            return report
+        with patch.dict(os.environ, {"MATCH_LLM_TOP_K": "1"}), patch("app.matching.run_diagnose", side_effect=fake):
+            old = self.create(["a"])
+            self.assertIsNotNone(self.wait(old)["items"][0]["report"])
+            current = app.state.job_repository.jobs["a"]
+            evidence = current.evidence.model_copy(deep=True)
+            evidence.content.completeness = "summary"
+            app.state.job_repository.jobs["a"] = current.model_copy(update={"evidence": evidence})
+            changed = self.create(["a"])
+            self.assertNotEqual(old, changed)
+            self.assertIsNone(self.wait(changed)["items"][0].get("report"))
+            self.assertEqual(self.client.get("/api/job-matches/" + old).json()["items"][0]["degraded_reason"], "ai_disabled")
+
+    def test_real_catalogue_top_eight_with_synthetic_resume(self):
+        app.state.job_repository = JobRepository(app.state.store)
+        app.state.job_matches.repository = app.state.job_repository
+        response = self.client.post("/api/job-recommendations", json={"resume_id": "r"})
+        self.assertEqual(response.status_code, 202, response.text)
+        result = self.wait(response.json()["task_id"])
+        self.assertEqual(result["status"], "succeeded")
+        self.assertEqual(len(result["items"]), 8)
+        for item in result["items"]:
+            job = self.client.get("/api/jobs/" + item["job_id"]).json()
+            self.assertEqual(job["effective_status"], "unverified")
+            self.assertFalse(job["application_verified"])
 
     def test_evidence_is_returned_and_report_reconciled_after_cache(self):
         resume = "技能：Java、MySQL\n项目经历\n使用 Java 和 Spring Boot 开发订单服务。"
