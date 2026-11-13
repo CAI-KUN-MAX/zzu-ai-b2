@@ -14,7 +14,7 @@ from app.routers.diagnose import MAX_TOTAL_CHARS, MIN_CHARS, SYSTEM_PROMPT
 from app.routers.resumes import fail
 
 logger = logging.getLogger(__name__)
-SCORING_VERSION = "job-ranking-v12"
+SCORING_VERSION = "job-ranking-v14-limited-analysis"
 # 单独出现时区分度低；不排除“可用性测试”等具体复合技能。
 GENERIC_JOB_TERMS = frozenset({"原型", "文档", "流程", "测试", "验证"})
 RECOMMENDATION_RESULT_LIMIT = 8
@@ -120,7 +120,7 @@ class JobMatchService:
             job = self.repository.jobs.get(identifier)
             if job is None:
                 fail(404, "JOB_NOT_FOUND", "岗位不存在")
-            if job.application_status != "open" and not (job.application_status == "unverified" and test_ready(job)):
+            if job.effective_status == "closed" or job.jd_completeness == "campaign" or not (job.effective_status == "open" or test_ready(job)):
                 fail(409, "JOB_NOT_OPEN", "岗位已关闭或岗位信息不完整")
             jobs.append(job.model_dump(mode="json"))
         # Snapshots are deliberately stored, unlike the older HR-facing match task.
@@ -165,6 +165,19 @@ class JobMatchService:
         error = json.loads(task["error"]) if task["error"] else None
         snapshot = json.loads(task["payload"])
         items = json.loads(task["result"]) if task["result"] else []
+        snapshot_jobs = {job["job_id"]: job for job in snapshot.get("jobs", [])}
+        current_jobs = self.repository.jobs
+        for item in items:
+            original = snapshot_jobs.get(item["job_id"], {})
+            current = current_jobs.get(item["job_id"])
+            if (not current or current.jd_completeness == "campaign" or
+                    original.get("jd_text") != current.jd_text or
+                    original.get("evidence") != current.model_dump(mode="json").get("evidence") or
+                    original.get("jd_completeness") != current.jd_completeness):
+                if item.get("report"):
+                    item.update(report=None, reason=None, score=item["stage1_score"], degraded=True,
+                                degraded_reason="ai_disabled", analysis_status="degraded")
+                    item.update(matching.level_fields(item["score"]))
         selected = [item for item in items if item.get("degraded_reason") not in {"not_selected", "ai_disabled"}]
         completed = sum(item["analysis_status"] in {"succeeded", "degraded"} for item in selected)
         return dict(status=task["status"], stage=task["stage"], progress=task["progress"],
@@ -181,6 +194,9 @@ class JobMatchService:
         job = next((job for job in snapshot["jobs"] if job["job_id"] == job_id), None)
         if job is None:
             fail(404, "JOB_NOT_FOUND", "岗位不属于此匹配任务")
+        current = self.repository.jobs.get(job_id)
+        if current and current.jd_completeness == "campaign":
+            fail(409, "JOB_CONTENT_INCOMPLETE", "招聘简章不能作为单岗位分析上下文，请核对来源")
         row = readable_resume(self.repository, snapshot["resume_id"])
         # Interview creation rereads this ID; detect drift instead of silently mixing originals.
         if row["text"] != snapshot["resume_text"]:
@@ -245,7 +261,9 @@ class JobMatchService:
                         item["analysis_status"] = "running"
                         self.repository.update(identifier, result=ranked(items))
                         try:
-                            if min(len(text.strip()), len(jd.strip())) < MIN_CHARS:
+                            if by_id[item["job_id"]].get("jd_completeness", "unknown") == "campaign":
+                                reason = "ai_disabled"
+                            elif min(len(text.strip()), len(jd.strip())) < MIN_CHARS:
                                 reason = "input_too_short"
                             elif len(text.strip()) + len(jd.strip()) > MAX_TOTAL_CHARS:
                                 reason = "input_too_long"
@@ -253,13 +271,17 @@ class JobMatchService:
                                 trace_token = matching.report_trace.set((identifier, item["job_id"]))
                                 try:
                                     async with asyncio.timeout(ITEM_TIMEOUT):
-                                        report = await self.match_jobs.shared_report_for(text, jd)
+                                        proof = (by_id[item["job_id"]].get("evidence") or {}).get("content")
+                                        namespace = "job-trust-v1:" + json.dumps(proof, sort_keys=True, ensure_ascii=False)
+                                        report = await self.match_jobs.shared_report_for(text, jd, namespace)
                                 finally:
                                     matching.report_trace.reset(trace_token)
                                 if report.meta.mode != "llm":
                                     reason = "mock_report"
                                 else:
                                     report = skill_evidence.reconcile_job_report(report, item["skill_assessments"])
+                                    if by_id[item["job_id"]].get("jd_completeness") != "full":
+                                        report.summary = "岗位内容可能不完整，以下分析仅依据现有文本，缺失要求仍需核实。" + report.summary
                                     skill_evidence.validate_job_report(report, item["skill_assessments"])
                                     score = round(.35 * item["stage1_score"] + .65 * report.overall_score)
                                     item.update(score=score, **matching.level_fields(score), degraded=False,

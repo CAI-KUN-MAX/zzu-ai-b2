@@ -2,7 +2,7 @@
 from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StrictStr, model_validator
 
 from app.interview_schemas import InterviewCreate
 from app.schemas import DiagnoseRequest, DiagnoseResponse, DimensionScore
@@ -15,6 +15,38 @@ ApplicationStatus = Literal["open", "closed", "unverified"]
 
 class Contract(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+
+class Evidence(Contract):
+    source_url: str = Field(pattern=r"^https://")
+    checked_at: AwareDatetime
+    valid_until: AwareDatetime
+    note: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def valid_interval(self):
+        if self.valid_until <= self.checked_at:
+            raise ValueError("evidence validity must end after checking")
+        return self
+
+
+class StatusEvidence(Evidence):
+    status: Literal["open", "closed"]
+
+
+class ContentEvidence(Evidence):
+    completeness: Literal["full", "summary", "campaign"]
+    jd_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class ApplicationEvidence(Evidence):
+    application_url: str = Field(pattern=r"^https://")
+
+
+class JobEvidence(Contract):
+    status: StatusEvidence | None = None
+    content: ContentEvidence | None = None
+    application: ApplicationEvidence | None = None
 
 
 class Job(Contract):
@@ -35,6 +67,11 @@ class Job(Contract):
     verified_at: datetime
     application_status: ApplicationStatus
     verification_note: str = Field(min_length=1)
+    # Derived evidence fields; legacy catalogue records have no independent proof.
+    effective_status: ApplicationStatus = "unverified"
+    jd_completeness: Literal["full", "summary", "campaign", "unknown"] = "unknown"
+    application_verified: bool = False
+    evidence: JobEvidence | None = None
 
 class JobList(Contract):
     catalogue_version: str

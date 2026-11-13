@@ -142,7 +142,7 @@ export default function App() {
         if (collected.length >= total) break;
       }
       if (cancelled) return;
-      const openJobs = collected.filter((job) => job.application_status === "open");
+      const openJobs = collected.filter((job) => job.effective_status !== "closed" && job.application_status !== "closed");
       setHomeJobs(openJobs);
       setHomeTotal(openJobs.length);
       setHomeCategories(new Set(openJobs.map((job) => job.category)).size);
@@ -395,7 +395,7 @@ export default function App() {
 
                 <div className="dashboard-stats">
                   <span>
-                    岗位库共 <b>{homeTotal || "—"}</b> 个开放状态岗位，覆盖 <b>{homeCategories || "—"}</b> 类专业
+                    岗位库共 <b>{homeTotal || "—"}</b> 个岗位线索（招聘状态以详情为准），覆盖 <b>{homeCategories || "—"}</b> 类专业
                   </span>
                   <button type="button" onClick={() => setView({ name: "job" })}>
                     挑选岗位 →

@@ -2,35 +2,80 @@
 import hashlib
 import json
 import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 
 from app.ingestion import now
-from app.job_schemas import Job
+from app.job_schemas import Job, JobEvidence
 
 CATALOGUE_PATH = Path(__file__).resolve().parents[1] / "catalogue" / "jobs.v1.json"
+EVIDENCE_PATH = Path(__file__).resolve().parents[1] / "catalogue" / "job-evidence.v1.json"
+
+
+def effective_job(job, now=None):
+    """Compute independent claims from time-bounded, explicitly recorded evidence."""
+    now = now or datetime.now(timezone.utc)
+    evidence = job.evidence
+    def current(item):
+        return item is not None and item.checked_at <= now < item.valid_until
+
+    status = "closed" if job.application_status == "closed" else "unverified"
+    if evidence and current(evidence.status):
+        status = evidence.status.status
+    content = "unknown"
+    if (evidence and current(evidence.content) and
+            evidence.content.jd_sha256 == hashlib.sha256(job.jd_text.encode("utf-8")).hexdigest()):
+        content = evidence.content.completeness
+    application_verified = bool(evidence and current(evidence.application) and job.application_url and
+                                evidence.application.application_url == job.application_url and status == "open")
+    return job.model_copy(update={"effective_status": status, "jd_completeness": content,
+                                  "application_verified": application_verified})
 
 
 def test_ready(job):
     jd = job.jd_text.strip()
-    return (job.application_status in {"open", "unverified"} and len(jd) >= 80
+    return (job.effective_status != "closed" and job.jd_completeness != "campaign" and len(jd) >= 80
             and "岗位职责：" in jd and "任职要求：" in jd)
 
 
 class JobRepository:
-    def __init__(self, store, path=CATALOGUE_PATH):
+    def __init__(self, store, path=CATALOGUE_PATH, evidence_path=None):
         self.store = store
         data = json.loads(Path(path).read_text(encoding="utf-8"))
         self.version = data["version"]
-        jobs = [Job.model_validate(item) for item in data["items"]]
+        evidence_path = EVIDENCE_PATH if evidence_path is None and Path(path) == CATALOGUE_PATH else evidence_path
+        self.evidence_path = Path(evidence_path) if evidence_path else None
+        evidence_data = json.loads(Path(evidence_path).read_text(encoding="utf-8")) if evidence_path and Path(evidence_path).exists() else {}
+        evidence = {key: JobEvidence.model_validate(value) for key, value in evidence_data.items()}
+        jobs = [Job.model_validate({**item, "evidence": evidence.get(item["job_id"])}) for item in data["items"]]
+        if set(evidence) - {job.job_id for job in jobs}:
+            raise ValueError("evidence references unknown job_id")
         self.jobs = {job.job_id: job for job in jobs}
         if len(self.jobs) != len(jobs):
             raise ValueError("duplicate catalogue job_id")
+
+    @property
+    def jobs(self):
+        if self.evidence_path:
+            raw = json.loads(self.evidence_path.read_text(encoding="utf-8")) if self.evidence_path.exists() else {}
+            evidence = {key: JobEvidence.model_validate(value) for key, value in raw.items()}
+            if set(evidence) - set(self._jobs):
+                raise ValueError("evidence references unknown job_id")
+            self._jobs.update({key: effective_job(job.model_copy(update={"evidence": evidence.get(key)}))
+                               for key, job in self._jobs.items()})
+        else:
+            self._jobs.update({key: effective_job(job) for key, job in self._jobs.items()})
+        return self._jobs
+
+    @jobs.setter
+    def jobs(self, value):
+        self._jobs = value
 
     def list(self, category=None, education=None, application_status=None, page=1, page_size=20):
         items = sorted((job for job in self.jobs.values()
                         if (category is None or job.category == category)
                         and (education is None or job.education == education)
-                        and ((job.application_status == "open" or test_ready(job)) if application_status is None
+                        and ((job.effective_status == "open" and job.jd_completeness != "campaign" or test_ready(job)) if application_status is None
                              else job.application_status == application_status)),
                        key=lambda job: job.job_id)
         return dict(catalogue_version=self.version, total=len(items), page=page, page_size=page_size,
@@ -46,7 +91,7 @@ class JobRepository:
 
     def recommendation_candidates(self, category=None, city=None):
         return [job for job in self.jobs.values()
-                if (job.application_status == "open" or test_ready(job))
+                if (job.effective_status == "open" and job.jd_completeness != "campaign" or test_ready(job))
                 and (category is None or job.category == category)
                 and (city is None or city in job.cities)]
 
