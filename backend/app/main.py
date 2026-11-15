@@ -20,6 +20,9 @@ from app.guest_access import GuestAccessMiddleware
 from app.routers.jobs import router as jobs_router
 from app.auth import AuthStore
 from app.routers.auth import router as auth_router
+from app.history_repository import HistoryRepository
+from app.history_service import HistoryService
+from app.routers.history import router as history_router
 
 
 @asynccontextmanager
@@ -33,6 +36,7 @@ async def lifespan(app):
     app.state.job_repository = JobRepository(app.state.store)
     app.state.job_matches = JobMatchService(app.state.job_repository, app.state.match_jobs)
     app.state.interviews = InterviewService(app.state.store, app.state.match_jobs.llm_gate)
+    app.state.history = HistoryService(HistoryRepository(app.state.store))
     try:
         yield
     finally:
@@ -100,6 +104,7 @@ app.include_router(match_router)
 app.include_router(interviews_router)
 app.include_router(jobs_router)
 app.include_router(auth_router)
+app.include_router(history_router)
 
 @app.get("/")
 def read_root():

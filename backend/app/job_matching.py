@@ -5,6 +5,9 @@ import json
 import logging
 import os
 import re
+import time
+import uuid
+from copy import deepcopy
 from datetime import datetime, timezone
 
 from app import matching, job_embedding, skill_evidence
@@ -62,6 +65,17 @@ def intent_bonus(resume_text, job):
             if re.search(job_pattern, source, re.I):
                 return 20
     return 0
+
+
+def finish_unresolved(items, error):
+    finished = datetime.now(timezone.utc)
+    for item in items:
+        if item["analysis_status"] in {"pending", "running"}:
+            elapsed = item.get("analysis_elapsed_ms")
+            if elapsed is None and item.get("analysis_started_at"):
+                elapsed = max(0, int((finished - datetime.fromisoformat(item["analysis_started_at"])).total_seconds() * 1000))
+            item.update(analysis_status="degraded", degraded_reason="batch_timeout" if error == "timeout" else "model_failed",
+                        analysis_error=error, analysis_finished_at=finished.isoformat(), analysis_elapsed_ms=elapsed)
 
 
 def base_scores(resume, jobs, recommendation=False):
@@ -195,6 +209,27 @@ class JobMatchService:
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
 
+    def retry_item(self, identifier, job_id, *, owner=None):
+        original = self.task(identifier)
+        snapshot = json.loads(original["payload"])
+        if snapshot.get("owner") != owner:
+            fail(404, "TASK_NOT_FOUND", "岗位匹配任务不存在")
+        self.context(identifier, job_id)
+        if original["status"] in {"queued", "running"}:
+            fail(409, "TASK_RUNNING", "原分析尚未结束，请等待当前分析完成")
+        item = next((i for i in json.loads(original["result"] or "[]") if i["job_id"] == job_id), None)
+        if item is None:
+            fail(409, "RESULT_NOT_READY", "岗位基础评分尚未生成，请重新匹配")
+        job = next(j for j in snapshot["jobs"] if j["job_id"] == job_id)
+        snapshot = {**snapshot, "jobs": [job], "recommendation": False, "top_k": 1,
+                    "recommendation_result_limit": 1, "retry_nonce": uuid.uuid4().hex,
+                    "retry_item": item, "retry_parent_id": identifier, "fresh_analysis": True}
+        new_id, _ = self.repository.create_or_reuse(snapshot)
+        task = asyncio.create_task(self.run(new_id, snapshot))
+        self.jobs.add(task)
+        task.add_done_callback(self.jobs.discard)
+        return {"task_id": new_id}
+
     async def run(self, identifier, snapshot):
         items = []
         async with self.match_jobs.task_gate:
@@ -203,10 +238,18 @@ class JobMatchService:
                 async with asyncio.timeout(TOTAL_TIMEOUT):
                     row = dict(id=snapshot["resume_id"], name="", text=snapshot["resume_text"])
                     items = await asyncio.to_thread(base_scores, row, snapshot["jobs"], snapshot.get("recommendation", False))
+                    if snapshot.get("retry_item"):
+                        item = deepcopy(snapshot["retry_item"])
+                        item.update(score=item["stage1_score"], **matching.level_fields(item["stage1_score"]),
+                                    report=None, reason=None, degraded=True, degraded_reason=None,
+                                    analysis_status="pending", analysis_error=None,
+                                    analysis_started_at=None, analysis_finished_at=None, analysis_elapsed_ms=None)
+                        items = [item]
                     jobs_by_id = {job["job_id"]: job for job in snapshot["jobs"]}
-                    embedding_status = "disabled"
-                    embedding_error = None
-                    if snapshot.get("embedding_enabled"):
+                    await asyncio.to_thread(add_skill_assessments, items, row["text"], jobs_by_id)
+                    embedding_status = snapshot.get("embedding_status", "disabled") if snapshot.get("retry_item") else "disabled"
+                    embedding_error = snapshot.get("embedding_error") if snapshot.get("retry_item") else None
+                    if snapshot.get("embedding_enabled") and not snapshot.get("retry_item"):
                         self.repository.update(identifier, stage="语义匹配", progress=10)
                         try:
                             values = await job_embedding.similarities(row["text"], snapshot["jobs"], self.match_jobs.llm_gate)
@@ -242,6 +285,9 @@ class JobMatchService:
                         jd = by_id[item["job_id"]]["jd_text"]
                         text = row["text"]
                         reason = None
+                        started = time.monotonic()
+                        item["analysis_started_at"] = datetime.now(timezone.utc).isoformat()
+                        item["analysis_error"] = None
                         item["analysis_status"] = "running"
                         self.repository.update(identifier, result=ranked(items))
                         try:
@@ -253,7 +299,10 @@ class JobMatchService:
                                 trace_token = matching.report_trace.set((identifier, item["job_id"]))
                                 try:
                                     async with asyncio.timeout(ITEM_TIMEOUT):
-                                        report = await self.match_jobs.shared_report_for(text, jd)
+                                        if snapshot.get("fresh_analysis"):
+                                            report = await self.match_jobs.report_for(text, jd, fresh=True)
+                                        else:
+                                            report = await self.match_jobs.shared_report_for(text, jd)
                                 finally:
                                     matching.report_trace.reset(trace_token)
                                 if report.meta.mode != "llm":
@@ -269,14 +318,22 @@ class JobMatchService:
                             raise
                         except TimeoutError:
                             reason = "item_timeout"
+                            item["analysis_error"] = "timeout"
                         except matching.LlmError as exc:
                             reason = "item_timeout" if str(exc) in {"diagnose_timeout", "diagnose_http_504"} else "model_failed"
+                            item["analysis_error"] = ("timeout" if reason == "item_timeout" else
+                                                      "invalid_output" if str(exc) == "diagnose_invalid_output" else "service_unavailable")
                         except skill_evidence.InconsistentSkillReport:
                             logger.warning("job report failed consistency check task_id=%s job_id=%s",
                                            identifier, item["job_id"])
                             reason = "model_failed"
+                            item["analysis_error"] = "inconsistent_evidence"
                         except Exception:
                             reason = "model_failed"
+                            item["analysis_error"] = "unknown"
+                        finally:
+                            item["analysis_finished_at"] = datetime.now(timezone.utc).isoformat()
+                            item["analysis_elapsed_ms"] = max(0, int((time.monotonic() - started) * 1000))
                         if reason:
                             item.update(analysis_status="degraded", degraded_reason=reason)
                             if reason == "item_timeout":
@@ -295,19 +352,19 @@ class JobMatchService:
                     self.repository.update(identifier, status="failed", stage="基础评分超时",
                                            error={"code": "JOB_MATCH_TIMEOUT", "message": "基础评分超时，请重试"})
                     return
-                for item in items:
-                    if item["analysis_status"] in {"pending", "running"}:
-                        item.update(analysis_status="degraded", degraded_reason="batch_timeout")
+                finish_unresolved(items, "timeout")
                 self.repository.update(identifier, status="failed", stage="深度分析超时",
                                        result=ranked(items),
                                        error={"code": "JOB_MATCH_TIMEOUT", "message": "岗位深度分析超时，请重试"})
                 return
             except asyncio.CancelledError:
+                finish_unresolved(items, "service_unavailable")
                 self.repository.update(identifier, status="failed", stage="任务已中断",
                                        result=ranked(items),
                                        error={"code": "TASK_INTERRUPTED", "message": "服务重启，任务已中断，请重试"})
                 raise
             except Exception as exc:
+                finish_unresolved(items, "unknown")
                 logger.error("job match failed task_id=%s category=%s", identifier, type(exc).__name__)
                 self.repository.update(identifier, status="failed", stage="岗位匹配失败",
                                        result=ranked(items),
@@ -315,3 +372,9 @@ class JobMatchService:
                 return
             self.repository.update(identifier, status="succeeded", stage="岗位匹配完成", progress=100,
                                    result=ranked(items), error=None)
+            if snapshot.get("retry_parent_id") and items:
+                parent = self.repository.task(snapshot["retry_parent_id"])
+                if parent and parent["status"] in {"succeeded", "failed"}:
+                    previous = json.loads(parent["result"] or "[]")
+                    merged = [items[0] if i["job_id"] == items[0]["job_id"] else i for i in previous]
+                    self.repository.update(snapshot["retry_parent_id"], result=ranked(merged))

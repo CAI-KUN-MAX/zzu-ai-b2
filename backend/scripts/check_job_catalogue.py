@@ -25,7 +25,7 @@ def check(path, as_of):
     if len(set(ids)) != len(ids):
         raise ValueError("duplicate job_id")
     for job in jobs:
-        if job.published_at > as_of or job.verified_at.date() > as_of:
+        if (job.published_at is not None and job.published_at > as_of) or job.verified_at.date() > as_of:
             raise ValueError("future catalogue date: " + job.job_id)
     active = [j for j in jobs if j.application_status == "open"]
     testing = [j for j in jobs if test_ready(j)]

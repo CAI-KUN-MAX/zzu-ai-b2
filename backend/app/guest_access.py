@@ -73,7 +73,8 @@ class GuestAccessMiddleware(BaseHTTPMiddleware):
                 values = payload.get("resume_ids", [payload.get("resume_id")])
                 if isinstance(values, list):
                     identifiers.extend(value for value in values if isinstance(value, str))
-        elif request.method == "POST" and match and path.startswith("/api/interviews/"):
+        elif request.method == "POST" and match and (path.startswith("/api/interviews/") or
+                re.fullmatch(r"/api/job-matches/[^/]+/items/[^/]+/retry", path)):
             identifiers.append(match[1])
         if any(identifier not in owned for identifier in identifiers):
             response = JSONResponse({"error": {"code": "RESOURCE_NOT_FOUND", "message": "记录不存在或不属于当前游客，请重新上传简历", "request_id": uuid.uuid4().hex}}, status_code=404)
@@ -88,6 +89,8 @@ class GuestAccessMiddleware(BaseHTTPMiddleware):
                     resources.extend(json.loads(task["payload"])["resume_ids"])
                 store.grant_guest(acl_id, resources)
                 response = Response(body, status_code=response.status_code, headers=dict(response.headers), media_type="application/json")
+        if path.startswith("/api/history"):
+            response.headers["Cache-Control"] = "no-store"
         if fresh:
             response.set_cookie(COOKIE, token, httponly=True, secure=request.url.scheme == "https", samesite="lax", max_age=86400 * 30)
         return response
