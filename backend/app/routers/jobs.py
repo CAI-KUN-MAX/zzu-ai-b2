@@ -47,3 +47,8 @@ async def get_job_match(task_id: str, request: Request):
 @router.get("/api/job-matches/{task_id}/items/{job_id}/context", response_model=MatchContext)
 async def get_context(task_id: str, job_id: str, request: Request):
     return request.app.state.job_matches.context(task_id, job_id)
+
+
+@router.post("/api/job-matches/{task_id}/items/{job_id}/retry", status_code=202, response_model=TaskCreated)
+async def retry_job_analysis(task_id: str, job_id: str, request: Request):
+    return request.app.state.job_matches.retry_item(task_id, job_id, owner=request.state.owner)

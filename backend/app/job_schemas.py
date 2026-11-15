@@ -29,7 +29,8 @@ class Job(Contract):
     graduation_year: str = Field(min_length=1)
     jd_text: str = Field(min_length=30, max_length=20000)
     source_url: str = Field(pattern=r"^https://")
-    published_at: date
+    published_at: date | None
+    collected_at: datetime | None = None
     publication_type: Literal["original", "repost"]
     application_url: str | None = Field(default=None, pattern=r"^https://")
     verified_at: datetime
@@ -88,6 +89,10 @@ class JobMatchItem(Contract):
     degraded_reason: Literal["ai_disabled", "not_selected", "input_too_short", "input_too_long",
                              "model_failed", "item_timeout", "batch_timeout", "mock_report"] | None
     analysis_status: Literal["pending", "running", "succeeded", "degraded"]
+    analysis_started_at: datetime | None = None
+    analysis_finished_at: datetime | None = None
+    analysis_elapsed_ms: int | None = Field(default=None, ge=0)
+    analysis_error: Literal["timeout", "invalid_output", "inconsistent_evidence", "service_unavailable", "unknown"] | None = None
     skill_assessments: list[SkillAssessment] = Field(default_factory=list)
     report: DiagnoseResponse | None = None
 

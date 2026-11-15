@@ -16,7 +16,7 @@
 
 `GET /api/jobs?category=计算机&education=本科&application_status=open&page=1&page_size=20`
 
-参数均可选；不传 `application_status` 时返回 open 和满足测试池完整性门槛的 unverified 岗位，排除 closed；显式传入状态时按状态精确筛选。page=1、page_size=20（1–100）。education 按岗位最低学历精确筛选，不表示个人资格判定。category 为十个专业大类，详见 OpenAPI。返回 `{catalogue_version,total,page,page_size,items}`；items 为完整岗位，包含 job_id、title、company、cities、category、education、education_requirement、majors、graduation_year、jd_text、source_url、published_at（YYYY-MM-DD）、publication_type（original/repost）、application_url（未核实入口时为 null）、verified_at、application_status（open/closed/unverified）、verification_note。状态只代表 verified_at 时点的核验；没有自动保鲜承诺。
+参数均可选；不传 `application_status` 时返回 open 和满足测试池完整性门槛的 unverified 岗位，排除 closed；显式传入状态时按状态精确筛选。page=1、page_size=20（1–100）。education 按岗位最低学历精确筛选，不表示个人资格判定。category 为十个专业大类，详见 OpenAPI。返回 `{catalogue_version,total,page,page_size,items}`；items 为完整岗位，包含 job_id、title、company、cities、category、education、education_requirement、majors、graduation_year、jd_text、source_url、published_at（YYYY-MM-DD 或 null）、collected_at（真实采集时间或 null）、publication_type（original/repost）、application_url（未核实入口时为 null）、verified_at、application_status（open/closed/unverified）、verification_note。发布日期未知时显示“未说明”，采集时间不得充当发布日期；状态只代表 verified_at 时点的核验，没有自动保鲜承诺。
 
 按用户确认，`open` 岗位必须有 `source_url`（岗位 JD 来源地址），但不强制提供单独的 `application_url`；未知投递入口保持 null，来源地址不自动视为投递入口。用户确认的状态是用户提供的信息，不代表系统独立验证或保证实际投递成功。目录验收中的 JD 完整性检查保持不变。
 
@@ -25,6 +25,12 @@
 `GET /api/jobs/testing-pool?category=生物医药&page=1&page_size=20` 返回满足完整性门槛的岗位，筛选标准为 JD 至少 80 字且同时具备岗位职责和任职要求。接口与普通目录采用同一 `JobList` 响应及分页、专业、最低学历筛选；`unverified` 不代表已确认可投。
 
 ## 创建、轮询与重试
+
+`POST /api/job-matches/{task_id}/items/{job_id}/retry`（无请求体）按原简历与 JD 快照重新分析单个岗位，返回 202 `{task_id}`。保留原基础分及语义排序口径，绕过旧 AI 报告缓存；其余岗位不重跑。原任务未结束时返回 409 TASK_RUNNING。不存在或不属于当前访问者的任务返回 404；简历变化返回 409 RESUME_CHANGED。客户端将新任务单项结果合并到原列表，并使用新任务 ID 获取该项上下文。
+
+逐项新增可选 `analysis_started_at`、`analysis_finished_at`（UTC ISO）、`analysis_elapsed_ms`（包含等待共享并发名额的时长）；运行时每秒从开始时间计算，结束后冻结。`analysis_error` 为 null 或 `timeout`、`invalid_output`、`inconsistent_evidence`、`service_unavailable`、`unknown`。旧任务缺失时不推断具体原因。
+
+投递入口合并为“前往投递”，优先 application_url，否则打开 source_url 的具体 JD 页面。按用户标准，具体 JD 页面存在投递按钮即可视为可投；此 UI 调整不批量改写目录核验记录。
 
 `POST /api/job-recommendations` 接受 `{"resume_id":"原简历ID","category":null,"city":null}`，意向字段可省略；提供时按专业大类、城市精确筛选。对当前目录中 open 和满足完整性门槛的 unverified 岗位执行规则初排。简历中明确标注“求职意向”等字段时，有限规则识别用户体验、后端、前端、数据分析、产品经理和软件测试方向；岗位名称有对应线索时，基础分加 20 分（上限 100），字段 `intent_bonus` 表示实际加分。不再因 JD 中偶然提及用户体验而给其他岗位加分；岗位名称未直接体现方向时可能漏加分。规则不排除未命中岗位，可减轻漏召回；支持部分英文用户体验同义词、无冒号但以空格分隔的意向字段及常见否定词；其他意向、复杂否定和文本格式可能无法识别。意向线索不证明能力或岗位适合。然后最多取前 30 项作为候选，再复用岗位匹配任务，返回 202 `{"task_id":"任务ID"}`；通过原轮询和 context 接口获取结果。启用 Embedding 时在候选范围内重排，之后最多对前 8 岗进行 AI 分析；新推荐任务在深度分析前确定最多 8 项展示名单，后续只对名单内岗位重新排序。进度只统计入选深度分析的岗位。历史任务继续按原规则读取。初排 30 名以外仍可能遗漏相关岗位；Embedding 未启用或失败时仍按规则初排。无符合条件岗位返回 404 `NO_RECOMMENDABLE_JOBS`。少于 8 个时如实返回实际数量；未核验岗位不能表述为确认可投。规则分是排序参考，并非录用概率。
 

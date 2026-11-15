@@ -4,6 +4,7 @@ import { STATUS_LABEL, getIngestTask, uploadResumes } from "../api/resumes";
 import { createJobMatch, createJobRecommendation, getJobMatchTask, listJobs } from "../api/jobs";
 import { saveLastResume } from "../lib/jobMatchStorage";
 import { useTask } from "../lib/useTask";
+import { filterJobCatalogue, locationGroups, loadJobCatalogue } from "../lib/jobCatalogue";
 import { DropZone } from "./DropZone";
 import { JobJdDialog } from "./JobJdDialog";
 
@@ -90,6 +91,7 @@ export function JobMatchPage({
   const [files, setFiles] = useState<File[]>(draft.files);
   const [resumeTaskId, setResumeTaskId] = useState<string | null>(draft.resumeTaskId);
   const [uploading, setUploading] = useState(false);
+  const [changingResume, setChangingResume] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resumeExpired, setResumeExpired] = useState(false);
 
@@ -192,17 +194,7 @@ export function JobMatchPage({
     setJobsLoading(true);
     setJobsError(null);
 
-    async function loadJobs() {
-      const first = await listJobs({ page: 1, page_size: 100 });
-      const allJobs = [...first.items];
-      for (let page = 2; allJobs.length < first.total; page++) {
-        const next = await listJobs({ page, page_size: 100 });
-        if (next.items.length === 0) break;
-        allJobs.push(...next.items);
-      }
-      return { ...first, items: allJobs };
-    }
-    loadJobs().then((data) => {
+    loadJobCatalogue(listJobs).then((data) => {
         if (cancelled) return;
         setJobs(data.items);
         setJobTotal(data.total);
@@ -227,27 +219,25 @@ export function JobMatchPage({
     return ["全部", ...Array.from(set)];
   }, [jobs]);
 
+  const filteredJobs = useMemo(
+    () => filterJobCatalogue(jobs, { search, education, city }),
+    [jobs, search, education, city]
+  );
+
   const categoryCount = useMemo(() => {
     const map = new Map<string, number>();
-    jobs.forEach((job) => map.set(job.category, (map.get(job.category) ?? 0) + 1));
+    filteredJobs.forEach((job) => map.set(job.category, (map.get(job.category) ?? 0) + 1));
     return map;
-  }, [jobs]);
+  }, [filteredJobs]);
 
   const educationOptions = useMemo(() => Array.from(new Set(jobs.map((job) => job.education))), [jobs]);
-  const cityOptions = useMemo(() => {
-    const count = new Map<string, number>();
-    jobs.forEach((job) => job.cities.forEach((item) => count.set(item, (count.get(item) ?? 0) + 1)));
-    return Array.from(count.keys()).sort((a, b) => (count.get(b) ?? 0) - (count.get(a) ?? 0));
-  }, [jobs]);
+  const cityGroups = useMemo(() => locationGroups(jobs), [jobs]);
 
   const filtering = search.trim() !== "" || category !== ALL || education !== ALL || city !== ALL;
 
   const visibleJobs = useMemo(
-    () => jobs.filter((job) => (category === ALL || job.category === category) &&
-      (education === ALL || job.education === education) &&
-      (city === ALL || job.cities.includes(city)) &&
-      [job.title, job.company, job.category, ...job.cities].join(" ").toLowerCase().includes(search.trim().toLowerCase())),
-    [jobs, category, education, city, search]
+    () => filteredJobs.filter((job) => category === ALL || job.category === category),
+    [filteredJobs, category]
   );
 
   // 换了筛选条件就回到第一批
@@ -277,6 +267,12 @@ export function JobMatchPage({
   const recFailed = !!recError || (!!recPollError && !recTask?.items.length);
   const recLoading = !!recResumeId && !recFailed && recItems.length === 0 && recTask?.status !== "succeeded";
   const recEmpty = !!recResumeId && !recFailed && !recLoading && recItems.length === 0;
+  const recInProgress = !!recResumeId && !recFailed && (!recTask || recTask.status === "queued" || recTask.status === "running");
+  const recProgressText = !recTask || recTask.status === "queued"
+    ? "正在准备推荐，结果会自动显示…"
+    : recTask.analysis_total
+      ? `正在完善推荐分析：已完成 ${recTask.analysis_completed ?? 0} / ${recTask.analysis_total} 个岗位，可先挑选感兴趣的岗位。`
+      : "正在比较简历与岗位，推荐结果会自动显示…";
   const recIds = useMemo(() => new Set(recItems.map((item) => item.job_id)), [recItems]);
   const shownRecItems = recExpanded ? recItems : recItems.slice(0, REC_PREVIEW);
   // 不筛选时，已经在推荐区出现的岗位不重复列出
@@ -296,6 +292,8 @@ export function JobMatchPage({
   }
 
   async function handleFileChange(next: File[]) {
+    if (changingResume && next.length === 0) return;
+    setChangingResume(false);
     setFiles(next);
     setError(null);
     setResumeTaskId(null);
@@ -366,11 +364,12 @@ export function JobMatchPage({
                   <button type="button" onClick={retryRecommendation}>重试</button>
                 </div>
               ) : recLoading || jobsLoading ? (
-                <p className="picker-message" aria-busy="true">正在按你的简历挑选岗位…</p>
+                <p className="picker-message" role="status" aria-live="polite" aria-busy="true">{recProgressText}</p>
               ) : recEmpty ? (
                 <p className="picker-message">暂时没有合适的推荐，可以在下方搜索或筛选岗位。</p>
               ) : (
                 <>
+                  {recInProgress && <p className="picker-hint" role="status" aria-live="polite">{recProgressText}</p>}
                   <div className="picker-grid">
                     {shownRecItems.map((item) => {
                       const job = jobIndex[item.job_id];
@@ -389,9 +388,9 @@ export function JobMatchPage({
           <div className="picker-toolbar">
             <label className="picker-search"><span className="sr-only">搜索岗位名称或企业名称</span><input type="search" placeholder="搜索岗位或企业名称" value={search} onChange={(e) => setSearch(e.target.value)} /><span aria-hidden="true">⌕</span></label>
             <label className="picker-select"><span className="sr-only">学历</span><select value={education} onChange={(e) => setEducation(e.target.value)}><option value={ALL}>全部学历</option>{educationOptions.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
-            <label className="picker-select"><span className="sr-only">城市</span><select value={city} onChange={(e) => setCity(e.target.value)}><option value={ALL}>全部城市</option>{cityOptions.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
+            <label className="picker-select"><span className="sr-only">工作地区</span><select value={city} onChange={(e) => setCity(e.target.value)}><option value={ALL}>全部地区</option>{cityGroups.map((group) => <optgroup key={group.label} label={group.label}>{group.options.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</optgroup>)}</select></label>
             <div className="picker-categories" role="group" aria-label="专业类别">
-              {categories.map((item) => <button type="button" key={item} aria-pressed={item === category} onClick={() => setCategory(item)} className={item === category ? "active" : ""}>{item}<span>{item === ALL ? jobTotal : categoryCount.get(item) ?? 0}</span></button>)}
+              {categories.map((item) => <button type="button" key={item} aria-pressed={item === category} onClick={() => setCategory(item)} className={item === category ? "active" : ""}>{item}<span>{item === ALL ? filteredJobs.length : categoryCount.get(item) ?? 0}</span></button>)}
             </div>
           </div>
           {jobsLoading ? (!recResumeId && <p className="picker-message" aria-busy="true">正在加载岗位…</p>) : jobsError ? <p className="picker-message" role="alert">{jobsError}</p> : listJobsToShow.length === 0 ? (
@@ -416,7 +415,11 @@ export function JobMatchPage({
           <section className="picker-panel" aria-label="已选岗位">
             <div className="picker-panel-head"><h2>已选岗位</h2><span><b>{selected.length}</b> / {jobTotal}</span></div>
             {selected.length === 0 ? <p className="picker-empty">还没有选，点击岗位卡片选择</p> : <div className="picker-picked">
-              {selected.map((id) => jobIndex[id]).filter((job): job is Job => !!job).map((job) => <div className="picker-picked-item" key={job.job_id}><span className="picker-logo small">{job.company.slice(0, 1)}</span><span className="picker-picked-name"><strong>{job.title}</strong><small>{job.company}</small></span><button type="button" onClick={() => toggleJob(job.job_id)} aria-label={`移除 ${job.title}`}>×</button></div>)}
+              {selected.map((id) => {
+                const job = jobIndex[id];
+                const title = job?.title ?? (jobsLoading ? "正在加载岗位…" : "岗位已不在目录");
+                return <div className="picker-picked-item" key={id}><span className="picker-logo small">{job?.company.slice(0, 1) || "岗"}</span><span className="picker-picked-name"><strong title={title}>{title}</strong><small>{job?.company || "可移除此岗位后重新选择"}</small></span><button type="button" onClick={() => toggleJob(id)} aria-label={`移除 ${title}`}>×</button></div>;
+              })}
             </div>}
             <p className="picker-hint">系统会逐岗计算匹配分；AI 分析可用时提供诊断建议。</p>
             <button className="picker-submit" type="button" onClick={handleSubmit} disabled={!canSubmit}>{submitting ? "正在发起匹配…" : "开始匹配 →"}</button>
@@ -440,7 +443,8 @@ export function JobMatchPage({
                 {pollUnavailable && <button type="button" onClick={retryPoll}>重新获取</button>}
               </p>
             )}
-            <DropZone files={files} onChange={handleFileChange} disabled={uploading} maxFiles={1} title="上传或拖拽简历" />
+            {parsed ? <button type="button" className="picker-last mt-3" onClick={() => setChangingResume(value => !value)} aria-expanded={changingResume}>{changingResume ? "取消更换" : "更换简历"}</button> : null}
+            {(!parsed || changingResume) && <DropZone files={changingResume ? [] : files} onChange={handleFileChange} disabled={uploading} maxFiles={1} title="上传或拖拽简历" />}
             <p className="picker-hint">简历用于本次匹配分析。AI 建议仅供参考，不构成录用判断。</p>
           </section>
         </div>

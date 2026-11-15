@@ -45,7 +45,7 @@ export function JobJdDialog({ job, selected, onToggle, onClose }: JobJdDialogPro
     { label: "学历", value: job.education_requirement || job.education },
     { label: "专业", value: job.majors.length > 0 ? job.majors.join("、") : "不限" },
     { label: "届别", value: job.graduation_year ? String(job.graduation_year) : "未注明" },
-    { label: "发布", value: job.published_at },
+    { label: "发布", value: job.published_at ?? "未说明" },
   ];
 
   return createPortal(
@@ -96,12 +96,12 @@ export function JobJdDialog({ job, selected, onToggle, onClose }: JobJdDialogPro
           <p className="mt-3 text-[11px] leading-relaxed text-ink-500">
             核验于 {job.verified_at.slice(0, 10)}，状态只代表核验当时的情况。
             <a
-              href={job.source_url}
+              href={job.application_url || job.source_url}
               target="_blank"
               rel="noreferrer"
               className="ml-1 text-brand-600 hover:underline"
             >
-              查看招聘来源
+              前往投递
             </a>
           </p>
         </div>
