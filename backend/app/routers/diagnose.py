@@ -10,6 +10,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 from openai import AsyncOpenAI, APITimeoutError
+from pydantic import ValidationError
 
 from app.schemas import DiagnoseRequest, DiagnoseResponse, ErrorResponse, MetaInfo
 from app.mock_data import MOCK_RESPONSES
@@ -204,7 +205,14 @@ def quoted_from(source, quote):
     return re.sub(r"\s+", "", quote) in re.sub(r"\s+", "", source)
 
 
-def parse_report(content, payload, request_id, elapsed_ms, lenient=False):
+def safe_rewrite_prompt(payload):
+    """Presentation fallback only; never invent experience when a rewrite is malformed."""
+    if (payload.options or {}).get("language") == "en-US":
+        return "Only if you have relevant experience, add 【actual tasks】 and 【verifiable results】 from 【a real project】; do not invent experience."
+    return "仅在确有相关经历时补充：在【真实项目】中完成【实际任务】，说明【本人职责】和【可核实成果】；请勿编造经历。"
+
+
+def parse_report(content, payload, request_id, elapsed_ms, lenient=False, repair_presentation=False):
     """lenient=True 用于最后一次尝试：引用不合格的个别亮点、缺项直接删掉，其余已核对的内容照常返回。
 
     只删不改，不会产生没有原文依据的内容；第一次仍严格校验并带着原因让模型重写。
@@ -220,6 +228,10 @@ def parse_report(content, payload, request_id, elapsed_ms, lenient=False):
         raise ValueError("not_object")
     if str(data.get("summary", "")).strip().rstrip("。.!！") == "基于证据的一句话总体评价":
         raise ValueError("摘要不能照抄示例占位文字，必须根据当前简历与岗位给出具体评价")
+    if (lenient or repair_presentation) and isinstance(data.get("gaps"), list):
+        for gap in data["gaps"]:
+            if isinstance(gap, dict) and "severity" not in gap:
+                gap["severity"] = "medium"
     report = DiagnoseResponse.model_validate({
         **{key: data[key] for key in ("dimension_scores", "highlights", "gaps", "summary")},
         "overall_score": 0,
@@ -263,6 +275,12 @@ def parse_report(content, payload, request_id, elapsed_ms, lenient=False):
     for gap in report.gaps:
         texts.extend([gap.title, gap.jd_requirement, gap.suggestion])
         if suggestions_enabled(payload):
+            # Rewrite formatting must not discard an otherwise valid analysis.
+            # On the repair attempt substitute a conditional editing prompt only;
+            # all scores, source quotations and evidence checks remain unchanged.
+            if (lenient or repair_presentation) and (not gap.rewrite_suggestion.strip() or
+                            (gap.resume_evidence is None and not REWRITE_PLACEHOLDER.search(gap.rewrite_suggestion))):
+                gap.rewrite_suggestion = safe_rewrite_prompt(payload)
             if not gap.rewrite_suggestion.strip():
                 raise ValueError("rewrite_suggestion_missing")
             if gap.resume_evidence is None and not REWRITE_PLACEHOLDER.search(gap.rewrite_suggestion):
@@ -367,6 +385,22 @@ async def diagnose(payload: DiagnoseRequest):
                                               int((time.monotonic() - start_time) * 1000), lenient=repair)
                         return report
                     except (ValueError, KeyError, TypeError) as validation_error:
+                        presentation_only = str(validation_error) in {
+                            "rewrite_suggestion_missing", "rewrite_suggestion_placeholder_missing"}
+                        if isinstance(validation_error, ValidationError):
+                            presentation_only = all(
+                                e["type"] == "missing" and len(e["loc"]) == 3 and
+                                e["loc"][0] == "gaps" and e["loc"][2] == "severity"
+                                for e in validation_error.errors(include_input=False))
+                        if presentation_only:
+                            try:
+                                # Reuse the actual model response and still strictly
+                                # check every quotation; no second generation needed.
+                                return parse_report(response.choices[0].message.content, payload, request_id,
+                                                    int((time.monotonic() - start_time) * 1000),
+                                                    repair_presentation=True)
+                            except (ValueError, KeyError, TypeError) as repair_error:
+                                validation_error = repair_error
                         logger.warning("diagnose request_id=%s category=invalid_output attempt=%s", request_id, attempt)
                         if attempt == 2:
                             raise

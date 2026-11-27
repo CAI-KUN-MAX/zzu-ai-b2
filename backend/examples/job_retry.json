@@ -1,0 +1,5 @@
+{
+  "request": {"method": "POST", "path": "/api/job-matches/fictional-task/items/fictional-job/retry"},
+  "response": {"task_id": "fictional-retry-task"},
+  "item_fields": {"analysis_started_at": "2026-11-14T11:00:00Z", "analysis_finished_at": "2026-11-14T11:00:12Z", "analysis_elapsed_ms": 12000, "analysis_error": "invalid_output"}
+}

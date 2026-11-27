@@ -202,6 +202,14 @@ export async function getJob(jobId: string): Promise<Job> {
   return request<Job>(`/api/jobs/${encodeURIComponent(jobId)}`);
 }
 
+export async function retryJobAnalysis(taskId: string, jobId: string): Promise<{ task_id: string }> {
+  if (IS_MOCK_MODE) return createJobMatch(mockResumeOf.get(taskId) ?? "mock-resume", [jobId]);
+  return request<{ task_id: string }>(
+    `/api/job-matches/${encodeURIComponent(taskId)}/items/${encodeURIComponent(jobId)}/retry`,
+    { method: "POST", timeoutMessage: "重新分析请求超时，请稍后重试" }
+  );
+}
+
 /** GET /api/job-matches/{task_id} */
 export async function getJobMatchTask(
   taskId: string,

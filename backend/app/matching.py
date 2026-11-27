@@ -189,6 +189,8 @@ async def run_diagnose(resume, jd):
         async with asyncio.timeout(LLM_ITEM_TIMEOUT):
             return await module.diagnose(DiagnoseRequest(resume_text=resume, jd_text=jd))
     except HTTPException as exc:
+        if exc.status_code == 500 and isinstance(exc.__context__, (ValueError, KeyError, TypeError)):
+            raise LlmError("diagnose_invalid_output") from None
         raise LlmError(f"diagnose_http_{exc.status_code}") from None
     except TimeoutError:
         raise LlmError("diagnose_timeout") from None
@@ -255,16 +257,16 @@ class MatchJobs:
                     entry["task"].cancel()
                 await asyncio.gather(entry["task"], return_exceptions=True)
 
-    async def report_for(self, resume, jd):
+    async def report_for(self, resume, jd, *, fresh=False):
         key = cache_key(resume, jd)
-        cached = self.cache_get(key)
+        cached = None if fresh else self.cache_get(key)
         if cached:
             return cached
         started = time.monotonic()
         phase = "gate_wait"
         try:
             async with self.llm_gate:
-                cached = self.cache_get(key)
+                cached = None if fresh else self.cache_get(key)
                 if cached:
                     return cached
                 phase = "diagnose"

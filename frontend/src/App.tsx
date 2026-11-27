@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IS_MOCK_MODE } from "./api/http";
 import { useAuth } from "./lib/useAuth";
-import { createJobRecommendation, listJobs } from "./api/jobs";
+import { loadJobCatalogue } from "./lib/jobCatalogue";
+import { listJobs } from "./api/jobs";
 import { DOCUMENT_ACCEPT, IMAGE_ACCEPT, getIngestTask, uploadResumes, validateFiles } from "./api/resumes";
+import { HistoryPage } from "./components/HistoryPage";
+import type { HistoryEntry } from "./api/history";
 import { JobCarousel } from "./components/JobCarousel";
 import { JobJdDialog } from "./components/JobJdDialog";
 import { JobMatchPage, type JobMatchDraft } from "./components/JobMatchPage";
@@ -77,15 +80,13 @@ export default function App() {
   }, [view.name]);
   const [homeJobs, setHomeJobs] = useState<Job[]>([]);
   const [recentResume, setRecentResume] = useState<StoredResume | null>(() => loadLastResume());
-  const [recommending, setRecommending] = useState(false);
-  const [recommendError, setRecommendError] = useState<string | null>(null);
   const uploadInputRef = useRef<HTMLInputElement>(null);
   const [homeUploading, setHomeUploading] = useState(false);
   const [homeUploadError, setHomeUploadError] = useState<string | null>(null);
   const [homeUploadTask, setHomeUploadTask] = useState<string | null>(null);
   const { data: homeIngest, error: homePollError, polling: homePolling, retry: retryHomeIngest } = useTask<IngestTask>(getIngestTask, homeUploadTask);
-  const [homeTotal, setHomeTotal] = useState(0);
-  const [homeCategories, setHomeCategories] = useState(0);
+  const [homeTotal, setHomeTotal] = useState<number | null>(null);
+  const [homeCategories, setHomeCategories] = useState<number | null>(null);
   const [homeJdJob, setHomeJdJob] = useState<Job | null>(null);
   // 草稿只在切页时读一次，用 ref 存避免每次勾选都让 App 重渲染
   const draftRef = useRef<JobMatchDraft>({ ...loadDraft(), files: [] });
@@ -131,26 +132,17 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
-    // 首页统计和岗位速览使用目录中状态为开放的岗位。
-    (async () => {
-      const collected: Job[] = [];
-      let total = 0;
-      for (let page = 1; page <= 4; page += 1) {
-        const data = await listJobs({ page, page_size: 50 });
-        collected.push(...data.items);
-        total = data.total;
-        if (collected.length >= total) break;
-      }
+    // 总量与分类覆盖取自完整目录，速览仍优先展示开放岗位。
+    loadJobCatalogue(listJobs).then((data) => {
       if (cancelled) return;
-      const openJobs = collected.filter((job) => job.application_status === "open");
-      setHomeJobs(openJobs);
-      setHomeTotal(openJobs.length);
-      setHomeCategories(new Set(openJobs.map((job) => job.category)).size);
-    })().catch(() => {
+      setHomeJobs(data.items.filter((job) => job.application_status === "open"));
+      setHomeTotal(data.total);
+      setHomeCategories(new Set(data.items.map((job) => job.category)).size);
+    }).catch(() => {
       if (!cancelled) {
         setHomeJobs([]);
-        setHomeTotal(0);
-        setHomeCategories(0);
+        setHomeTotal(null);
+        setHomeCategories(null);
       }
     });
     return () => { cancelled = true; };
@@ -246,34 +238,24 @@ export default function App() {
   }
 
   /**
-   * 一键推荐：由后端从目录中筛选并排序。
+   * 一键进入选岗页，由该页发起并展示后端推荐进度。
    * 分数、排序、匹配理由全部来自后端，前端不生成任何分数。
    */
-  async function handleRecommend() {
-    if (recommending) return;
-    if (!recentResume) {
-      setRecommendError("还没有可用的简历，请先上传并等解析完成");
-      return;
-    }
-    setRecommendError(null);
-    setRecommending(true);
-    try {
-      const { task_id } = await createJobRecommendation(recentResume.resumeId);
-      openResult({
-        taskId: task_id,
-        resumeId: recentResume.resumeId,
-        resumeName: recentResume.name,
-        resumeStatus: recentResume.status ?? "need_review",
-        jobIds: [],
-        jobIndex: {},
-        savedAt: Date.now(),
-        mode: "recommend",
-      });
-    } catch (err) {
-      setRecommendError(err instanceof Error ? err.message : "推荐失败，请稍后重试");
-    } finally {
-      setRecommending(false);
-    }
+  function handleRecommend() {
+    clearHash();
+    setView({ name: "job" });
+  }
+
+  function useHistoryResume(entry: HistoryEntry) {
+    if (!entry.ingest_task_id || !entry.resume_id || !entry.resume_name ||
+        (entry.resume_status !== "ready" && entry.resume_status !== "need_review")) return;
+    handleDraftChange({ ...draftRef.current, resumeTaskId: entry.ingest_task_id, files: [] });
+    const saved: StoredResume = { resumeId: entry.resume_id, name: entry.resume_name,
+      status: entry.resume_status, savedAt: Date.now() };
+    saveLastResume(saved);
+    setRecentResume(saved);
+    clearHash();
+    setView({ name: "job" });
   }
 
   /** 身份变了就整页重载：内存里的简历、匹配、会话都要按新身份重来 */
@@ -309,7 +291,7 @@ export default function App() {
           <div className="offer-sidebar-note">
             {auth.status === "authenticated"
               ? "记录跟随账号，换设备登录也能看到。"
-              : "当前是游客空间，记录只保存在这台设备上。"}
+              : "游客历史可在当前浏览器回看；清除 Cookie 后可能无法找回。"}
           </div>
         </aside>
         <div className="offer-content">
@@ -369,21 +351,14 @@ export default function App() {
                   type="button"
                   className="offer-primary dashboard-cta"
                   onClick={handleRecommend}
-                  disabled={recommending || !recentResume || homeUploading || homePolling}
+                  disabled={homeUploading || homePolling}
                 >
-                  {recommending ? "正在为你挑选岗位…" : "为我推荐岗位"}
+                  一键推荐岗位
                   <span>→</span>
                 </button>
 
                 {!recentResume ? (
-                  <p className="dashboard-hint">先上传一份简历，才能按你的经历推荐岗位。</p>
-                ) : null}
-
-                {recommendError ? (
-                  <p className="dashboard-error" role="alert">
-                    <span>{recommendError}</span>
-                    <button type="button" onClick={handleRecommend}>重试</button>
-                  </p>
+                  <p className="dashboard-hint">上传简历后会自动推荐，也可以先进入页面挑选岗位。</p>
                 ) : null}
 
                 {lastMatch ? (
@@ -395,11 +370,8 @@ export default function App() {
 
                 <div className="dashboard-stats">
                   <span>
-                    岗位库共 <b>{homeTotal || "—"}</b> 个开放状态岗位，覆盖 <b>{homeCategories || "—"}</b> 类专业
+                    岗位库共 <b>{homeTotal ?? "—"}</b> 个岗位，覆盖 <b>{homeCategories ?? "—"}</b> 类专业
                   </span>
-                  <button type="button" onClick={() => setView({ name: "job" })}>
-                    挑选岗位 →
-                  </button>
                 </div>
               </section>
 
@@ -446,7 +418,7 @@ export default function App() {
               </section>
             </main>
           ) : view.name === "records" ? (
-            <main className="offer-picker"><div className="picker-title"><div><span className="offer-eyebrow">YOUR ACTIVITY</span><h1>记录</h1><p>在当前浏览器继续查看最近一次匹配。</p></div></div><div className="records-grid"><section className="picker-panel"><h2>最近动态</h2>{lastMatch ? <button className="dashboard-job" onClick={() => openResult(lastMatch)}><span className="picker-logo small">▤</span><span><strong>{lastMatch.resumeName}</strong><small>{lastMatch.jobIds.length} 个岗位 · {new Date(lastMatch.savedAt).toLocaleString("zh-CN")}</small></span><span>查看 →</span></button> : <p className="picker-empty">还没有匹配记录，完成匹配后可在这里查看。</p>}</section><section className="picker-panel"><h2>模拟面试记录</h2><p className="picker-hint">当前仅支持在面试过程中查看反馈，暂不提供历史面试记录。</p><h2 className="mt-6">我的简历</h2><p className="picker-hint">{lastMatch ? lastMatch.resumeName : "暂未保存最近匹配的简历。"}</p><button className="dashboard-link" onClick={() => setView({ name: "job" })}>管理本次简历 →</button></section></div></main>
+            <HistoryPage authenticated={auth.status === "authenticated"} onOpenMatch={openResult} onUseResume={useHistoryResume} />
           ) : view.name === "job" ? (
           <JobMatchPage
             onStartMatch={handleStartJobMatch}

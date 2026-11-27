@@ -9,8 +9,9 @@ import type {
   MatchContext,
   ResumeStatus,
 } from "../types";
-import { createJobMatch, createJobRecommendation, getJob, getJobMatchTask, getMatchContext } from "../api/jobs";
+import { createJobMatch, createJobRecommendation, getJob, getJobMatchTask, getMatchContext, retryJobAnalysis } from "../api/jobs";
 import { useTask } from "../lib/useTask";
+import { analysisDuration, analysisFailure } from "../lib/jobAnalysis";
 import { levelTone } from "../lib/theme";
 import { DimensionBars } from "./report/DimensionBars";
 import { Highlights } from "./report/Highlights";
@@ -63,7 +64,7 @@ const DEGRADED_REASON: Record<JobDegradedReason, { short: string; detail: string
   not_selected: { short: "未做深度分析", detail: "只会给排在前面的岗位（默认前 8 个）做 AI 深入分析，这个岗位没排进去" },
   input_too_short: { short: "简历太短", detail: "简历内容太少，不足以做 AI 分析" },
   input_too_long: { short: "内容太长", detail: "简历和岗位要求加起来超过 2 万字，超出了分析长度，可以精简后再试" },
-  model_failed: { short: "AI 没成功", detail: "AI 分析这次没成功，可以重新匹配再试一次" },
+  model_failed: { short: "AI 没成功", detail: "AI 分析未成功；旧记录未保存详细原因，可重新 AI 分析" },
   item_timeout: { short: "AI 等太久", detail: "这个岗位的 AI 分析等太久了，先按关键词给分" },
   batch_timeout: { short: "AI 等太久", detail: "整批分析等太久，这个岗位没跑完" },
   mock_report: { short: "示例数据", detail: "这是演示用的示例报告，不是真实结果" },
@@ -75,8 +76,8 @@ function isAnalyzing(item: JobMatchItem): boolean {
 }
 
 /** 卡片右下角的分析状态 */
-function analysisLabel(item: JobMatchItem): string {
-  if (isAnalyzing(item)) return "AI 分析中";
+function analysisLabel(item: JobMatchItem, now: number): string {
+  if (isAnalyzing(item)) return `AI 分析中${analysisDuration(item, now)}`;
   if (item.degraded_reason === "mock_report") return "模拟报告";
   if (item.report) return "AI 已分析";
   return item.degraded_reason ? `基础评分 · ${DEGRADED_REASON[item.degraded_reason].short}` : "基础评分";
@@ -97,8 +98,16 @@ function JobDetail({
   resumeId,
   embeddingStatus,
   onStartInterview,
+  onRetry,
+  retrying,
+  retryError,
+  now,
 }: {
   item: JobMatchItem;
+  onRetry: () => void;
+  retrying: boolean;
+  retryError: string | null;
+  now: number;
   job?: Job;
   taskId: string;
   resumeId: string;
@@ -277,7 +286,7 @@ function JobDetail({
               <div className="flex gap-2">
                 <dt className="w-16 shrink-0 text-ink-500">发布</dt>
                 <dd className="num min-w-0 text-ink-700">
-                  {job.published_at}
+                  {job.published_at ?? "未说明"}
                   <span className="ml-1.5 text-ink-500">
                     {job.publication_type === "original" ? "企业原始发布" : "转载"}
                   </span>
@@ -291,7 +300,7 @@ function JobDetail({
                 <span>
                   {job.application_status === "closed"
                     ? "该岗位已关闭，不能再投递，仅供参考。"
-                    : "该岗位为待核验线索，投递入口未经核实，不能当作已确认可投。"}
+                    : "点击前往投递打开具体招聘页面，可通过页面上的投递按钮申请。"}
                   {job.verification_note ? `（${job.verification_note}）` : ""}
                 </span>
               </p>
@@ -308,32 +317,13 @@ function JobDetail({
 
             <div className="mt-4 flex flex-wrap gap-2">
               <a
-                href={job.source_url}
+                href={job.application_url || job.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-surface-line bg-white px-3.5 py-2 text-[12px] font-medium text-ink-700 transition-colors hover:border-brand-300 hover:text-brand-700"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-3.5 py-2 text-[12px] font-semibold text-white transition-colors hover:bg-brand-700"
               >
-                查看招聘来源
+                前往投递
               </a>
-              {job.application_url ? (
-                <a
-                  href={job.application_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-3.5 py-2 text-[12px] font-semibold text-white transition-colors hover:bg-brand-700"
-                >
-                  前往投递
-                </a>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  title="该岗位尚未核实投递入口"
-                  className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-xl bg-ink-300 px-3.5 py-2 text-[12px] font-semibold text-white"
-                >
-                  前往投递（暂未核实）
-                </button>
-              )}
             </div>
           </section>
         ) : <p className="mt-5 text-sm text-ink-500">岗位目录详情暂不可用，请返回目录核对岗位来源。</p>}
@@ -393,17 +383,25 @@ function JobDetail({
         ) : isAnalyzing(item) ? (
           <p className="mt-5 flex items-start gap-2 rounded-xl border border-brand-100 bg-brand-50 px-4 py-3 text-[12px] leading-relaxed text-brand-700">
             <SpinnerIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 animate-spin" />
-            <span>AI 正在分析这个岗位，完成后诊断报告会自动显示在这里；当前总分为基础分。</span>
+            <span>AI 正在分析这个岗位{analysisDuration(item, now)}，完成后报告会自动显示；当前总分为基础分。</span>
           </p>
         ) : (
           <p className="mt-5 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] leading-relaxed text-amber-700">
             <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             <span>
               这个岗位没有 AI 深度诊断
-              {item.degraded_reason ? `：${DEGRADED_REASON[item.degraded_reason].detail}` : ""}。总分即基础分，关键词命中情况已列在上方。
+              {item.degraded_reason ? `：${item.analysis_error || item.degraded_reason === "model_failed" ? analysisFailure(item) : DEGRADED_REASON[item.degraded_reason].detail}` : ""}{analysisDuration(item, now)}。总分即基础分，关键词命中情况已列在上方。
             </span>
           </p>
         )}
+
+        <div className="mt-4">
+          <button type="button" onClick={onRetry} disabled={retrying || isAnalyzing(item)}
+            className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50">
+            {retrying || isAnalyzing(item) ? `AI 分析中${analysisDuration(item, now)}` : "重新 AI 分析"}
+          </button>
+          {retryError ? <p role="alert" className="mt-2 text-sm text-rose-700">{retryError}</p> : null}
+        </div>
 
         <p className="mt-6 flex items-start gap-2 text-[11px] leading-relaxed text-ink-500">
           <InfoIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
@@ -514,7 +512,7 @@ function ProgressBanner({
   onRestart: () => void;
   onRefetch: () => void;
 }) {
-  const startedAt = task?.analysis_started_at ?? null;
+  const startedAt = task?.status === "running" ? task.analysis_started_at ?? null : null;
   const [now, setNow] = useState(() => Date.now());
 
   // 有开始时间才走秒表，每秒刷新一次「已等待」
@@ -662,6 +660,62 @@ export function JobResultPage({
   onInterviewOpenChange,
 }: JobResultPageProps) {
   const { data: task, error, transient, polling, retry } = useTask(getJobMatchTask, taskId);
+  const [now, setNow] = useState(Date.now);
+  const [overrides, setOverrides] = useState<Record<string, JobMatchItem>>({});
+  const [itemRetry, setItemRetry] = useState<{ jobId: string; taskId: string | null; startedAt: string } | null>(null);
+  const [itemRetryError, setItemRetryError] = useState<string | null>(null);
+  const retryInFlight = useRef(false);
+  const currentTaskId = useRef(taskId);
+  currentTaskId.current = taskId;
+  const { data: retryTask, error: retryPollError, polling: retryPolling, transient: retryTransient, retry: refetchRetry } = useTask(getJobMatchTask, itemRetry?.taskId ?? null);
+  useEffect(() => {
+    if (itemRetry?.taskId && retryPollError && !retryPolling && !retryTransient) {
+      setOverrides(previous => {
+        const next = { ...previous };
+        delete next[itemRetry.jobId];
+        return next;
+      });
+      setItemRetryError(retryPollError);
+      setItemRetry(null);
+      retryInFlight.current = false;
+    }
+  }, [itemRetry?.taskId, retryPollError, retryPolling, retryTransient]);
+  useEffect(() => {
+    setOverrides({}); setItemRetry(null); setItemRetryError(null); retryInFlight.current = false;
+  }, [taskId]);
+  useEffect(() => {
+    if (!retryTask || !itemRetry?.taskId) return;
+    const item = retryTask.items.find(i => i.job_id === itemRetry.jobId);
+    if (item) setOverrides(previous => ({ ...previous, [item.job_id]: item }));
+    if (retryTask.status === "succeeded" || retryTask.status === "failed") {
+      retryInFlight.current = false;
+      if (retryTask.status === "failed") setItemRetryError(retryTask.error ?? "重新分析未完成，请重试");
+      setItemRetry(null);
+    }
+  }, [retryTask, itemRetry?.taskId]);
+  const activeAnalysis = task?.status === "queued" || task?.status === "running" || Boolean(itemRetry);
+  useEffect(() => {
+    if (!activeAnalysis) return;
+    setNow(Date.now());
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [activeAnalysis]);
+  async function handleItemRetry(jobId: string) {
+    if (retryInFlight.current) return;
+    retryInFlight.current = true;
+    setItemRetryError(null);
+    const parentId = taskId;
+    setItemRetry({ jobId, taskId: null, startedAt: new Date().toISOString() });
+    try {
+      const created = await retryJobAnalysis(parentId, jobId);
+      if (currentTaskId.current === parentId) setItemRetry(previous => previous ? { ...previous, taskId: created.task_id } : null);
+    } catch (error) {
+      if (currentTaskId.current === parentId) {
+        setItemRetryError(error instanceof Error ? error.message : "重新分析未能发起");
+        setItemRetry(null); retryInFlight.current = false;
+      }
+    }
+  }
   const [restarting, setRestarting] = useState(false);
   const [restartError, setRestartError] = useState<string | null>(null);
   const [loadedJobs, setLoadedJobs] = useState<Record<string, Job>>({});
@@ -728,9 +782,13 @@ export function JobResultPage({
   const [detailJobId, setDetailJobId] = useState<string | null>(null);
 
   const allItems = useMemo(() => {
-    const list = task?.items ?? [];
-    return [...list].sort((a, b) => b.score - a.score);
-  }, [task]);
+    const list = (task?.items ?? []).map(item => overrides[item.job_id] ?? item);
+    return list.map(item => itemRetry?.jobId === item.job_id ? {
+      ...item, score: item.stage1_score, report: null, analysis_status: "running" as const,
+      analysis_started_at: item.analysis_status === "running" && item.analysis_started_at ? item.analysis_started_at : itemRetry.startedAt,
+      analysis_elapsed_ms: null, analysis_finished_at: null,
+    } : item).sort((a, b) => b.score - a.score);
+  }, [task, overrides, itemRetry]);
 
   // 推荐模式：后端对全目录排序，前端只展示最靠前的 8 个
   const items = useMemo(
@@ -864,6 +922,7 @@ export function JobResultPage({
       </section> : null}
       <EmbeddingNotice status={task?.embedding_status} error={task?.embedding_error} />
       <ProgressBanner task={task} items={items} pollError={task?.status === "failed" ? null : error} polling={polling} restarting={restarting} onRestart={handleRestart} onRefetch={retry} />
+      {retryPollError && itemRetry ? <p role="alert" className="mt-3 text-sm text-amber-700">暂时无法获取重新分析进度：{retryPollError} <button type="button" onClick={refetchRetry} className="underline">重新获取进度</button></p> : null}
       {restartError && <p className="picker-error" role="alert">{restartError}</p>}
       {items.length === 0 ? (
         <section className="picker-panel result-empty">
@@ -879,11 +938,11 @@ export function JobResultPage({
         <div className="offer-results-layout">
           <section className="picker-panel result-ranks" aria-label="匹配排序"><div className="picker-panel-head"><h2>匹配排序</h2><span>{items.length} 个岗位</span></div>
             <div className="result-rank-list">{items.map((item, index) => { const job = displayedJobs[item.job_id]; return <button key={item.job_id} type="button" aria-pressed={detailJob?.job_id === item.job_id} className={`result-rank ${detailJob?.job_id === item.job_id ? "active" : ""}`} onClick={() => setDetailJobId(item.job_id)}>
-              <span className="result-order">{index + 1}</span><span className="picker-logo small">{job?.company.slice(0,1) || "岗"}</span><span className="result-rank-text"><strong>{item.title}</strong><small>{job?.company || "岗位"}{job?.cities?.length ? " · " + job.cities[0] : ""} · {analysisLabel(item)}{item.report?.gaps?.length ? ` · 待补 ${item.report.gaps.length} 项` : ""}</small></span><span className="result-score">{item.score}</span>
+              <span className="result-order">{index + 1}</span><span className="picker-logo small">{job?.company.slice(0,1) || "岗"}</span><span className="result-rank-text"><strong>{item.title}</strong><small>{job?.company || "岗位"}{job?.cities?.length ? " · " + job.cities[0] : ""} · {analysisLabel(item, now)}{item.report?.gaps?.length ? ` · 待补 ${item.report.gaps.length} 项` : ""}</small></span><span className="result-score">{item.score}</span>
             </button>; })}</div>
             <p className="picker-hint">结果根据简历与岗位内容计算，分析建议仅供参考。</p>
           </section>
-          {detailJob && <JobDetail key={detailJob.job_id} item={detailJob} job={displayedJobs[detailJob.job_id]} taskId={taskId} resumeId={resumeId} embeddingStatus={task?.embedding_status} onStartInterview={startInterview} />}
+          {detailJob && <JobDetail key={detailJob.job_id} item={detailJob} job={displayedJobs[detailJob.job_id]} taskId={taskId} resumeId={resumeId} embeddingStatus={task?.embedding_status} onStartInterview={startInterview} onRetry={() => handleItemRetry(detailJob.job_id)} retrying={Boolean(itemRetry) || task?.status === "running" || task?.status === "queued"} retryError={itemRetryError || retryPollError} now={now} />}
         </div>
       )}
     </main>

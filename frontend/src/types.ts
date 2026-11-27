@@ -281,9 +281,10 @@ export interface Job {
   graduation_year: string;
   jd_text: string;
   source_url: string;
-  published_at: string;
+  published_at: string | null;
+  collected_at?: string | null;
   publication_type: "original" | "repost";
-  /** 未核实投递入口时为 null，不能拿 source_url 当投递地址 */
+  /** 独立投递地址；缺失时界面打开 source_url 的具体 JD 页面 */
   application_url: string | null;
   verified_at: string;
   application_status: JobApplicationStatus;
@@ -362,6 +363,10 @@ export interface JobMatchItem {
   degraded: boolean;
   degraded_reason: JobDegradedReason | null;
   analysis_status: JobAnalysisStatus;
+  analysis_started_at?: string | null;
+  analysis_finished_at?: string | null;
+  analysis_elapsed_ms?: number | null;
+  analysis_error?: "timeout" | "invalid_output" | "inconsistent_evidence" | "service_unavailable" | "unknown" | null;
   report: DiagnoseResponse | null;
 }
 
